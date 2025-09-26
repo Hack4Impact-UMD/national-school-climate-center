@@ -11,6 +11,7 @@
   <p>
     <a href="#-quick-start"><img src="https://img.shields.io/badge/Quick-Start-16A34A?style=for-the-badge" alt="Quick Start"></a>
     <a href="#-for-developers"><img src="https://img.shields.io/badge/For-Developers-DC2626?style=for-the-badge" alt="For Developers"></a>
+    <a href="./STYLING.md"><img src="https://img.shields.io/badge/Style-Guide-F59E0B?style=for-the-badge" alt="Style Guide"></a>
     <a href="#-architecture"><img src="https://img.shields.io/badge/Architecture-7C3AED?style=for-the-badge" alt="Architecture"></a>
   </p>
 </div>
@@ -131,6 +132,21 @@ src/
 - **Students**: Take anonymous surveys
 - **School Leaders**: View school-specific data and export reports
 - **NSCC Admins**: Create surveys, view all data, manage system
+
+---
+
+## 📋 TL TODO
+
+### High Priority
+- [ ] Set up Firebase project and configure authentication
+- [ ] Design and implement Firestore database schema
+- [ ] Create Firestore security rules for role-based access
+
+### Medium Priority
+- [ ] Define brand colors and finalize style guide
+- [ ] Set up CI/CD pipeline (GitHub Actions)
+- [ ] Configure Firebase Hosting for deployment
+- [ ] Add automated testing in CI pipeline
 
 ---
 
