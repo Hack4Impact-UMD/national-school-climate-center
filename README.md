@@ -124,8 +124,8 @@ _Image of team here_
   <tr>
     <td align="center">
       <div>
-        <img src="" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
-        <b><a href="" target="_blank">David</a></b><br>
+        <img src="src/assets/david.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <b><a href="https://www.linkedin.com/in/davidbond26/" target="_blank">David</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
         </span>
