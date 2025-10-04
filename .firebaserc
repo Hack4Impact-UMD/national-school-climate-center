@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "testing-92978"
-  }
+    "default": "national-school-climate-center",
+    "national-prod": "national-school-climate-center"
+  },
+  "targets": {},
+  "etags": {}
 }
