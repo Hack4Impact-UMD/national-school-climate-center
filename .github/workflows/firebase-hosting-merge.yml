@@ -14,7 +14,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install npm dependencies
-        working-directory: ./national-school-climate-center # Make sure this matches the name of your react-app
+        # working-directory: ./national-school-climate-center # Make sure this matches the name of your react-app
         run: npm install
       - name: npm init
         run: npm init -y
