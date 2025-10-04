@@ -17,11 +17,11 @@ jobs:
       - name: npm init
         run: npm init -y
       - name: deploy it
-        working-directory: ./national-school-climate-center # Make sure your react-app is called react-app
+        # working-directory: ./national-school-climate-center # Make sure your react-app is called react-app
         run: CI=false && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          # entryPoint: ./national-school-climate-center # Make sure your react-app is called react-app
+          entryPoint: ./national-school-climate-center # Make sure your react-app is called react-app
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_NATIONAL_SCHOOL_CLIMATE_CENTER }}' # Make sure your change this to your project id
           projectId: national-school-climate-center # Change to your project id
