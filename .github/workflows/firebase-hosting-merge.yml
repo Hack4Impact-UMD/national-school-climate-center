@@ -23,7 +23,7 @@ jobs:
         run: CI=false && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          entryPoint: ./react-app
+          entryPoint: ./national-school-climate-center # Make sure this matches the name of your react-app
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_NATIONAL_SCHOOL_CLIMATE_CENTER }}' # Replace this with your project id
           channelId: live
