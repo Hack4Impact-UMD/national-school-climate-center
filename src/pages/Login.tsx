@@ -1,70 +1,100 @@
-import { useState } from 'react'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { useForm } from 'react-hook-form'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
+interface LoginFormData {
+  email: string
+  password: string
+}
+
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-//   const [isLoading, setIsLoading] = useState(false)
-//   const [error, setError] = useState('')
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>()
 
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault()
-//     setIsLoading(true)
-//     setError('')
-
-//     // Simulate form submission
-//     console.log('Login attempt:', { email, password })
-//     setTimeout(() => {
-//       setIsLoading(false)
-//     }, 1000)
-//   }
+  const onSubmit = (data: LoginFormData) => {
+    console.log('Login attempt:', data)
+    // TODO: Implement Firebase authentication here
+  }
 
   return (
-
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="w-full max-w-md mx-auto">
         <div className="text-center">
-           <img 
-             src="/logo.png" 
-             alt="National School Climate Center" 
-             className="mx-auto h-20 w-auto mb-4"
-             />
-           <h1 className="font-heading text-4xl font-bold text-primary">
-             Welcome!
-           </h1>
-         </div>
-            <Card className="shadow-none border-0">
-            <CardHeader>
-            </CardHeader>
-            <CardContent className="space-y-4">
-            <div className="space-y-2">
-                <label className="text-sm font-heading text-primary">Email</label>
-                <Input 
-                type="email" 
-                placeholder="Please enter your email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                />
-            </div>
-            <div className="space-y-2">
-                <label className="text-sm font-heading text-primary">Password</label>
-                <Input 
-                type="password" 
-                placeholder="Pleasenter your password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                />
-            </div>
-            </CardContent>
-            <CardFooter>
-            <Button className="w-full bg-secondary text-secondary-foreground">Login</Button>
-            </CardFooter>
-        </Card>
-        <p className="font-heading text-md text-secondary underline text-center mt-4">Forgot Password</p>
+          <img
+            src="/logo.png"
+            alt="National School Climate Center"
+            className="mx-auto h-32 w-auto mb-4"
+          />
+          <h1 className="font-heading text-3xl font-bold text-primary">
+            Welcome!
+          </h1>
         </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Card className="shadow-none border-0">
+            <CardContent className="space-y-4 pt-6">
+              <div className="space-y-2">
+                <label className="text-sm font-heading text-primary">
+                  Email
+                </label>
+                <Input
+                  type="email"
+                  placeholder="Please enter your email"
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address',
+                    },
+                  })}
+                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-heading"
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500 font-heading">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-heading text-primary">
+                  Password
+                </label>
+                <Input
+                  type="password"
+                  placeholder="Please enter your password"
+                  {...register('password', {
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters',
+                    },
+                  })}
+                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-heading"
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500 font-heading">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <Button
+                type="submit"
+                className="w-[165px] bg-secondary text-secondary-foreground"
+              >
+                Log in
+              </Button>
+            </CardFooter>
+          </Card>
+        </form>
+        <p className="font-heading text-md text-secondary underline text-center mt-4 font-bold">
+          Forgot Password
+        </p>
+      </div>
     </div>
-
   )
 }
