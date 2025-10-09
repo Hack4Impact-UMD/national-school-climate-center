@@ -21,7 +21,8 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    
+    <main className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto">
         <div className="text-center">
           <img
@@ -34,8 +35,8 @@ export default function Login() {
           </h1>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Card className="shadow-none border-0">
-            <CardContent className="space-y-4 pt-6">
+          <Card className="shadow-none border-0 p-4">
+            <CardContent className="space-y-4 pt-6 text-body font-body">
               <div className="space-y-2">
                 <label className="text-sm font-heading text-primary">
                   Email
@@ -91,10 +92,14 @@ export default function Login() {
             </CardFooter>
           </Card>
         </form>
-        <p className="font-heading text-md text-secondary underline text-center mt-4 font-bold">
+        
+        <button
+          type="button"
+          className="font-heading text-md text-secondary underline text-center mt-4 font-bold w-full cursor-pointer bg-transparent border-0 p-0"
+        >
           Forgot Password
-        </p>
+        </button>
       </div>
-    </div>
+    </main>
   )
 }
