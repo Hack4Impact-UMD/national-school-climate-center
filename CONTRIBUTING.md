@@ -12,7 +12,12 @@
 - Keep components focused and reusable
 
 ### Naming Conventions
-- ...
+- Components/types/enums: PascalCase
+- Variables/functions: camelCase
+- Constants: UPPER_SNAKE_CASE
+- Booleans: is/has/should prefix (e.g., isLoading)
+- Hooks/handlers: useX, handleX/onX
+- Files: Components PascalCase.tsx; utils camelCase.ts; tests .test.ts(x)
 
 ### Git Workflow
 - Create feature branches from `main`
