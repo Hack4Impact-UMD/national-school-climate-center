@@ -180,8 +180,8 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
-        <b><a href="" target="_blank">Sara</a></b><br>
+        <img src="src/assets/Sara.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <b><a href="https://www.linkedin.com/in/sara-karnik" target="_blank">Sara</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
         </span>
