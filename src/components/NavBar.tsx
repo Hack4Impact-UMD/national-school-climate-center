@@ -7,6 +7,7 @@ const NavBar: React.FC = () => {
             <div className="w-15 h-15 rounded-full bg-gray-300 overflow-hidden m-3 p-5">
                 <img
                     src=""
+                    alt="admin-pfp'
                     className="w-full h-full object-cover"
                 />
             </div>
