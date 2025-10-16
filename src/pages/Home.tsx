@@ -5,10 +5,22 @@ export default function Home() {
     <div>
       <header className="border-b p-4">
         <nav className="flex justify-between items-center">
-          <h1 className="text-xl font-semibold">National School Climate Center</h1>
+          <h1 className="text-xl font-semibold">
+            National School Climate Center
+          </h1>
           <div className="space-x-4">
-            <Link to="/" className="hover:underline">Home</Link>
-            <Link to="/about" className="hover:underline">About</Link>
+            <Link to="/" className="hover:underline">
+              Home
+            </Link>
+            <Link to="/about" className="hover:underline">
+              About
+            </Link>
+            <Link to="/login" className="hover:underline">
+              Login
+            </Link>
+            <Link to="/admin" className="hover:underline">
+              Admin
+            </Link>
           </div>
         </nav>
       </header>
