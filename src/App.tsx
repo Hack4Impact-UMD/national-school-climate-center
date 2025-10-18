@@ -1,15 +1,16 @@
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import About from './pages/About'
-import NavBar from "./components/NavBar";
+import Layout from "./components/Layout";
 
 function App() {
   return (
     <div className = "flex">
-      <NavBar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          </Route>
       </Routes>
     </div>
   )

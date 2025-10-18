@@ -2,15 +2,15 @@ import React from 'react';
 
 const NavBar: React.FC = () => {
     return (
-        <nav className="bg-primary text-primary-foreground min-h-screen w-80"> 
-        <div className = "flex">
-            <div className="w-15 h-15 rounded-full bg-gray-300 overflow-hidden m-3 p-5">
+        <nav className="bg-primary text-primary-foreground min-h-screen w-80 pr-6"> 
+        <div className = "flex items-center p-4">
+            <div className="w-16 h-16 rounded-full bg-gray-300 overflow-hidden">
                 <img
                     src=""
                     className="w-full h-full object-cover"
                 />
             </div>
-            <div className = "pt-5 ml-3">
+            <div className = "ml-4">
                 <h3 className="font-heading text-2xl text-heading text-white">
                     Username
                 </h3>
@@ -19,55 +19,55 @@ const NavBar: React.FC = () => {
                 </p>
             </div>
         </div>
-        <div className = "ml-5 text-white mt-30 text-white">
+        <div className = "ml-5 text-white mt-28">
             <p className="font-body text-base text-body text-white">
                 Survey Creation
             </p>
-            <div className = "mt-3 ml-7 text-lg mb-20">
-                <div className = "flex">
-                    <h3 className="font-heading text-2xl text-heading text-white mb-4">
+            <div className = "mt-3 ml-7 text-lg mb-20 space-y-2">
+                <div className = "flex items-center justify-between">
+                    <h3 className="font-heading text-2xl text-heading text-white mb-1">
                         Survey Builder
                     </h3>
-                    <h3 className="font-heading text-2xl text-heading text-white ml-15">
+                    <span className="font-heading text-2xl text-white">
                         ᐳ
-                    </h3>
+                    </span>
                 </div>
-                <div className = "flex">
-                    <h3 className="font-heading text-2xl text-heading text-white mb-4">
+                <div className = "flex items-center justify-between">
+                    <h3 className="font-heading text-2xl text-heading text-white mb-1">
                          All Surveys
                     </h3>
-                    <h3 className="font-heading text-2xl text-heading text-white ml-24">
+                    <span className="font-heading text-2xl text-white">
                         ᐳ
-                    </h3>
+                    </span>
                 </div>
-                <div className = "flex">
+                <div className = "flex items-center justify-between">
                     <h3 className="font-heading text-2xl text-heading text-white">
                         Survey Analytics
                     </h3>
-                    <h3 className="font-heading text-2xl text-heading text-white ml-10">
+                    <span className="font-heading text-2xl text-white">
                         ᐳ
-                    </h3>
+                    </span>
                 </div>
             </div>
             <p className="font-body text-base text-body text-white">
                 Settings
             </p>
-            <div className = "mt-3 ml-7 text-lg">
-                <div className = "flex">
-                    <h3 className="font-heading text-2xl text-heading text-white mb-4">
+            <div className = "mt-3 ml-7 text-lg space-y-2">
+                <div className = "flex items-center justify-between">
+                    <h3 className="font-heading text-2xl text-heading text-white mb-1">
                         General
                     </h3>
-                    <h3 className="font-heading text-2xl text-heading text-white ml-32">
+                    <span className="font-heading text-2xl text-white">
                         ᐳ
-                    </h3>
+                    </span>
                 </div>
-                <div className = "flex">
-                    <h3 className="font-heading text-2xl text-heading text-white mb-4">
+                <div className = "flex items-center justify-between">
+                    <h3 className="font-heading text-2xl text-heading text-white mb-1">
                         Manage Users
                     </h3>
-                    <h3 className="font-heading text-2xl text-heading text-white ml-14">
+                    <span className="font-heading text-2xl text-white">
                         ᐳ
-                    </h3>
+                    </span>
                 </div>
             </div>
         </div>
