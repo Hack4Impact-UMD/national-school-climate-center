@@ -20,7 +20,7 @@ jobs:
         run: npm init -y
       - name: Create .env.production for Vite
         run: |
-          cat > .env.production << 'EOF'
+          cat > .env.production << EOF
           VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }}
