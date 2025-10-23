@@ -43,12 +43,19 @@ jobs:
           VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
           EOF
 
-      # 🧩 (Optional) Verify that all env variables were written (won’t print secrets)
+      # 🧩 Verify that all env variables were written (won't print secrets)
       - name: Verify env presence (names only)
         run: |
+          missing=0
           for k in VITE_FIREBASE_API_KEY VITE_FIREBASE_AUTH_DOMAIN VITE_FIREBASE_PROJECT_ID VITE_FIREBASE_STORAGE_BUCKET VITE_FIREBASE_MESSAGING_SENDER_ID VITE_FIREBASE_APP_ID; do
-            grep -q "$k=" .env.production && echo "$k present" || echo "::error::$k missing"
+            if grep -q "$k=" .env.production; then
+              echo "$k present"
+            else
+              echo "::error::$k missing"
+              missing=1
+            fi
           done
+          exit $missing
 
       # 🧩 Build your project for production
       - name: Build

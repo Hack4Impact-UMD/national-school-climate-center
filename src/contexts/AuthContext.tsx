@@ -26,7 +26,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
       const snap = await getDoc(doc(db, 'members', u.uid))
-      setRole(snap.exists() ? (snap.data().role as Role) : null)
+      if (snap.exists()) {
+        const roleData = snap.data()?.role
+        const validRoles: Role[] = ['admin', 'school_personnel']
+        setRole(validRoles.includes(roleData) ? roleData : null)
+      } else {
+        setRole(null)
+      }
       setLoading(false)
     })
     return unsub

@@ -6,21 +6,22 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
 
     function myRole() {
-
         return signedIn()
-        ? get(/database/$(database)/documents/members/$(request.auth.uid)).data.role
+        ? get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role
         : null;
     }
 
     function isAdmin()      {return myRole() == 'admin';}
     function isSchoolPersonnel      { return myRole() == 'school_personnel' }
 
-    match/members/{uid} {
+    match /members/{uid} {
         allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
 
-        allow create, read, delete: if isAdmin() &&
+        allow create, delete: if isAdmin() &&
             request.resource.data.keys().hasOnly(['role','joinedAt']) &&
             request.resource.data.role in ['admin','school_personnel'];
+
+        allow update: if isAdmin();
     }
 
     match /surveys/{surveyID} {
