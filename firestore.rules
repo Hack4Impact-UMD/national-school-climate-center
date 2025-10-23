@@ -1,0 +1,36 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function signedIn() { return request.auth != null; }
+
+    function myRole() {
+        return signedIn()
+        ? get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role
+        : null;
+    }
+
+    function isAdmin()      {return myRole() == 'admin';}
+    function isSchoolPersonnel      { return myRole() == 'school_personnel' }
+
+    match /members/{uid} {
+        allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+        allow create, delete: if isAdmin() &&
+            request.resource.data.keys().hasOnly(['role','joinedAt']) &&
+            request.resource.data.role in ['admin','school_personnel'];
+
+        allow update: if isAdmin();
+    }
+
+    match /surveys/{surveyID} {
+
+        allow read: if isAdmin() || isSchoolPersonnel();
+
+        allow create, update, delete: if isAdmin();
+    }
+
+    // We will add more rules for analytics and also things such user managment for the admins
+
+}
