@@ -5,6 +5,7 @@ import Login from './pages/auth/Login'
 import Admin from './pages/Admin'
 import Layout from './components/Layout'
 import SurveyBuilder from './pages/SurveyBuilder'
+import CreateSurvey from './pages/CreateSurvey'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/survey-builder" element={<SurveyBuilder />} />
+          <Route path="/create-survey" element={<CreateSurvey />} />
         </Route>
       </Routes>
     </div>

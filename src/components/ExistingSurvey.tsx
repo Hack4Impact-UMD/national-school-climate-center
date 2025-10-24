@@ -13,7 +13,7 @@ export default function ExistingSurvey({
 }: Props) {
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="rounded-lg border bg-transparent p-6">
+      <div className="rounded-md border bg-transparent p-6">
         <div className="flex flex-col items-center text-center gap-4">
           <h3 className="text-2xl font-normal font-body text-heading">{title}</h3>
           <p className="text-sm font-light font-body">{description}</p>
