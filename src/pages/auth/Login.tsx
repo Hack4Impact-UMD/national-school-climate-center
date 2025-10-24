@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/firebase/config'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -9,15 +13,59 @@ interface LoginFormData {
 }
 
 export default function Login() {
+  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>()
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log('Login attempt:', data)
-    // TODO: Implement Firebase authentication here
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true)
+    setAuthError(null)
+
+    try {
+      await signInWithEmailAndPassword(auth, data.email, data.password)
+      // On success, navigate to admin dashboard
+      navigate('/admin')
+    } catch (error) {
+      // Handle Firebase authentication errors
+      let errorMessage = 'An error occurred during login'
+
+      if (error instanceof Error && 'code' in error) {
+        const firebaseError = error as { code: string; message: string }
+
+        switch (firebaseError.code) {
+          case 'auth/user-not-found':
+            errorMessage = 'No account found with this email'
+            break
+          case 'auth/wrong-password':
+            errorMessage = 'Incorrect password'
+            break
+          case 'auth/invalid-email':
+            errorMessage = 'Invalid email address'
+            break
+          case 'auth/user-disabled':
+            errorMessage = 'This account has been disabled'
+            break
+          case 'auth/too-many-requests':
+            errorMessage = 'Too many failed attempts. Please try again later'
+            break
+          case 'auth/invalid-credential':
+            errorMessage = 'Invalid email or password'
+            break
+          default:
+            errorMessage = firebaseError.message || 'Failed to login'
+        }
+      }
+
+      setAuthError(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -37,6 +85,13 @@ export default function Login() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Card className="shadow-none border-0 p-4">
             <CardContent className="space-y-4 pt-6 text-body font-body">
+              {authError && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                  <p className="text-sm text-red-600 font-heading">
+                    {authError}
+                  </p>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-heading text-primary">
                   Email
@@ -85,9 +140,10 @@ export default function Login() {
             <CardFooter className="flex justify-center">
               <Button
                 type="submit"
-                className="w-[165px] bg-secondary text-secondary-foreground"
+                disabled={isLoading}
+                className="w-[165px] bg-secondary text-secondary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Log in
+                {isLoading ? 'Logging in...' : 'Log in'}
               </Button>
             </CardFooter>
           </Card>

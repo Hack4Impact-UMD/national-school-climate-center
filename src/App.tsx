@@ -4,6 +4,7 @@ import About from './pages/About'
 import Login from './pages/auth/Login'
 import Admin from './pages/Admin'
 import Layout from './components/Layout'
+import { AdminOnlyRoute } from './components/AdminOnlyRoute'
 
 function App() {
   return (
@@ -13,7 +14,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<Admin />} />
+
+          {/* Protected admin routes - only accessible by admin role */}
+          <Route element={<AdminOnlyRoute />}>
+            <Route path="/admin" element={<Admin />} />
+          </Route>
         </Route>
       </Routes>
     </div>
