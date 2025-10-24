@@ -27,7 +27,10 @@ export default function App() {
           {/* Action-gated */}
           <Route element={<ProtectedRoute requiredAction="create" />}>
             <Route path="/surveys/builder" element={<SurveyBuilder />} />
-            <Route path="/surveys/create/challenge" element={<CreateChallengeSurvey />} />
+            <Route
+              path="/surveys/create/challenge"
+              element={<CreateChallengeSurvey />}
+            />
             <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/analytics" element={<Analytics />} />
           </Route>
@@ -36,6 +39,7 @@ export default function App() {
             <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/general" element={<General />} />
           </Route>
+          {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
         </Route>
       </Route>
 
