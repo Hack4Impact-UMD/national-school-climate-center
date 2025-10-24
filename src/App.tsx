@@ -4,7 +4,7 @@ import About from './pages/About'
 import Login from './pages/auth/Login'
 import Admin from './pages/Admin'
 import Layout from './components/Layout'
-import DatabaseDemo from './pages/DatabaseDemo'
+// import DatabaseDemo from './pages/DatabaseDemo'
 
 function App() {
   return (
