@@ -4,6 +4,7 @@ import About from './pages/About'
 import Login from './pages/auth/Login'
 import Admin from './pages/Admin'
 import Layout from './components/Layout'
+import DatabaseDemo from './pages/DatabaseDemo'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
+          {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
         </Route>
       </Routes>
     </div>
