@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function getUserData(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function isRole(uid, role) {
+      return isAuth() && getUserData(uid).role == role;
+    }
+
+    function isAdmin() {
+      return isRole(request.auth.uid, 'admin');
+    }
+
+    function isLeader() {
+      return isRole(request.auth.uid, 'leader');
+    }
+
+    function isStudent() {
+      return isRole(request.auth.uid, 'student');
+    }
+
+
+    match /surveys/{surveyId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /responses/{responseId} {
+      allow get: if isAdmin() || (isLeader() && getUserData(request.auth.uid).school_id == resource.data.school_id);
+
+      allow list: if isAdmin();
+
+      allow create: if isStudent();
+      
+      allow update, delete: if false;
+    }
+
+    match /consentGrants/{grantId} {
+      allow get: if isStudent() && resource.data.respondentKey == request.auth.uid;
+
+      allow list, write: if false;
+    }
+
+
+    match /users/{uid} {
+
+      allow get: if isAuth() && (request.auth.uid == uid || isAdmin() || isLeader());
+
+      allow list: if isAdmin();
+
+      allow create, update: if isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    match /questionBank/{questionId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /mail/{mailId} {
+      allow create: if isAdmin();
+
+      allow read, update, delete: if false;
+    }
+  }
+}
