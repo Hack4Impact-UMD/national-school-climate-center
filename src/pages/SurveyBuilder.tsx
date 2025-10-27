@@ -2,7 +2,7 @@ import ExistingSurvey from "@/components/ExistingSurvey";
 
 export default function SurveyBuilder() {
     return (
-      <div>
+      <div className="ml-6">
         <img src="/logo.png" alt="National School Climate Center" className="w-40" />
         <h2 className=" font-semibold font-body text-3xl mb-1">Survey Builder</h2>
         <p className="font-body text-2xl font-normal mb-4">
