@@ -11,24 +11,25 @@ service cloud.firestore {
         : null;
     }
 
+    function isSuperAdmin() { return myRole() == 'super_admin';}
     function isAdmin()      {return myRole() == 'admin';}
     function isSchoolPersonnel      { return myRole() == 'school_personnel' }
 
     match /members/{uid} {
-        allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+        allow read: if signedIn() && (request.auth.uid == uid || isAdmin() || isSuperAdmin());
 
-        allow create, delete: if isAdmin() &&
+        allow create, delete: if isSuperAdmin() &&
             request.resource.data.keys().hasOnly(['role','joinedAt']) &&
-            request.resource.data.role in ['admin','school_personnel'];
+            request.resource.data.role in ['super_admin','admin','school_personnel'];
 
-        allow update: if isAdmin();
+        allow update: if isSuperAdmin();
     }
 
     match /surveys/{surveyID} {
 
-        allow read: if isAdmin() || isSchoolPersonnel();
+        allow read: if isSuperAdmin() || isAdmin() || isSchoolPersonnel();
 
-        allow create, update, delete: if isAdmin();
+        allow create, update, delete: if isSuperAdmin() || isAdmin();
     }
 
     // We will add more rules for analytics and also things such user managment for the admins
