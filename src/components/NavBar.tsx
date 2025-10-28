@@ -3,6 +3,11 @@ import { NavLink } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+import { Guard } from '@/components/ui/Guard'
+
+>>>>>>> Stashed changes
 =======
 import { Guard } from '@/components/ui/Guard'
 
@@ -17,7 +22,10 @@ const NavBar: React.FC = () => {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -26,6 +34,9 @@ const NavBar: React.FC = () => {
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -50,6 +61,7 @@ const NavBar: React.FC = () => {
 
 
        <div className = "ml-5 text-white mt-28">
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
             <p className="font-body text-base text-body text-white">
@@ -104,6 +116,8 @@ const NavBar: React.FC = () => {
                 </NavLink>
             </div>
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
            {canSeeSurvey && (
@@ -167,6 +181,9 @@ const NavBar: React.FC = () => {
                </>
            )}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -176,7 +193,11 @@ const NavBar: React.FC = () => {
  };
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 export default NavBar;
+=======
+export default NavBar;
+>>>>>>> Stashed changes
 =======
 export default NavBar;
 >>>>>>> Stashed changes

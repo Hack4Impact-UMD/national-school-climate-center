@@ -7,6 +7,7 @@ import Layout from './components/Layout'
 import { Guard } from './components/ui/Guard'
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import AccessDenied from '@/components/AccessDenied'
 
 
@@ -18,6 +19,8 @@ import ManageUsers from './pages/ManageUsers' */
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 
 
 {/* import SurveyBuilder from './pages/SurveyBuilder'
@@ -26,6 +29,9 @@ import SurveyAnalytics from './pages/SurveyAnalytics'
 import General from './pages/General'
 import ManageUsers from './pages/ManageUsers' */}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -45,7 +51,11 @@ function App() {
            element={
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
              <Guard do="read" fallback={<AccessDenied />}>
+=======
+             <Guard do="read" fallback={<p>Signed-in users only</p>}>
+>>>>>>> Stashed changes
 =======
              <Guard do="read" fallback={<p>Signed-in users only</p>}>
 >>>>>>> Stashed changes
@@ -63,7 +73,11 @@ function App() {
            element={
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
              <Guard do="read" fallback={<AccessDenied />}>
+=======
+             <Guard do="read" fallback={<p>Signed-in users only</p>}>
+>>>>>>> Stashed changes
 =======
              <Guard do="read" fallback={<p>Signed-in users only</p>}>
 >>>>>>> Stashed changes
@@ -80,7 +94,11 @@ function App() {
            element={
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
              <Guard do="read" fallback={<AccessDenied />}>
+=======
+             <Guard do="read" fallback={<p>Signed-in only</p>}>
+>>>>>>> Stashed changes
 =======
              <Guard do="read" fallback={<p>Signed-in only</p>}>
 >>>>>>> Stashed changes
@@ -98,7 +116,11 @@ function App() {
            element={
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
              <Guard do="update" fallback={<AccessDenied />}>
+=======
+             <Guard do="update" fallback={<p>Admins only</p>}>
+>>>>>>> Stashed changes
 =======
              <Guard do="update" fallback={<p>Admins only</p>}>
 >>>>>>> Stashed changes
@@ -116,7 +138,11 @@ function App() {
            element={
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
              <Guard do="manage_users" fallback={<AccessDenied />}>
+=======
+             <Guard do="manage_users" fallback={<p>Admins only</p>}>
+>>>>>>> Stashed changes
 =======
              <Guard do="manage_users" fallback={<p>Admins only</p>}>
 >>>>>>> Stashed changes
@@ -130,12 +156,15 @@ function App() {
          */}
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
          
          <Route
            path="/admin"
            element={
              <Guard do="manage_users" fallback={<AccessDenied />}>
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -145,6 +174,9 @@ function App() {
            element={
              <Guard do="manage_users" fallback={<p>Admins only</p>}>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
