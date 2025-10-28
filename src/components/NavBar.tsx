@@ -2,6 +2,11 @@ import React from 'react';
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+import { Guard } from '@/components/ui/Guard'
+
+>>>>>>> Stashed changes
 =======
 import { Guard } from '@/components/ui/Guard'
 
@@ -11,12 +16,18 @@ const NavBar: React.FC = () => {
    const { role } = useAuth()
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
    const canSeeSurvey = role === 'super_admin' || role === 'admin' || role === 'school_personnel'
    const canSeeSettings = role === 'super_admin' || role === 'admin'
 
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
    return (
        <nav className="bg-primary text-primary-foreground min-h-screen w-80 pr-6">
@@ -39,6 +50,7 @@ const NavBar: React.FC = () => {
 
 
        <div className = "ml-5 text-white mt-28">
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
             <p className="font-body text-base text-body text-white">
                 Survey Creation
@@ -92,6 +104,8 @@ const NavBar: React.FC = () => {
                 </NavLink>
             </div>
 =======
+=======
+>>>>>>> Stashed changes
            {canSeeSurvey && (
                <>
                    <p className="font-body text-base text-body text-white">
@@ -152,13 +166,20 @@ const NavBar: React.FC = () => {
                    </div>
                </>
            )}
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
        </div>
      </nav>
    );
  };
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 export default NavBar;
+=======
+export default NavBar;
+>>>>>>> Stashed changes
 =======
 export default NavBar;
 >>>>>>> Stashed changes
