@@ -1,13 +1,25 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { signOut } from 'firebase/auth'
 import { useAuth } from '@/contexts/AuthContext'
 import { can } from '@/pages/auth/rbac'
+import { auth } from '@/firebase/config'
 
 export default function NavBar() {
   const { user, role } = useAuth()
+  const navigate = useNavigate()
 
   const getRoleLabel = () => {
     if (!role) return 'Guest'
     return role === 'admin' ? 'NSCC Admin' : 'School Personnel'
+  }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      navigate('/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
   }
 
   return (
@@ -90,6 +102,15 @@ export default function NavBar() {
                   <span className="font-heading text-2xl text-white">ᐳ</span>
                 </Link>
               )}
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-between hover:opacity-80 transition-opacity w-full text-left"
+              >
+                <h3 className="font-heading text-2xl text-heading text-white mb-1">
+                  Logout
+                </h3>
+                <span className="font-heading text-2xl text-white">ᐳ</span>
+              </button>
             </div>
           </>
         )}
