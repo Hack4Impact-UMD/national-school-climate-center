@@ -5,8 +5,9 @@ import Login from './pages/auth/Login'
 import ManageUsers from './pages/Admin'
 import Settings from './pages/Settings'
 import Analytics from './pages/Analytics'
-import SurveyBuilder from './pages/surveys/SurveyBuilder'
+import SurveyBuilder from './pages/SurveyBuilder'
 import AllSurveys from './pages/surveys/AllSurveys'
+import CreateSurvey from './pages/CreateSurvey'
 import Layout from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
@@ -26,6 +27,7 @@ function App() {
         <Route element={<ProtectedRoute requiredAction="create" />}>
           <Route path="/surveys/builder" element={<SurveyBuilder />} />
           <Route path="/surveys" element={<AllSurveys />} />
+          <Route path="/surveys/create" element={<CreateSurvey />} />
           <Route path="/analytics" element={<Analytics />} />
         </Route>
 
