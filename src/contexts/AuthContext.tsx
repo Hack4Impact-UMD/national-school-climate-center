@@ -25,15 +25,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false)
         return
       }
-      const snap = await getDoc(doc(db, 'members', u.uid))
-      if (snap.exists()) {
-        const roleData = snap.data()?.role
-        const validRoles: Role[] = ['admin', 'school_personnel']
-        setRole(validRoles.includes(roleData) ? roleData : null)
-      } else {
-        setRole(null)
-      }
+      // TODO: Remove this testing override - defaults all users to admin
+      setRole('admin')
       setLoading(false)
+      return
+
+      // Original role fetching logic (disabled for testing)
+      // const snap = await getDoc(doc(db, 'members', u.uid))
+      // if (snap.exists()) {
+      //   const roleData = snap.data()?.role
+      //   const validRoles: Role[] = ['admin', 'school_personnel']
+      //   setRole(validRoles.includes(roleData) ? roleData : null)
+      // } else {
+      //   setRole(null)
+      // }
+      // setLoading(false)
     })
     return unsub
   }, [])
