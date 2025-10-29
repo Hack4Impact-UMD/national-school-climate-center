@@ -93,7 +93,7 @@ export default function NavBar() {
               </Link>
               {can(role, 'manage_users') && (
                 <Link
-                  to="/admin"
+                  to="/manage-users"
                   className="flex items-center justify-between hover:opacity-80 transition-opacity"
                 >
                   <h3 className="font-heading text-2xl text-heading text-white mb-1">

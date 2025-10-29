@@ -30,7 +30,7 @@ function App() {
         </Route>
 
         <Route element={<ProtectedRoute requiredAction="manage_users" />}>
-          <Route path="/admin" element={<ManageUsers />} />
+          <Route path="/manage-users" element={<ManageUsers />} />
         </Route>
       </Route>
     </Routes>

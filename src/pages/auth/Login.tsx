@@ -29,8 +29,7 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password)
-      // On success, navigate to admin dashboard
-      navigate('/admin')
+      navigate('/manage-users')
     } catch (error) {
       // Handle Firebase authentication errors
       let errorMessage = 'An error occurred during login'
