@@ -10,7 +10,7 @@ import type { Question } from "@/types/surveybuilder";
 import WorkflowSection from "@/components/WorkFlowSection";
 
 
-export default function CreateSurvey() {
+export default function CreateChallengeSurvey() {
 
   // Default just for UI
   const [questions, setQuestions] = useState<Question[]>([
