@@ -86,7 +86,11 @@ export default function Login() {
           <Card className="shadow-none border-0 p-4">
             <CardContent className="space-y-4 pt-6 text-body font-body">
               {authError && (
-                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className="p-3 rounded-lg bg-red-50 border border-red-200"
+                >
                   <p className="text-sm text-red-600 font-heading">
                     {authError}
                   </p>
