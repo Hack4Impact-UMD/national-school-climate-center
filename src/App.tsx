@@ -10,10 +10,11 @@ function App() {
   return (
     <div className="flex">
       <Routes>
+        <Route path="/login" element={<Login />} />
+
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/login" element={<Login />} />
 
           <Route element={<ProtectedRoute requiredAction="manage_users" />}>
             <Route path="/admin" element={<Admin />} />
