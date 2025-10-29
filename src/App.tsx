@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import About from './pages/About'
 import Login from './pages/auth/Login'
-import Admin from './pages/Admin'
+import ManageUsers from './pages/Admin'
 import Settings from './pages/Settings'
 import Analytics from './pages/Analytics'
 import SurveyBuilder from './pages/surveys/SurveyBuilder'
@@ -30,7 +30,7 @@ function App() {
         </Route>
 
         <Route element={<ProtectedRoute requiredAction="manage_users" />}>
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<ManageUsers />} />
         </Route>
       </Route>
     </Routes>

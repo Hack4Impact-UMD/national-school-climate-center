@@ -1,7 +1,12 @@
-export default function Admin() {
+export default function ManageUsers() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <h1 className="font-heading text-4xl font-bold text-primary">admin</h1>
+    <div className="p-6">
+      <h1 className="font-heading text-4xl font-bold text-heading mb-4">
+        Manage Users
+      </h1>
+      <p className="font-body text-lg text-body">
+        Create, view, and manage user accounts and permissions.
+      </p>
     </div>
   )
 }
