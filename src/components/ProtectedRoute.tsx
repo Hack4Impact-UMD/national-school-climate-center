@@ -47,25 +47,25 @@ function UnauthorizedMessage({ requiredAction }: UnauthorizedMessageProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full mx-auto p-6 text-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 border-2 border-red-200">
+    <main className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md mx-auto">
+        <div className="text-center mb-8">
           <div className="mb-4">
             <AlertTriangle className="mx-auto h-16 w-16 text-red-500" />
           </div>
-          <h2 className="font-heading text-2xl font-bold text-heading mb-2">
+          <h2 className="font-heading text-3xl font-bold text-primary mb-4">
             Not Authorized
           </h2>
-          <p className="font-body text-body mb-6">
+          <p className="font-body text-lg text-body mb-2">
             {actionMessages[requiredAction]}
           </p>
           <p className="font-body text-sm text-body/70">
             Redirecting to login...
           </p>
         </div>
+        <RedirectToLogin />
       </div>
-      <RedirectToLogin />
-    </div>
+    </main>
   )
 }
 
