@@ -32,7 +32,7 @@ export default function CreateSurvey() {
   );
 
   function addBlankQuestion() {
-    const id = `q${Date.now()}`;
+    const id = crypto.randomUUID();
     const next: Question = {
       id,
       name: `Question ${questions.length + 1}`,

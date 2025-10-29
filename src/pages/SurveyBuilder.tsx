@@ -1,4 +1,6 @@
 import ExistingSurvey from "@/components/ExistingSurvey";
+import challengeIcon from "@/assets/survey_builder/challenge.png";
+import pulseIcon from "@/assets/survey_builder/pulse.png";
 
 export default function SurveyBuilder() {
     return (
@@ -11,7 +13,7 @@ export default function SurveyBuilder() {
       <div className="flex flex-col md:flex-row items-stretch gap-4 mb-5">
         <div className="rounded-md border bg-transparent p-6 flex-none w-full md:w-80 md:h-60 min-h-[12rem]">
           <div className="flex flex-col items-center text-center gap-2">
-            <img src="src/assets/survey_builder/challenge.png" alt="Challenge Icon" className="w-20 h-20 mb-4" />
+            <img src={challengeIcon} alt="Challenge Icon" className="w-20 h-20 mb-4 object-contain" />
             <h3 className="text-2xl font-normal font-body text-heading">Challenge</h3>
             <p className="text-sm font-light font-body">An anonymous survey shared widely to gather broad opinions or quick feedback on a specific topic.</p>
           </div>
@@ -19,7 +21,7 @@ export default function SurveyBuilder() {
 
         <div className="rounded-md border bg-transparent p-6 flex-none w-full md:w-80 md:h-60 min-h-[12rem]">
           <div className="flex flex-col items-center text-center gap-2">
-            <img src="src/assets/survey_builder/pulse.png" alt="Pulse Icon" className="w-20 h-20 mb-4" onError={(e) => console.error('Image failed to load:', e)} />
+            <img src={pulseIcon} alt="Pulse Icon" className="w-20 h-20 mb-4 object-contain" />
             <h3 className="text-2xl font-normal font-body text-heading">Pulse</h3>
             <p className="text-sm font-light font-body">A focused, recurring survey tailored to specific schools or districts to track trends and insights over time.</p>
           </div>

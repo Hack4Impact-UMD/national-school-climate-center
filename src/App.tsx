@@ -16,8 +16,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/survey-builder" element={<SurveyBuilder />} />
-          <Route path="/create-survey" element={<CreateSurvey />} />
+          <Route path="/surveys/builder" element={<SurveyBuilder />} />
+          <Route path="/surveys/create" element={<CreateSurvey />} />
         </Route>
       </Routes>
     </div>
