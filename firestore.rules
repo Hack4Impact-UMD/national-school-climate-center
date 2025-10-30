@@ -11,8 +11,8 @@ service cloud.firestore {
         : null;
     }
 
-    function isAdmin()      {return myRole() == 'admin';}
-    function isSchoolPersonnel      { return myRole() == 'school_personnel' }
+    function isAdmin() { return myRole() == 'admin'; }
+    function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
 
     match /members/{uid} {
         allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
