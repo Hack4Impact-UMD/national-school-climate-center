@@ -33,4 +33,5 @@ service cloud.firestore {
 
     // We will add more rules for analytics and also things such user managment for the admins
 
+  }
 }
