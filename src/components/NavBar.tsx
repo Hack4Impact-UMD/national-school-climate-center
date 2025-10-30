@@ -26,7 +26,11 @@ export default function NavBar() {
     <nav className="bg-primary text-primary-foreground min-h-screen w-80 pr-6">
       <div className="flex items-center p-4">
         <div className="w-16 h-16 rounded-full bg-gray-300 overflow-hidden">
-          <img src="" alt="User avatar" className="w-full h-full object-cover" />
+          <img
+            src=""
+            alt="User avatar"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="ml-4">
           <h3 className="font-heading text-2xl text-heading text-white">
