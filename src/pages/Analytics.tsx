@@ -3,6 +3,9 @@ import ResponseChart from '@/components/analytics/ResponseChart'
 import SelectionMenu from '@/components/analytics/SelectionMenu'
 
 export default function Analytics() {
+  {
+    /* Sample chart data */
+  }
   const charts = [
     {
       question: 'How safe do you feel at school?',
@@ -13,11 +16,8 @@ export default function Analytics() {
     { question: 'Question 4', data: 'Even more data' },
     { question: 'Question 5', data: 'Even more data' },
     { question: 'Question 6', data: 'Even more data' },
-    { question: 'Question 2', data: 'Chart data goes here' },
-    { question: 'Question 3', data: 'More chart data' },
-    { question: 'Question 4', data: 'Even more data' },
-    { question: 'Question 5', data: 'Even more data' },
-    { question: 'Question 6', data: 'Even more data' },
+    { question: 'Question 7', data: 'Chart data goes here' },
+    { question: 'Question 8', data: 'More chart data' },
   ]
 
   return (
@@ -28,9 +28,15 @@ export default function Analytics() {
       <p className="font-body text-lg text-body">
         View data visualizations and insights from survey responses.
       </p>
+
+      {/* Generate Report Button */}
       <GenerateReport />
+
+      {/* Selection Menu */}
       <SelectionMenu />
-      <div className="h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400">
+      
+      {/* Response Charts Grid */}
+      <div className="h-[400px] overflow-y-auto">
         <div className="grid grid-cols-2 gap-4 bg-background p-4">
           {charts.map((chart, idx) => (
             <ResponseChart
