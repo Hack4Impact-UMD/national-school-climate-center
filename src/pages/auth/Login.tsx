@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '@/firebase/config'
+import { auth, googleProvider } from '@/firebase/config'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { signInWithPopup } from 'firebase/auth'
+import { FcGoogle } from 'react-icons/fc' // npm install react-icons to make this work
 
 interface LoginFormData {
   email: string
@@ -67,8 +69,22 @@ export default function Login() {
     }
   }
 
+  /* Google Sign-In Handler */
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true)
+    setAuthError(null)
+
+    try {
+      await signInWithPopup(auth, googleProvider)
+      navigate('/manage-users')
+    } catch (error) {
+      setAuthError('Failed to login with Google. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    
     <main className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto">
         <div className="text-center">
@@ -140,7 +156,7 @@ export default function Login() {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-center">
+            <CardFooter className="flex justify-center gap-4">
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -148,10 +164,22 @@ export default function Login() {
               >
                 {isLoading ? 'Logging in...' : 'Log in'}
               </Button>
+
+              {/* Google sign-in button */}
+              <Button
+                type="submit"
+                onClick={handleGoogleSignIn}
+                variant="outline"
+                className="w-[165px] disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              >
+                <FcGoogle size={20} />
+                Log in with Google
+              </Button>
             </CardFooter>
           </Card>
         </form>
-        
+
         <button
           type="button"
           className="font-heading text-md text-secondary underline text-center mt-4 font-bold w-full cursor-pointer bg-transparent border-0 p-0"
