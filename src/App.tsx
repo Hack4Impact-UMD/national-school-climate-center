@@ -5,6 +5,7 @@ import Login from './pages/auth/Login'
 import ManageUsers from './pages/Admin'
 import Analytics from './pages/Analytics'
 import SurveyBuilder from './pages/surveys/SurveyBuilder'
+import General from './pages/General'
 import AllSurveys from './pages/surveys/AllSurveys'
 import Layout from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -31,6 +32,7 @@ export default function App() {
 
           <Route element={<ProtectedRoute requiredAction="manage_users" />}>
             <Route path="/manage-users" element={<ManageUsers />} />
+            <Route path="/general" element={<General />} />
           </Route>
         </Route>
       </Route>
