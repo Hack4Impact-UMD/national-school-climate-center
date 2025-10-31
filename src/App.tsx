@@ -30,10 +30,15 @@ export default function App() {
             <Route path="/analytics" element={<Analytics />} />
           </Route>
 
-          <Route element={<ProtectedRoute requiredAction="manage_users" />}>
-            <Route path="/manage-users" element={<ManageUsers />} />
-            <Route path="/general" element={<General />} />
-          </Route>
+          <Route element={<ProtectedRoute requiredAction="read" />}>
++            <Route path="/general" element={<General />} />
++          </Route>
++
++          <Route element={<ProtectedRoute requiredAction="manage_users" />}>
++            <Route path="/manage-users" element={<ManageUsers />} />
++          </Route>
+          
+          
         </Route>
       </Route>
 
