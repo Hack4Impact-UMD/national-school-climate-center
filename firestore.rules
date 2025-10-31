@@ -11,8 +11,8 @@ service cloud.firestore {
         : null;
     }
 
-    function isAdmin()      {return myRole() == 'admin';}
-    function isSchoolPersonnel      { return myRole() == 'school_personnel' }
+    function isAdmin() { return myRole() == 'admin'; }
+    function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
 
     match /members/{uid} {
         allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
@@ -33,4 +33,5 @@ service cloud.firestore {
 
     // We will add more rules for analytics and also things such user managment for the admins
 
+  }
 }
