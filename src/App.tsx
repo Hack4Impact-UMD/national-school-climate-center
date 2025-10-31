@@ -1,4 +1,3 @@
-// App.tsx (replace current <Routes> tree)
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import About from './pages/About'
