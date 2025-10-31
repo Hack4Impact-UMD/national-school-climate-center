@@ -29,7 +29,7 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password)
-      navigate('/manage-users')
+      navigate('/home')
     } catch (error) {
       // Handle Firebase authentication errors
       let errorMessage = 'An error occurred during login'
@@ -68,7 +68,6 @@ export default function Login() {
   }
 
   return (
-    
     <main className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto">
         <div className="text-center">
@@ -151,7 +150,7 @@ export default function Login() {
             </CardFooter>
           </Card>
         </form>
-        
+
         <button
           type="button"
           className="font-heading text-md text-secondary underline text-center mt-4 font-bold w-full cursor-pointer bg-transparent border-0 p-0"
