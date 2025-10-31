@@ -26,7 +26,11 @@ export default function NavBar() {
     <nav className="bg-primary text-primary-foreground min-h-screen w-80 pr-6">
       <div className="flex items-center p-4">
         <div className="w-16 h-16 rounded-full bg-gray-300 overflow-hidden">
-          <img src="" alt="User avatar" className="w-full h-full object-cover" />
+          <img
+            src=""
+            alt="User avatar"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="ml-4">
           <h3 className="font-heading text-2xl text-heading text-white">
@@ -83,7 +87,7 @@ export default function NavBar() {
             </p>
             <div className="mt-3 ml-7 text-lg space-y-2">
               <Link
-                to="/settings"
+                to="/General"
                 className="flex items-center justify-between hover:opacity-80 transition-opacity"
               >
                 <h3 className="font-heading text-2xl text-heading text-white mb-1">

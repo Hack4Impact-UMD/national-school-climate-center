@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
       // TODO: Remove this testing override - defaults all users to admin
-      setRole('admin')
+      setRole('super_admin')
       setLoading(false)
       return
 
