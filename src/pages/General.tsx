@@ -1,15 +1,13 @@
-import React from 'react'
-
-const General: React.FC = () => {
+export default function General() {
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-semibold mb-4 text-gray-800">General</h1>
-      <p className="text-gray-600">
+      <h1 className="font-heading text-4xl font-bold text-heading mb-4">
+        General
+      </h1>
+      <p className="font-body text-lg text-body">
         This is a placeholder for the General page. You can add general
         information, settings, or features here later on.
       </p>
     </div>
   )
 }
-
-export default General

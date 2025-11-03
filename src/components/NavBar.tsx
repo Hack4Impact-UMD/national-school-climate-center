@@ -87,7 +87,7 @@ export default function NavBar() {
             </p>
             <div className="mt-3 ml-7 text-lg space-y-2">
               <Link
-                to="/General"
+                to="/general"
                 className="flex items-center justify-between hover:opacity-80 transition-opacity"
               >
                 <h3 className="font-heading text-2xl text-heading text-white mb-1">
