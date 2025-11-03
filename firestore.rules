@@ -7,14 +7,14 @@ service cloud.firestore {
 
     function myRole() {
         return signedIn()
-        ? get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
         : null;
     }
 
     function isAdmin() { return myRole() == 'admin'; }
     function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
 
-    match /members/{uid} {
+    match /users/{uid} {
         allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
 
         allow create, delete: if isAdmin() &&
@@ -31,7 +31,7 @@ service cloud.firestore {
         allow create, update, delete: if isAdmin();
     }
 
-    // We will add more rules for analytics and also things such user managment for the admins
+    // We will add more rules for analytics and also things such as user management for the admins
 
   }
 }
