@@ -39,7 +39,7 @@ export default function Analytics() {
 
       {/* Response Charts Grid */}
       <div className="h-[400px] overflow-y-auto">
-        <div className="grid grid-cols-2 gap-4 bg-background p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4">
           {charts.map((chart, idx) => (
             <ResponseChart
               key={idx}
