@@ -1,8 +1,9 @@
-export type Role = 'admin' | 'school_personnel'
+export type Role = 'super_admin' | 'admin' | 'school_personnel'
 export type Action = 'read' | 'create' | 'update' | 'delete' | 'manage_users'
 
 const policy: Record<Role, Action[]> = {
-  admin: ['read', 'create', 'update', 'delete', 'manage_users'],
+  super_admin: ['read', 'create', 'update', 'delete', 'manage_users'],
+  admin: ['read', 'create', 'update', 'delete'],
   school_personnel: ['read'],
 }
 
