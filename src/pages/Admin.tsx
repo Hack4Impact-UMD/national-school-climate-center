@@ -1,17 +1,47 @@
-import { useState } from "react";
-import { Search, Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from 'react'
+import { Search, Plus } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { getMembers, listenMembers, inviteMemberByEmail, type Member } from '@/lib/admin'
+import type { Role } from '@/pages/auth/rbac'
 
 export default function ManageUsers() {
   const [open, setOpen] = useState(false);
-  const [emails, setEmails] = useState([
-    { email: "johnsmith@gmail.com", role: "Admin" },
-    { email: "johnsmith@gmail.com", role: "Employee" },
-    { email: "johnsmith@gmail.com", role: "School" },
-  ]);
+  const [members, setMembers] = useState<Member[]>([])
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState<Role>('admin')
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  
+
+  useEffect(() => {
+    // load once then subscribe to members collection
+    let unsub: (() => void) | undefined
+    getMembers().then(setMembers).catch(console.error)
+    try {
+      unsub = listenMembers((m) => setMembers(m))
+    } catch (err) {
+      console.error('Failed to listen to members', err)
+    }
+    return () => unsub && unsub()
+  }, [])
+
+  
 
   return (
     <div className="p-6">
@@ -31,12 +61,14 @@ export default function ManageUsers() {
             />
             <Search className="absolute right-2 top-2.5 w-4 h-4 text-gray-500" />
           </div>
-          <Button
-            onClick={() => setOpen(true)}
-            className="bg-[#4C7FCC] hover:bg-[#3c68b3] text-white flex items-center gap-2 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" /> Invite users
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setOpen(true)}
+              className="bg-[#4C7FCC] hover:bg-[#3c68b3] text-white flex items-center gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Invite users
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -46,17 +78,17 @@ export default function ManageUsers() {
             <tr>
               <th className="px-6 py-3 text-sm font-semibold text-gray-600">Name</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-600">Email</th>
-              <th className="px-6 py-3 text-sm font-semibold text-gray-600">Last Active</th>
+              <th className="px-6 py-3 text-sm font-semibold text-gray-600">Joined</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-600">Role</th>
             </tr>
           </thead>
           <tbody>
-            {[...Array(8)].map((_, i) => (
-              <tr key={i} className="border-t border-gray-100 h-12">
-                <td className="px-6"></td>
-                <td className="px-6"></td>
-                <td className="px-6"></td>
-                <td className="px-6"></td>
+            {members.map((m) => (
+              <tr key={m.id} className="border-t border-gray-100 h-12">
+                <td className="px-6">{(m as unknown as { name?: string }).name ?? m.displayName ?? '-'}</td>
+                <td className="px-6">{m.email ?? '-'}</td>
+                <td className="px-6">{m.joinedAt ? new Date(m.joinedAt.seconds * 1000).toLocaleString() : '-'}</td>
+                <td className="px-6">{m.role ?? '-'}</td>
               </tr>
             ))}
           </tbody>
@@ -83,35 +115,52 @@ export default function ManageUsers() {
                 <Input
                   type="email"
                   placeholder="Email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
                   className="pr-8 bg-gray-100 cursor-text"
                 />
                 <Search className="absolute right-2 top-2.5 w-4 h-4 text-gray-500" />
               </div>
-              <Button className="bg-[#4C7FCC] hover:bg-[#3c68b3] text-white cursor-pointer">
-                Send Invite
+              <Select defaultValue={inviteRole} onValueChange={(v: string) => setInviteRole(v as Role)}>
+                <SelectTrigger className="w-36 bg-gray-50 cursor-pointer">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="school_personnel">School Personnel</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                disabled={inviteLoading}
+                onClick={async () => {
+                  if (!inviteEmail) return
+                  setInviteError(null)
+                  setInviteLoading(true)
+                  try {
+                    await inviteMemberByEmail(inviteEmail, inviteRole)
+                    setInviteEmail('')
+                  } catch (err: unknown) {
+                    console.error('Invite failed', err)
+                    const msg = err instanceof Error ? err.message : String(err)
+                    // Mssage for common permission error
+                    if (msg.includes('permission-denied')) {
+                      setInviteError('Invite failed: missing permissions. Ensure your account has an admin record in Firestore (members/{uid}) or use the Console to create it.')
+                    } else {
+                      setInviteError('Invite failed: ' + msg)
+                    }
+                  } finally {
+                    setInviteLoading(false)
+                  }
+                }}
+                className="bg-[#4C7FCC] hover:bg-[#3c68b3] text-white cursor-pointer"
+              >
+                {inviteLoading ? 'Sending…' : 'Send Invite'}
               </Button>
             </div>
 
-            <div className="space-y-2">
-              {emails.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between border border-gray-200 rounded-lg p-2"
-                >
-                  <p className="text-sm text-gray-700">{item.email}</p>
-                  <Select defaultValue={item.role}>
-                    <SelectTrigger className="w-32 bg-gray-50 cursor-pointer">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="Admin" className="cursor-pointer">Admin</SelectItem>
-                      <SelectItem value="Employee" className="cursor-pointer">Employee</SelectItem>
-                      <SelectItem value="School" className="cursor-pointer">School</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
-            </div>
+            {inviteError && <div className="mt-2 text-sm text-red-600">{inviteError}</div>}
           </div>
 
           <DialogFooter>
