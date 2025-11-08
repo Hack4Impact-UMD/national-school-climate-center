@@ -1,37 +1,50 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    function signedIn() { return request.auth != null; }
 
+    function signedIn() { return request.auth != null; }
+    function myUid() { return request.auth.uid; }
+
+    // role lookup from users doc
     function myRole() {
-        return signedIn()
-        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+      return signedIn()
+        ? get(/databases/$(database)/documents/users/$(myUid())).data.role
         : null;
     }
-
     function isAdmin() { return myRole() == 'admin'; }
-    function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
+    function isStaff() { return myRole() == 'school_personnel'; }
 
     match /users/{uid} {
-        allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-
-        allow create, delete: if isAdmin() &&
-            request.resource.data.keys().hasOnly(['role','joinedAt']) &&
-            request.resource.data.role in ['admin','school_personnel'];
-
-        allow update: if isAdmin();
+      allow read: if signedIn() && (uid == myUid() || isAdmin());
+      allow create, update, delete: if isAdmin();
     }
 
-    match /surveys/{surveyID} {
-
-        allow read: if isAdmin() || isSchoolPersonnel();
-
-        allow create, update, delete: if isAdmin();
+    match /questionBank/{qid} {
+      allow read: if signedIn();                 // everyone logged in can read
+      allow create, update, delete: if isAdmin();// only admins manage bank
     }
 
-    // We will add more rules for analytics and also things such as user management for the admins
+    match /surveys/{surveyId} {
+      allow read: if signedIn();                 // or restrict by visibility
+      allow create, update, delete: if isAdmin();
+    }
 
+    match /responses/{rid} {
+      // Students create their own responses; must include consent
+      allow create: if signedIn()
+        && request.resource.data.uid == myUid()
+        && request.resource.data.consent == true;
+
+      // Immutable once created (prevent edits)
+      allow update: if false;
+
+      // Reads: staff/admin; a student can read their own response
+      allow read: if (signedIn() && resource.data.uid == myUid())
+                  || isAdmin() || isStaff();
+
+      allow delete: if isAdmin();
+    }
+
+    
   }
 }
