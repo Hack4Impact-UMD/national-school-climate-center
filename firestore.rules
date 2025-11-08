@@ -11,18 +11,28 @@ service cloud.firestore {
         : null;
     }
 
-    function isAdmin() { return myRole() == 'admin'; }
-    function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
+  function isAdmin() { return myRole() in ['admin', 'super_admin']; }
+  function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
 
-    match /members/{uid} {
-        allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+  match /members/{uid} {
+    allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
 
-        allow create, delete: if isAdmin() &&
-            request.resource.data.keys().hasOnly(['role','joinedAt']) &&
-            request.resource.data.role in ['admin','school_personnel'];
+    // Admins can create/delete member records
+    allow create, delete: if isAdmin() &&
+      request.resource.data.keys().hasOnly(['role','joinedAt','email','displayName']) &&
+      request.resource.data.role in ['super_admin','admin','school_personnel','student'];
 
-        allow update: if isAdmin();
-    }
+    allow update: if isAdmin();
+  }
+
+  // Invitations collection
+  match /invitations/{id} {
+    allow create: if isAdmin() &&
+      request.resource.data.keys().hasOnly(['email','role','invitedAt','invitedBy','status']) &&
+      request.resource.data.role in ['super_admin','admin','school_personnel','student'];
+
+    allow read, update, delete: if isAdmin();
+  }
 
     match /surveys/{surveyID} {
 

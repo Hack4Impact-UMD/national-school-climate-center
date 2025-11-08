@@ -27,6 +27,18 @@ export default function ManageUsers() {
   const [inviteRole, setInviteRole] = useState<Role>('admin')
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteError, setInviteError] = useState<string | null>(null)
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null)
+  
+  const roleLabel = (r?: Role | null) => {
+    if (!r) return '-'
+    const map: Record<string, string> = {
+      super_admin: 'Super Admin',
+      admin: 'Admin',
+      student: 'Student',
+      school_personnel: 'School Personnel',
+    }
+    return map[r] ?? r
+  }
   
 
   useEffect(() => {
@@ -88,7 +100,7 @@ export default function ManageUsers() {
                 <td className="px-6">{(m as unknown as { name?: string }).name ?? m.displayName ?? '-'}</td>
                 <td className="px-6">{m.email ?? '-'}</td>
                 <td className="px-6">{m.joinedAt ? new Date(m.joinedAt.seconds * 1000).toLocaleString() : '-'}</td>
-                <td className="px-6">{m.role ?? '-'}</td>
+                <td className="px-6">{roleLabel(m.role)}</td>
               </tr>
             ))}
           </tbody>
@@ -136,20 +148,19 @@ export default function ManageUsers() {
                 disabled={inviteLoading}
                 onClick={async () => {
                   if (!inviteEmail) return
+                  const email = inviteEmail
                   setInviteError(null)
+                  setInviteSuccess(null)
                   setInviteLoading(true)
                   try {
-                    await inviteMemberByEmail(inviteEmail, inviteRole)
+                    await inviteMemberByEmail(email, inviteRole)
                     setInviteEmail('')
+                    setInviteSuccess(`Invite sent to ${email}`)
+                    setTimeout(() => setInviteSuccess(null), 5000)
                   } catch (err: unknown) {
                     console.error('Invite failed', err)
                     const msg = err instanceof Error ? err.message : String(err)
-                    // Mssage for common permission error
-                    if (msg.includes('permission-denied')) {
-                      setInviteError('Invite failed: missing permissions. Ensure your account has an admin record in Firestore (members/{uid}) or use the Console to create it.')
-                    } else {
-                      setInviteError('Invite failed: ' + msg)
-                    }
+                    setInviteError('Invite failed: ' + msg)
                   } finally {
                     setInviteLoading(false)
                   }
@@ -160,6 +171,7 @@ export default function ManageUsers() {
               </Button>
             </div>
 
+            {inviteSuccess && <div className="mt-2 text-sm text-green-600">{inviteSuccess}</div>}
             {inviteError && <div className="mt-2 text-sm text-red-600">{inviteError}</div>}
           </div>
 

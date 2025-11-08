@@ -13,7 +13,7 @@ import {
   type DocumentData,
   type Timestamp,
 } from 'firebase/firestore'
-import { db } from '@/firebase/config'
+import { db, auth } from '@/firebase/config'
 import type { Role } from '@/pages/auth/rbac'
 
 export type Member = {
@@ -25,6 +25,7 @@ export type Member = {
 }
 
 const membersCol = collection(db, 'members')
+const invitationsCol = collection(db, 'invitations')
 
 export async function getMembers(): Promise<Member[]> {
   const q = query(membersCol, orderBy('joinedAt', 'desc'))
@@ -43,9 +44,15 @@ export function listenMembers(onChange: (members: Member[]) => void) {
 
 
 export async function inviteMemberByEmail(email: string, role: Role) {
-  // create a new doc with server timestamp
-  const docRef = doc(membersCol)
-  await setDoc(docRef, { email, role, joinedAt: serverTimestamp() })
+  // create an invitation document 
+  const docRef = doc(invitationsCol)
+  await setDoc(docRef, {
+    email,
+    role,
+    invitedAt: serverTimestamp(),
+    invitedBy: auth.currentUser?.uid ?? null,
+    status: 'pending',
+  })
   return docRef.id
 }
 
