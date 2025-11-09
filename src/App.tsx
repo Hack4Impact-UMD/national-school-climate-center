@@ -10,12 +10,17 @@ import AllSurveys from './pages/surveys/AllSurveys'
 import CreateChallengeSurvey from './pages/CreateChallengeSurvey'
 import Layout from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
+// import WordCloud1 from './components/wordcloud/WordCloud1'
+// import WordCloud2 from './components/wordcloud/WordCloud2'
+// import DatabaseDemo from './pages/DatabaseDemo'
 
 export default function App() {
   return (
     <Routes>
       {/* Public */}
       <Route path="/login" element={<Login />} />
+      {/* <Route path="/wordcloud1" element={<WordCloud1 width={500} height={500} />} />
+      <Route path="/wordcloud2" element={<WordCloud2 width={500} height={500} />} /> */}
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
@@ -23,11 +28,15 @@ export default function App() {
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
+          {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
 
           {/* Action-gated */}
           <Route element={<ProtectedRoute requiredAction="create" />}>
             <Route path="/surveys/builder" element={<SurveyBuilder />} />
-            <Route path="/surveys/create/challenge" element={<CreateChallengeSurvey />} />
+            <Route
+              path="/surveys/create/challenge"
+              element={<CreateChallengeSurvey />}
+            />
             <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/analytics" element={<Analytics />} />
           </Route>
