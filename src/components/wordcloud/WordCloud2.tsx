@@ -1,8 +1,10 @@
+// WordCloud2
+// A simple word cloud using react-d3-cloud.
+// - Scales font size based on each word's value using a linear interpolation
+// - Optional rotation strategy: none, random preset angles, or a custom function
+// - Container size is controlled by width/height props (no auto-resize)
 import { useMemo } from "react";
 import WordCloud from "react-d3-cloud";
-
-// demonstration file for react-d3-cloud library
-// also added a declaration module in the types folder for the library
 
 export type WordCloudDatum = {
   text: string;
@@ -19,7 +21,7 @@ export type WordCloud2Props = {
   rotate?: "none" | "random" | ((word: WordCloudDatum, index: number) => number);
 };
 
-// the default values for the text dictate the size of each word.. this can be changed through the fontSizeMapper prop
+// Demo data. Larger values -> larger text after scaling.
 const DEFAULT_WORDS: WordCloudDatum[] = [
   { text: "school", value: 1020 },
   { text: "climate", value: 900 },
@@ -61,6 +63,7 @@ export default function WordCloud2({
   padding = 2,
   rotate = "random",
 }: WordCloud2Props) {
+  // Precompute min/max once per words array for linear scaling
   const [minVal, maxVal] = useMemo<[number, number]>(() => {
     if (!words.length) return [0, 0];
     let min = words[0].value;
@@ -72,6 +75,8 @@ export default function WordCloud2({
     return [min, max];
   }, [words]);
 
+  // Map each word -> pixel font size in [minFontSize, maxFontSize]
+  // If all values are equal, fall back to the midpoint size.
   const fontSize = useMemo<((word: WordCloudDatum) => number)>(() => {
     if (maxVal === minVal) {
       const mid = Math.round((minFontSize + maxFontSize) / 2);
@@ -84,6 +89,10 @@ export default function WordCloud2({
     };
   }, [minVal, maxVal, minFontSize, maxFontSize]);
 
+  // Rotation strategy:
+  // - custom function: use as-is
+  // - "none": 0°
+  // - "random": pick from a small set of angles
   const rotateMapper = useMemo<((word: WordCloudDatum, index: number) => number)>(() => {
     if (typeof rotate === "function") return rotate;
     if (rotate === "none") return () => 0;
@@ -92,6 +101,7 @@ export default function WordCloud2({
   }, [rotate]);
 
   return (
+    // The library renders an SVG to fill this container; control size here.
     <div style={{ width, height }}>
       <WordCloud
         data={words}
