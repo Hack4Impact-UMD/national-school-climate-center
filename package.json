@@ -23,15 +23,12 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "firebase": "^12.3.0",
+    "firebase-admin": "^13.6.0",
     "lucide-react": "^0.544.0",
-<<<<<<< HEAD
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-=======
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
     "react-hook-form": "^7.64.0",
->>>>>>> f8afbc64ad8a8ca2966a9906093150c23626c984
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.2",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7"

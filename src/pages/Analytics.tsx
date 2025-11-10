@@ -2,6 +2,7 @@ import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
 import { useState } from 'react'
+import type { ChartType } from '@/components/analytics/types'
 
 export default function Analytics() {
   {
@@ -20,7 +21,7 @@ export default function Analytics() {
     { question: 'Question 7', data: 'Chart data goes here' },
     { question: 'Question 8', data: 'More chart data' },
   ]
-  const [chartType, setChartType] = useState('option1') // initial value
+  const [chartType, setChartType] = useState<ChartType>('bar') // initial value
 
   return (
     <div className="p-6">
@@ -32,7 +33,7 @@ export default function Analytics() {
       </p>
 
       {/* Selection Menu */}
-      <ChartTypeSelector />
+      <ChartTypeSelector value={chartType} onChange={setChartType} />
 
       {/* Generate Report Button */}
       <GenerateReport />

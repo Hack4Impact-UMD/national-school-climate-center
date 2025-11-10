@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, googleProvider } from '@/firebase/config'
+import { auth, googleProvider, db } from '@/firebase/config'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { signInWithPopup } from 'firebase/auth'
+import { signInWithPopup, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import { FcGoogle } from 'react-icons/fc' // npm install react-icons to make this work
 
 interface LoginFormData {
@@ -69,15 +70,46 @@ export default function Login() {
     }
   }
 
-  /* Google Sign-In Handler */
+  // Helper for getting the data from the members collection
+  async function isMember(uid: string): Promise<boolean> {
+    const snap = await getDoc(doc(db, 'members', uid))
+    return snap.exists()
+  }
+
+  async function getMemberRole(uid: string): Promise<string | null> {
+    const snap = await getDoc(doc(db, 'members', uid))
+    return snap.exists() ? (snap.data().role as string) : null
+  }
+
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     setAuthError(null)
-
     try {
-      await signInWithPopup(auth, googleProvider)
+      const cred = await signInWithPopup(auth, googleProvider)
+      const uid = cred.user.uid
+
+      if (!(await isMember(uid))) {
+        await signOut(auth)
+        setAuthError(
+          'Your Google account is not authorized to access this application.'
+        )
+        return
+      }
+
+      const role = await getMemberRole(uid)
+
+      if (
+        !role ||
+        !['admin', 'school_personnel', 'super_admin'].includes(role)
+      ) {
+        await signOut(auth)
+        setAuthError('Your account does not have sufficient permissions.')
+        return
+      }
+
       navigate('/manage-users')
-    } catch (error) {
+    } catch (e: any) {
+      console.error('Sign in error:', e)
       setAuthError('Failed to login with Google. Please try again.')
     } finally {
       setIsLoading(false)
@@ -167,7 +199,7 @@ export default function Login() {
 
               {/* Google sign-in button */}
               <Button
-                type="submit"
+                type="button"
                 onClick={handleGoogleSignIn}
                 variant="outline"
                 className="w-[165px] disabled:opacity-50 disabled:cursor-not-allowed"
