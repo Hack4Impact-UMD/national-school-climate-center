@@ -31,5 +31,8 @@ service cloud.firestore {
       allow read: if isAdmin() || isSchoolPersonnel();
       allow create, update, delete: if isAdmin();
     }
+
+    // We will add more rules for analytics and also things such as user management for the admins
+
   }
 }

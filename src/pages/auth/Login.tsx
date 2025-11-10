@@ -32,7 +32,7 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password)
-      navigate('/manage-users')
+      navigate('/home')
     } catch (error) {
       // Handle Firebase authentication errors
       let errorMessage = 'An error occurred during login'

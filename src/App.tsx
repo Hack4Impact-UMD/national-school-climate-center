@@ -5,6 +5,7 @@ import Login from './pages/auth/Login'
 import ManageUsers from './pages/Admin'
 import Analytics from './pages/Analytics'
 import SurveyBuilder from './pages/SurveyBuilder'
+import General from './pages/General'
 import AllSurveys from './pages/surveys/AllSurveys'
 import CreateChallengeSurvey from './pages/CreateChallengeSurvey'
 import Layout from './components/Layout'
@@ -26,16 +27,14 @@ export default function App() {
           {/* Action-gated */}
           <Route element={<ProtectedRoute requiredAction="create" />}>
             <Route path="/surveys/builder" element={<SurveyBuilder />} />
-            <Route
-              path="/surveys/create/challenge"
-              element={<CreateChallengeSurvey />}
-            />
+            <Route path="/surveys/create/challenge" element={<CreateChallengeSurvey />} />
             <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/analytics" element={<Analytics />} />
           </Route>
 
           <Route element={<ProtectedRoute requiredAction="manage_users" />}>
             <Route path="/manage-users" element={<ManageUsers />} />
+            <Route path="/general" element={<General />} />
           </Route>
         </Route>
       </Route>
