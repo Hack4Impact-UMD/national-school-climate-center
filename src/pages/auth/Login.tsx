@@ -107,7 +107,7 @@ export default function Login() {
         return
       }
 
-      navigate('/manage-users')
+      navigate('/home')
     } catch (e: any) {
       console.error('Sign in error:', e)
       setAuthError('Failed to login with Google. Please try again.')
