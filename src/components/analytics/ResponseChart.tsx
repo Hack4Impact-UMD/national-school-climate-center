@@ -1,24 +1,28 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import React from 'react'
+import type { ChartType } from './types'
 
-interface ResponseChartProps<T> {
+export interface ResponseChartProps {
   question: string
-  ChartComponent: React.FC<{ data: T }>
-  chartData: T
+  data: string
+  chartType?: ChartType
 }
 
-const ResponseChart = <T,>({
+export const ResponseChart: React.FC<ResponseChartProps> = ({
   question,
-  ChartComponent,
-  chartData,
-}: ResponseChartProps<T>) => {
+  data,
+  chartType = 'bar',
+}) => {
+  // For now, just show the type; you can swap actual chart components later.
   return (
     <Card className="border-none">
       <CardHeader>
         <CardTitle>{question}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartComponent data={chartData} />
+        <p className="mb-2 text-sm text-muted-foreground">
+          Chart type: <span className="font-mono">{chartType}</span>
+        </p>
+        <p>{data}</p>
       </CardContent>
     </Card>
   )

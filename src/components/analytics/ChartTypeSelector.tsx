@@ -2,18 +2,15 @@ import {
   RadioGroup,
   RadioButton,
 } from '@/components/ui/chart-type-selector-group'
+import type { ChartType } from './types'
 
-type ChartType = 'bar' | 'pie' | 'x'
-
-interface ChartTypeSelectorProps {
+type Props = {
   value: ChartType
-  onChange: (newValue: ChartType) => void
+  onChange: (next: ChartType) => void
 }
 
-export default function ChartTypeSelector({
-  value,
-  onChange,
-}: ChartTypeSelectorProps) {
+export default function ChartTypeSelector({ value, onChange }: Props) {
+  // options you support
   const options: { label: string; value: ChartType }[] = [
     { label: 'Bar Chart', value: 'bar' },
     { label: 'Pie Chart', value: 'pie' },
@@ -22,7 +19,11 @@ export default function ChartTypeSelector({
 
   return (
     <div className="p-1 border-primary border-2 rounded-md inline-block">
-      <RadioGroup value={value} onValueChange={onChange} className="flex gap-2">
+      <RadioGroup
+        value={value}
+        onValueChange={(v) => onChange(v as ChartType)}
+        className="flex gap-2"
+      >
         {options.map((opt) => (
           <RadioButton
             key={opt.value}
