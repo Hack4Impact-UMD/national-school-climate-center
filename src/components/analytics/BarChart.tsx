@@ -8,11 +8,9 @@ import {
   Tooltip,
 } from 'recharts'
 
-// #region Sample data
 interface BarChartProps {
   data: { name: string; value: number }[]
 }
-// #endregion
 
 const SimpleBarChart: React.FC<BarChartProps> = ({ data }) => {
   return (

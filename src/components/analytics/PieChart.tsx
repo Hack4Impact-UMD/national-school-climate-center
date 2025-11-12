@@ -17,7 +17,6 @@ interface PieChartProps {
 const COLORS = ['#269ACF', '#D97706', '#9A2B7A', '#3730A3']
 const RADIAN = Math.PI / 180
 
-// Custom label for Pie slices
 const renderCustomizedLabel = (
   props: PieLabelRenderProps
 ): JSX.Element | null => {
@@ -55,7 +54,6 @@ const renderCustomizedLabel = (
   )
 }
 
-// ✅ Functional component accepting `data` as prop
 const SimplePieChart: React.FC<PieChartProps> = ({
   data,
   isAnimationActive = true,
