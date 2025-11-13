@@ -11,8 +11,10 @@ service cloud.firestore {
         ? get(/databases/$(database)/documents/users/$(myUid())).data.role
         : null;
     }
+    function isSuperAdmin() { return myRole() == 'super_admin'; }
     function isAdmin() { return myRole() == 'admin'; }
-    function isStaff() { return myRole() == 'school_personnel'; }
+    function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
+    function isStudent() { return myRole() == 'student'; }
 
     match /users/{uid} {
       allow read: if signedIn() && (uid == myUid() || isAdmin());
@@ -38,9 +40,9 @@ service cloud.firestore {
       // Immutable once created (prevent edits)
       allow update: if false;
 
-      // Reads: staff/admin; a student can read their own response
+      // Reads: school_personnel/admin; a student can read their own response
       allow read: if (signedIn() && resource.data.uid == myUid())
-                  || isAdmin() || isStaff();
+                  || isAdmin() || isSchoolPersonnel();
 
       allow delete: if isAdmin();
     }

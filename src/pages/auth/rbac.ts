@@ -1,10 +1,11 @@
-export type Role = 'super_admin' | 'admin' | 'school_personnel'
+export type Role = 'super_admin' | 'admin' | 'school_personnel' | 'student'
 export type Action = 'read' | 'create' | 'update' | 'delete' | 'manage_users'
 
 const policy: Record<Role, Action[]> = {
   super_admin: ['read', 'create', 'update', 'delete', 'manage_users'],
   admin: ['read', 'create', 'update', 'delete'],
-  school_personnel: ['read'],
+  school_personnel: ['read', 'update'],
+  student: ['read'],
 }
 
 export function can(role: Role | null | undefined, action: Action): boolean {

@@ -4,7 +4,7 @@ export interface User {
   uid: string
   email: string
   name: string
-  role: 'admin' | 'leader' | 'student' | 'parent'
+  role: 'super_admin' | 'admin' | 'school_personnel' | 'student'
   school_id: string
   district_id: string
   createdAt: Timestamp | FieldValue

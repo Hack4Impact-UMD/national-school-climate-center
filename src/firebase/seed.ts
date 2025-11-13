@@ -23,7 +23,9 @@ import type {
 import { db } from './seed-config'
 
 const SAMPLE_STUDENT_UID = 'sample-student-uid-for-testing'
-const SAMPLE_LEADER_UID = 'sample-leader-uid-for-testing'
+const SAMPLE_ADMIN_UID = 'sample-admin-uid-for-testing'
+const SAMPLE_PERSONNEL_UID = 'sample-personnel-uid-for-testing'
+const SAMPLE_SUPERADMIN_UID = 'sample-superadmin-uid-for-testing'
 const SAMPLE_SURVEY_ID = 'sample-survey-id-for-testing'
 
 /**
@@ -33,6 +35,39 @@ async function seedUsers() {
   console.log('Seeding sample users...')
 
   const usersToCreate: { uid: string; data: Omit<User, 'uid'> }[] = [
+    {
+      uid: SAMPLE_SUPERADMIN_UID,
+      data: {
+        email: 'superadmin@example.com',
+        name: 'Super Admin',
+        role: 'super_admin',
+        school_id: 'district-wide',
+        district_id: 'all',
+        createdAt: Timestamp.now(),
+      }
+    },
+    {
+      uid: SAMPLE_ADMIN_UID,
+      data: {
+        email: 'admin@example.com',
+        name: 'Admin User',
+        role: 'admin',
+        school_id: 'sample-school-123',
+        district_id: 'sample-district-abc',
+        createdAt: Timestamp.now(),
+      }
+    },
+    {
+      uid: SAMPLE_PERSONNEL_UID,
+      data: {
+        email: 'personnel@example.com',
+        name: 'School Personnel',
+        role: 'school_personnel',
+        school_id: 'sample-school-123',
+        district_id: 'sample-district-abc',
+        createdAt: Timestamp.now(),
+      }
+    },
     {
       uid: SAMPLE_STUDENT_UID,
       data: {
@@ -44,83 +79,18 @@ async function seedUsers() {
         createdAt: Timestamp.now(),
       },
     },
-    {
-      uid: SAMPLE_LEADER_UID,
-      data: {
-        email: 'leader@example.com',
-        name: 'Sample Leader',
-        role: 'leader',
-        school_id: 'sample-school-123',
-        district_id: 'sample-district-abc',
-        createdAt: Timestamp.now(),
-      },
-    },
-    {
-      uid: 'sample-parent-uid-for-testing',
-      data: {
-        email: 'parent@example.com',
-        name: 'Sample Parent',
-        role: 'parent',
-        school_id: 'sample-school-123',
-        district_id: 'sample-district-abc',
-        createdAt: Timestamp.now(),
-      },
-    },
   ]
 
   try {
     const batch = writeBatch(db)
-    const collectionRef = collection(db, 'users')
-
+    const ref = collection(db, 'users')
     usersToCreate.forEach((user) => {
-      const docRef = doc(collectionRef, user.uid)
-      batch.set(docRef, user.data)
+      batch.set(doc(ref, user.uid), user.data)
     })
-
     await batch.commit()
     console.log(`✅ Seeded ${usersToCreate.length} users.`)
   } catch (error) {
     console.error('Error seeding users:', error)
-  }
-}
-
-/**
- * Adds initial questions to the 'questionBank' collection.
- */
-async function seedQuestionBank() {
-  console.log('Seeding question bank...')
-  const questions: Omit<QuestionBankItem, 'id' | 'validation'>[] = [
-    {
-      text: 'How satisfied are you with the school environment?',
-      domain: 'school-climate',
-      type: 'rating-5',
-      options: [],
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    },
-    {
-      text: 'Do you feel safe at school?',
-      domain: 'safety',
-      type: 'multiple-choice',
-      options: ['Yes', 'No', 'Sometimes'],
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    },
-  ]
-
-  try {
-    const batch = writeBatch(db)
-    const collectionRef = collection(db, 'questionBank')
-
-    questions.forEach((q) => {
-      const docRef = doc(collectionRef) // Auto-generate ID
-      batch.set(docRef, q)
-    })
-
-    await batch.commit()
-    console.log(`✅ Seeded ${questions.length} questions to questionBank.`)
-  } catch (error) {
-    console.error('Error seeding question bank:', error)
   }
 }
 
@@ -151,10 +121,10 @@ async function seedSurvey() {
     type: 'school-climate',
     status: 'published',
     visibility: 'public',
-    school_id: 'all-schools',
-    district_id: 'all-districts',
+    school_id: 'sample-school-123',
+    district_id: 'sample-district-abc',
     questions: surveyQuestions,
-    createdBy: 'system-seed-script',
+    createdBy: SAMPLE_ADMIN_UID,
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   }
@@ -199,57 +169,6 @@ async function seedResponse() {
 }
 
 /**
- * Creates a sample consent grant in the 'consentGrants' collection.
- */
-async function seedConsent() {
-  console.log('Seeding sample consent grant...')
-
-  // The schema implies the grantId is a composite key
-  const grantId = `${SAMPLE_SURVEY_ID}:${SAMPLE_STUDENT_UID}`
-
-  const newGrant: Omit<ConsentGrant, 'grantId'> = {
-    surveyId: SAMPLE_SURVEY_ID,
-    respondentKey: SAMPLE_STUDENT_UID,
-    grantedAt: Timestamp.now(),
-  }
-
-  try {
-    const grantRef = doc(db, 'consentGrants', grantId)
-    await setDoc(grantRef, newGrant)
-    console.log(`✅ Seeded sample consent grant with ID: ${grantId}`)
-  } catch (error) {
-    console.error('Error seeding sample consent grant:', error)
-  }
-}
-
-/**
- * Creates a sample mail item in the 'mail' collection.
- */
-async function seedMail() {
-  console.log('Seeding sample mail queue item...')
-
-  const newMail: Omit<Mail, 'id' | 'sentAt'> = {
-    to: ['student@example.com'],
-    template: {
-      name: 'surveyInvite',
-      data: {
-        surveyName: 'Sample School Climate Survey',
-        studentName: 'Sample Student',
-      },
-    },
-    status: 'pending',
-    createdAt: Timestamp.now(),
-  }
-
-  try {
-    const docRef = await addDoc(collection(db, 'mail'), newMail)
-    console.log(`✅ Seeded sample mail item with ID: ${docRef.id}`)
-  } catch (error) {
-    console.error('Error seeding sample mail item:', error)
-  }
-}
-
-/**
  * Main function to run all seeding operations.
  */
 async function seedDatabase() {
@@ -257,11 +176,8 @@ async function seedDatabase() {
 
   // Seed all collections from models.ts
   await seedUsers()
-  await seedQuestionBank()
   await seedSurvey()
   await seedResponse()
-  await seedConsent()
-  await seedMail()
 
   console.log('--- Database Seed Finished ---')
 }
