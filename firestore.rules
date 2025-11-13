@@ -1,10 +1,11 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() { return request.auth != null; }
+    function myUid() { return request.auth.uid; }
 
+    // role lookup from users doc
     function myRole() {
       return signedIn()
         ? get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role
@@ -13,6 +14,7 @@ service cloud.firestore {
 
     function isAdmin() { return myRole() in ['admin', 'super_admin']; }
     function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
+    function isStudent() { return myRole() == 'student'; }
 
     match /members/{uid} {
       // Only the signed-in user can read their own member doc, or an admin
@@ -32,7 +34,9 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // We will add more rules for analytics and also things such as user management for the admins
+      allow delete: if isAdmin();
+    }
 
+    
   }
 }
