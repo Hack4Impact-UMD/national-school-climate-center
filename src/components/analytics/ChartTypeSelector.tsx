@@ -2,7 +2,7 @@ import {
   RadioGroup,
   RadioButton,
 } from '@/components/ui/chart-type-selector-group'
-import type { ChartType } from './types'
+import type { ChartType } from '../../types/chartTypes'
 
 type Props = {
   value: ChartType

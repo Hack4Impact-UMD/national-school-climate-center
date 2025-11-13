@@ -4,9 +4,10 @@ import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
 import SimpleBarChart from '@/components/analytics/BarChart'
 import SimplePieChart from '@/components/analytics/PieChart'
+import type { ChartType } from '@/types/chartTypes'
 
 export default function Analytics() {
-  const [chartType, setChartType] = useState<'bar' | 'pie' | 'x'>('bar')
+  const [chartType, setChartType] = useState<ChartType>('bar')
 
   const charts = [
     {
@@ -63,7 +64,7 @@ export default function Analytics() {
       <GenerateReport />
 
       {/* Response charts grid */}
-      <div className="h-[400px] overflow-y-auto mt-4">
+      <div className="h-[500px] overflow-y-auto mt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4">
           {charts.map((chart, idx) => {
             const ChartComponent =
