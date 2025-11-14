@@ -45,7 +45,10 @@ export default function ManageUsers() {
 
   useEffect(() => {
     let unsub: (() => void) | undefined
-    getMembers().then(setMembers).catch(console.error)
+    getMembers()
+      .then(setMembers)
+      .catch(console.error)
+      .finally(() => setLoading(false))
     unsub = listenMembers((m) => setMembers(m))
     return () => unsub && unsub()
   }, [])
@@ -92,14 +95,31 @@ export default function ManageUsers() {
             </tr>
           </thead>
           <tbody>
-            {members.map((m) => (
-              <tr key={m.id} className="border-t border-gray-100 h-12">
-                <td className="px-6">{(m as unknown as { name?: string }).name ?? m.displayName ?? '-'}</td>
-                <td className="px-6">{m.email ?? '-'}</td>
-                <td className="px-6">{m.joinedAt ? new Date(m.joinedAt.seconds * 1000).toLocaleString() : '-'}</td>
-                <td className="px-6">{roleLabel(m.role)}</td>
+            {loading ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-primary border-r-transparent"></div>
+                    <span className="text-body font-body">Loading users...</span>
+                  </div>
+                </td>
               </tr>
-            ))}
+            ) : members.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center text-body font-body">
+                  No users found
+                </td>
+              </tr>
+            ) : (
+              members.map((m) => (
+                <tr key={m.id} className="border-t border-gray-100 h-12">
+                  <td className="px-6">{(m as unknown as { name?: string }).name ?? m.displayName ?? '-'}</td>
+                  <td className="px-6">{m.email ?? '-'}</td>
+                  <td className="px-6">{m.joinedAt ? new Date(m.joinedAt.seconds * 1000).toLocaleString() : '-'}</td>
+                  <td className="px-6">{roleLabel(m.role)}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
