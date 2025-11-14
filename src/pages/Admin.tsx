@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getMembers, listenMembers, inviteMemberByEmail, type Member } from '@/lib/admin'
+import { isValidEmail } from '@/lib/utils'
 import type { Role } from '@/pages/auth/rbac'
 
 export default function ManageUsers() {
@@ -148,6 +149,10 @@ export default function ManageUsers() {
                 disabled={inviteLoading}
                 onClick={async () => {
                   if (!inviteEmail) return
+                  if (!isValidEmail(inviteEmail)) {
+                    setInviteError('Please enter a valid email address')
+                    return
+                  }
                   const email = inviteEmail
                   setInviteError(null)
                   setInviteSuccess(null)
