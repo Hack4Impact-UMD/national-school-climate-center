@@ -10,8 +10,8 @@ import AllSurveys from './pages/surveys/AllSurveys'
 import CreateChallengeSurvey from './pages/CreateChallengeSurvey'
 import Layout from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
-// import WordCloud1 from './components/wordcloud/WordCloud1'
-// import WordCloud2 from './components/wordcloud/WordCloud2'
+import WordCloud1 from './components/wordcloud/WordCloud1'
+import WordCloud2 from './components/wordcloud/WordCloud2'
 // import DatabaseDemo from './pages/DatabaseDemo'
 
 export default function App() {
@@ -19,8 +19,8 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<Login />} />
-      {/* <Route path="/wordcloud1" element={<WordCloud1 width={500} height={500} />} />
-      <Route path="/wordcloud2" element={<WordCloud2 width={500} height={500} />} /> */}
+      <Route path="/wordcloud1" element={<WordCloud1 width={1000} height={500} />} />
+      <Route path="/wordcloud2" element={<WordCloud2 width={1000} height={500} />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>

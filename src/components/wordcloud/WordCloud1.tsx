@@ -15,6 +15,7 @@ interface ExampleProps {
   width: number;
   height: number;
   showControls?: boolean;
+  colors?: string[];
 }
 
 // Shape of each word datum
@@ -24,7 +25,7 @@ export interface WordData {
 }
 
 // A small palette to color words; rotates through by index
-const colors = ['#143059', '#2F6B9A', '#82a6c2'];
+const DEFAULT_COLORS = ['#6D28D9', '#A855F7', '#C084FC'];
 
 // Convert a block of text into [{ text, value }] by counting words.
 // Very simple tokenization for demo purposes.
@@ -62,9 +63,10 @@ const fixedValueGenerator = () => 0.5;
 type SpiralType = 'archimedean' | 'rectangular';
 
 // Example word cloud with optional UI controls (spiral + rotation)
-export default function Example({ width, height, showControls }: ExampleProps) {
+export default function Example({ width, height, showControls, colors }: ExampleProps) {
   const [spiralType, setSpiralType] = useState<SpiralType>('archimedean');
   const [withRotation, setWithRotation] = useState(false);
+  const palette = colors && colors.length > 0 ? colors : DEFAULT_COLORS;
 
   return (
     <div className="flex flex-col select-none">
@@ -86,7 +88,7 @@ export default function Example({ width, height, showControls }: ExampleProps) {
             cloudWords.map((w, i) => (
               <Text
                 key={w.text}
-                fill={colors[i % colors.length]}
+                  fill={palette[i % palette.length]}
                 textAnchor={'middle'}
                 transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
                 fontSize={w.size}
