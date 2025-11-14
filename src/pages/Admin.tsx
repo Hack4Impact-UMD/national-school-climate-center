@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getMembers, listenMembers, inviteMemberByEmail, type Member } from '@/lib/admin'
-import { isValidEmail } from '@/lib/utils'
+import { isValidEmail, formatTimestamp } from '@/lib/utils'
 import type { Role } from '@/pages/auth/rbac'
 
 export default function ManageUsers() {
@@ -115,7 +115,7 @@ export default function ManageUsers() {
                 <tr key={m.id} className="border-t border-gray-100 h-12">
                   <td className="px-6">{(m as unknown as { name?: string }).name ?? m.displayName ?? '-'}</td>
                   <td className="px-6">{m.email ?? '-'}</td>
-                  <td className="px-6">{m.joinedAt ? new Date(m.joinedAt.seconds * 1000).toLocaleString() : '-'}</td>
+                  <td className="px-6">{formatTimestamp(m.joinedAt)}</td>
                   <td className="px-6">{roleLabel(m.role)}</td>
                 </tr>
               ))
