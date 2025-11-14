@@ -5,6 +5,7 @@ import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
 import SimpleBarChart from '@/components/analytics/BarChart'
 import SimplePieChart from '@/components/analytics/PieChart'
 import type { ChartType } from '@/types/chartTypes'
+import GeoMap from '@/components/analytics/GeoData'
 
 export default function Analytics() {
   const [chartType, setChartType] = useState<ChartType>('bar')
