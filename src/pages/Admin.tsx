@@ -24,6 +24,7 @@ import type { Role } from '@/pages/auth/rbac'
 export default function ManageUsers() {
   const [open, setOpen] = useState(false);
   const [members, setMembers] = useState<Member[]>([])
+  const [loading, setLoading] = useState(true)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<Role>('admin')
   const [inviteLoading, setInviteLoading] = useState(false)
@@ -43,14 +44,9 @@ export default function ManageUsers() {
   
 
   useEffect(() => {
-    // load once then subscribe to members collection
     let unsub: (() => void) | undefined
     getMembers().then(setMembers).catch(console.error)
-    try {
-      unsub = listenMembers((m) => setMembers(m))
-    } catch (err) {
-      console.error('Failed to listen to members', err)
-    }
+    unsub = listenMembers((m) => setMembers(m))
     return () => unsub && unsub()
   }, [])
 
