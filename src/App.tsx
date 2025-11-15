@@ -1,26 +1,21 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/Home'
-import About from './pages/About'
+import Home from './pages/public/Home'
+import About from './pages/public/About'
+import Analytics from './pages/public/Analytics'
 import Login from './pages/auth/Login'
-import ManageUsers from './pages/Admin'
-import Analytics from './pages/Analytics'
-import SurveyBuilder from './pages/SurveyBuilder'
-import General from './pages/General'
-import AllSurveys from './pages/surveys/AllSurveys'
-import CreateChallengeSurvey from './pages/CreateChallengeSurvey'
-import Layout from './components/Layout'
-import { ProtectedRoute } from './components/ProtectedRoute'
-import WordCloud1 from './components/wordcloud/WordCloud1'
-import WordCloud2 from './components/wordcloud/WordCloud2'
-// import DatabaseDemo from './pages/DatabaseDemo'
+import ManageUsers from './pages/admin/ManageUsers'
+import General from './pages/admin/General'
+import SurveyBuilder from './pages/survey/SurveyBuilder'
+import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
+import AllSurveys from './pages/survey/AllSurveys'
+import Layout from './components/layout/Layout'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 export default function App() {
   return (
     <Routes>
       {/* Public */}
       <Route path="/login" element={<Login />} />
-      <Route path="/wordcloud1" element={<WordCloud1 width={1000} height={500} />} />
-      <Route path="/wordcloud2" element={<WordCloud2 width={1000} height={500} />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>

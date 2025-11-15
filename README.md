@@ -49,7 +49,7 @@ _Image of team here_
   <tr>
     <td align="center">
       <div>
-        <img src="src/assets/Arsha.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Arsha.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/arsha-garg/" target="_blank">Arsha</a></b><br>
         <span style="background:#007bff; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💼 Product Manager
@@ -58,7 +58,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/Maria.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Maria.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/mariahouseordonez/" target="_blank">Maria</a></b><br>
         <span style="background:#007bff; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💼 Product Manager
@@ -74,7 +74,7 @@ _Image of team here_
   <tr>
     <td align="center">
       <div>
-        <img src="src/assets/Maiwand.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Maiwand.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/maiwandraheem/" target="_blank">Maiwand</a></b><br>
         <span style="background:#ff5722; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           🛠️ Tech Lead
@@ -83,7 +83,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/Steven.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Steven.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/stevenha75/" target="_blank">Steven</a></b><br>
         <span style="background:#ff5722; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           🛠️ Tech Lead
@@ -99,7 +99,7 @@ _Image of team here_
   <tr>
     <td align="center">
       <div>
-        <img src="src/assets/Jennifer.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Jennifer.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/jennifer-vo20/" target="_blank">Jennifer</a></b><br>
         <span style="background:#9c27b0; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           🎨 Designer
@@ -108,7 +108,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/Hansika.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Hansika.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/hansika-murugu/" target="_blank">Hansika</a></b><br>
         <span style="background:#9c27b0; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           🎨 Designer
@@ -124,7 +124,7 @@ _Image of team here_
   <tr>
     <td align="center">
       <div>
-        <img src="src/assets/david.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/david.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/davidbond26/" target="_blank">David</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
@@ -133,7 +133,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/daniel.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/daniel.jpeg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/daniel-yu05/" target="_blank">Daniel</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
@@ -142,7 +142,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/Izzy.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Izzy.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/isabellemthomas" target="_blank">Izzy</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
@@ -151,7 +151,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/Joanne.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Joanne.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.joanneynlee.com/" target="_blank">Joanne</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
@@ -162,7 +162,7 @@ _Image of team here_
   <tr>
     <td align="center">
       <div>
-        <img src="src/assets/Pooja.jpg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Pooja.jpg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/pooja-raghuram/" target="_blank">Pooja</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
@@ -171,7 +171,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/Soumya.jpg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Soumya.jpg" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/soumyajailwala/" target="_blank">Soumya</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
@@ -180,7 +180,7 @@ _Image of team here_
     </td>
     <td align="center">
       <div>
-        <img src="src/assets/Sara.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
+        <img src="src/assets/team-headshots/Sara.png" alt="Pic" width="120" style="border-radius:2rem; padding:0.5rem;"><br>
         <b><a href="https://www.linkedin.com/in/sara-karnik" target="_blank">Sara</a></b><br>
         <span style="background:#4caf50; color:white; padding:3px 8px; border-radius:0.5rem; font-size:12px;">
           💻 Engineer
