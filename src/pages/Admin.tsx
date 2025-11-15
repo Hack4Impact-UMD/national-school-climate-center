@@ -76,7 +76,7 @@ export default function ManageUsers() {
           <div className="flex items-center gap-2">
             <Button
               onClick={() => setOpen(true)}
-              className="bg-[#4C7FCC] hover:bg-[#3c68b3] text-white flex items-center gap-2 cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Invite users
             </Button>
@@ -127,7 +127,7 @@ export default function ManageUsers() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-[#4C7FCC] text-2xl font-semibold">
+            <DialogTitle className="text-primary text-2xl font-semibold">
               Invite Users
             </DialogTitle>
             <DialogDescription>
@@ -186,7 +186,7 @@ export default function ManageUsers() {
                     setInviteLoading(false)
                   }
                 }}
-                className="bg-[#4C7FCC] hover:bg-[#3c68b3] text-white cursor-pointer"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
               >
                 {inviteLoading ? 'Sending…' : 'Send Invite'}
               </Button>
@@ -199,7 +199,7 @@ export default function ManageUsers() {
           <DialogFooter>
             <Button
               onClick={() => setOpen(false)}
-              className="bg-[#4C7FCC] hover:bg-[#3c68b3] text-white mt-4 w-full cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground mt-4 w-full cursor-pointer"
             >
               Done
             </Button>
