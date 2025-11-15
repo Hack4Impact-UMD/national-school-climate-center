@@ -8,6 +8,7 @@ import {
   deleteDoc,
   query,
   orderBy,
+  where,
   serverTimestamp,
   onSnapshot,
   type DocumentData,
@@ -35,7 +36,6 @@ export function listenMembers(onChange: (members: Member[]) => void) {
 
 
 export async function inviteMemberByEmail(email: string, role: Role) {
-  // create an invitation document 
   const docRef = doc(invitationsCol)
   await setDoc(docRef, {
     email,
@@ -47,11 +47,15 @@ export async function inviteMemberByEmail(email: string, role: Role) {
   return docRef.id
 }
 
+// TODO: Implement UI for updating member roles in the Admin page
+// Should allow super_admins to change any role, regular admins to only change school_personnel/student roles
 export async function updateMemberRole(id: string, role: Role) {
   const d = doc(db, 'members', id)
   await updateDoc(d, { role })
 }
 
+// TODO: Implement UI for deleting members in the Admin page
+// Should show confirmation dialog and respect role-based permissions
 export async function deleteMember(id: string) {
   const d = doc(db, 'members', id)
   await deleteDoc(d)
