@@ -2,46 +2,74 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     function signedIn() { return request.auth != null; }
 
     function myRole() {
-        return signedIn()
+      return signedIn()
         ? get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role
         : null;
     }
 
-  function isAdmin() { return myRole() in ['admin', 'super_admin']; }
-  function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
+    function isAdmin() { return myRole() in ['admin', 'super_admin']; }
+    function isSuperAdmin() { return myRole() == 'super_admin'; }
+    function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
 
-  match /members/{uid} {
-    allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+    // Members collection - user accounts and roles
+    match /members/{uid} {
+      // Users can read their own record, admins can read all
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
 
-    // Admins can create/delete member records
-    allow create, delete: if isAdmin() &&
-      request.resource.data.keys().hasOnly(['role','joinedAt','email','displayName']) &&
-      request.resource.data.role in ['super_admin','admin','school_personnel','student'];
+      // Super admins can create/delete any role
+      allow create, delete: if isSuperAdmin() &&
+        request.resource.data.keys().hasOnly(['role','joinedAt','email','displayName']) &&
+        request.resource.data.keys().hasAll(['role']) &&
+        request.resource.data.role in ['super_admin','admin','school_personnel','student'];
 
-    allow update: if isAdmin();
-  }
+      // Regular admins can only create/delete school_personnel and student accounts
+      allow create, delete: if isAdmin() && !isSuperAdmin() &&
+        request.resource.data.keys().hasOnly(['role','joinedAt','email','displayName']) &&
+        request.resource.data.keys().hasAll(['role']) &&
+        request.resource.data.role in ['school_personnel','student'];
 
-  // Invitations collection
-  match /invitations/{id} {
-    allow create: if isAdmin() &&
-      request.resource.data.keys().hasOnly(['email','role','invitedAt','invitedBy','status']) &&
-      request.resource.data.role in ['super_admin','admin','school_personnel','student'];
+      // Super admins can update any member
+      allow update: if isSuperAdmin();
 
-    allow read, update, delete: if isAdmin();
-  }
-
-    match /surveys/{surveyID} {
-
-        allow read: if isAdmin() || isSchoolPersonnel();
-
-        allow create, update, delete: if isAdmin();
+      // Regular admins can update school_personnel and student accounts only
+      allow update: if isAdmin() && !isSuperAdmin() &&
+        get(/databases/$(database)/documents/members/$(uid)).data.role in ['school_personnel','student'];
     }
 
-    // We will add more rules for analytics and also things such user managment for the admins
+    // Invitations collection - pending user invites
+    match /invitations/{id} {
+      // Super admins can invite any role
+      allow create: if isSuperAdmin() &&
+        request.resource.data.keys().hasOnly(['email','role','invitedAt','invitedBy','status']) &&
+        request.resource.data.role in ['super_admin','admin','school_personnel','student'];
 
+      // Regular admins can only invite school_personnel and student
+      allow create: if isAdmin() && !isSuperAdmin() &&
+        request.resource.data.keys().hasOnly(['email','role','invitedAt','invitedBy','status']) &&
+        request.resource.data.role in ['school_personnel','student'];
+
+      // All admins can read invitations
+      allow read: if isAdmin();
+
+      // Super admins can update/delete any invitation
+      allow update, delete: if isSuperAdmin();
+
+      // Regular admins can only update/delete invitations for school_personnel and student
+      allow update, delete: if isAdmin() && !isSuperAdmin() &&
+        get(/databases/$(database)/documents/invitations/$(id)).data.role in ['school_personnel','student'];
+    }
+
+    // Surveys collection
+    match /surveys/{surveyID} {
+      // Admins and school personnel can read surveys
+      allow read: if isAdmin() || isSchoolPersonnel();
+
+      // Only admins can create, update, or delete surveys
+      allow create, update, delete: if isAdmin();
+    }
   }
 }

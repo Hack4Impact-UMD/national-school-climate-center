@@ -150,6 +150,9 @@ export default function ManageUsers() {
                 />
                 <Search className="absolute right-2 top-2.5 w-4 h-4 text-gray-500" />
               </div>
+              {/* TODO: Filter role options based on current user's role (useAuth).
+                  Regular admins should only see school_personnel and student options.
+                  Super admins should see all roles. */}
               <Select defaultValue={inviteRole} onValueChange={(v: string) => setInviteRole(v as Role)}>
                 <SelectTrigger className="w-36 bg-gray-50 cursor-pointer">
                   <SelectValue placeholder="Select role" />
