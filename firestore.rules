@@ -45,21 +45,28 @@ service cloud.firestore {
       // Super admins can invite any role
       allow create: if isSuperAdmin() &&
         request.resource.data.keys().hasOnly(['email','role','invitedAt','invitedBy','status']) &&
-        request.resource.data.role in ['super_admin','admin','school_personnel','student'];
+        request.resource.data.role in ['super_admin','admin','school_personnel','student'] &&
+        request.resource.data.status in ['pending','accepted','expired'];
 
       // Regular admins can only invite school_personnel and student
       allow create: if isAdmin() && !isSuperAdmin() &&
         request.resource.data.keys().hasOnly(['email','role','invitedAt','invitedBy','status']) &&
-        request.resource.data.role in ['school_personnel','student'];
+        request.resource.data.role in ['school_personnel','student'] &&
+        request.resource.data.status in ['pending','accepted','expired'];
 
       // All admins can read invitations
       allow read: if isAdmin();
 
       // Super admins can update/delete any invitation
-      allow update, delete: if isSuperAdmin();
+      allow update: if isSuperAdmin() &&
+        request.resource.data.status in ['pending','accepted','expired'];
+      allow delete: if isSuperAdmin();
 
       // Regular admins can only update/delete invitations for school_personnel and student
-      allow update, delete: if isAdmin() && !isSuperAdmin() &&
+      allow update: if isAdmin() && !isSuperAdmin() &&
+        get(/databases/$(database)/documents/invitations/$(id)).data.role in ['school_personnel','student'] &&
+        request.resource.data.status in ['pending','accepted','expired'];
+      allow delete: if isAdmin() && !isSuperAdmin() &&
         get(/databases/$(database)/documents/invitations/$(id)).data.role in ['school_personnel','student'];
     }
 

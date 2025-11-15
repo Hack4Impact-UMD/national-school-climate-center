@@ -36,6 +36,18 @@ export function listenMembers(onChange: (members: Member[]) => void) {
 
 
 export async function inviteMemberByEmail(email: string, role: Role) {
+  // Check for duplicate pending invitations
+  const q = query(
+    invitationsCol,
+    where('email', '==', email),
+    where('status', '==', 'pending')
+  )
+  const existingInvites = await getDocs(q)
+
+  if (!existingInvites.empty) {
+    throw new Error('An invitation has already been sent to this email address')
+  }
+
   const docRef = doc(invitationsCol)
   await setDoc(docRef, {
     email,
