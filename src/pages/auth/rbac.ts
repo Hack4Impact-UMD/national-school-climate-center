@@ -1,5 +1,6 @@
-export type Role = 'super_admin' | 'admin' | 'student' | 'school_personnel'
-export type Action = 'read' | 'create' | 'update' | 'delete' | 'manage_users'
+import type { Role, Action } from '@/types/auth'
+
+export type { Role, Action }
 
 const policy: Record<Role, Action[]> = {
   super_admin: ['read', 'create', 'update', 'delete', 'manage_users'],

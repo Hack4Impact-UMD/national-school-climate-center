@@ -17,9 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getMembers, listenMembers, inviteMemberByEmail, type Member } from '@/lib/admin'
+import { getMembers, listenMembers, inviteMemberByEmail } from '@/lib/admin'
 import { isValidEmail, formatTimestamp } from '@/lib/utils'
-import type { Role } from '@/pages/auth/rbac'
+import type { Role, Member } from '@/types/auth'
 
 export default function ManageUsers() {
   const [open, setOpen] = useState(false);

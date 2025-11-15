@@ -11,18 +11,9 @@ import {
   serverTimestamp,
   onSnapshot,
   type DocumentData,
-  type Timestamp,
 } from 'firebase/firestore'
 import { db, auth } from '@/firebase/config'
-import type { Role } from '@/pages/auth/rbac'
-
-export type Member = {
-  id: string
-  email?: string
-  role: Role
-  joinedAt?: Timestamp | null
-  displayName?: string
-}
+import type { Role, Member } from '@/types/auth'
 
 const membersCol = collection(db, 'members')
 const invitationsCol = collection(db, 'invitations')

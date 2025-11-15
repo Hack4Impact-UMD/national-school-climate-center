@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 // import { doc, getDoc } from 'firebase/firestore'
 import { auth } from '@/firebase/config'
-import type { Role } from '@/pages/auth/rbac'
+import type { Role } from '@/types/auth'
 
 type AuthState = { user: User | null; role: Role | null; loading: boolean }
 const AuthCtx = createContext<AuthState>({
