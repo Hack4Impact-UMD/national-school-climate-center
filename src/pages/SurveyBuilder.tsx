@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import ExistingSurvey from "@/components/ExistingSurvey";
+import ExistingSurvey from "@/components/survey/ExistingSurvey";
 import challengeIcon from "@/assets/survey_builder/challenge.png";
 import pulseIcon from "@/assets/survey_builder/pulse.png";
 

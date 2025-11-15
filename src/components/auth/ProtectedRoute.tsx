@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { can, type Action } from '@/pages/auth/rbac'
-import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { LoadingSpinner } from '@/components/layout/LoadingSpinner'
 
 const UNAUTHORIZED_REDIRECT_DELAY_MS = 2000
 

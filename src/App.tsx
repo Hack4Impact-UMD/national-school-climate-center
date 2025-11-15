@@ -8,8 +8,8 @@ import SurveyBuilder from './pages/SurveyBuilder'
 import General from './pages/General'
 import AllSurveys from './pages/surveys/AllSurveys'
 import CreateChallengeSurvey from './pages/CreateChallengeSurvey'
-import Layout from './components/Layout'
-import { ProtectedRoute } from './components/ProtectedRoute'
+import Layout from './components/layout/Layout'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 export default function App() {
   return (
