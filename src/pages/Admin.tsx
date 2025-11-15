@@ -113,7 +113,7 @@ export default function ManageUsers() {
             ) : (
               members.map((m) => (
                 <tr key={m.id} className="border-t border-gray-100 h-12">
-                  <td className="px-6">{(m as unknown as { name?: string }).name ?? m.displayName ?? '-'}</td>
+                  <td className="px-6">{m.displayName ?? '-'}</td>
                   <td className="px-6">{m.email ?? '-'}</td>
                   <td className="px-6">{formatTimestamp(m.joinedAt)}</td>
                   <td className="px-6">{roleLabel(m.role)}</td>
