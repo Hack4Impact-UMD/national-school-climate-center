@@ -89,3 +89,6 @@ CLAUDE.md
 
 # TypeScript
 *.tsbuildinfo.tmp
+
+# Firebase
+src/firebase/service-account.json

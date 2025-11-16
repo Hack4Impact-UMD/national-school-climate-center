@@ -87,5 +87,22 @@ service cloud.firestore {
       // Allow any signed-in user (e.g., students) to submit responses
       allow create: if signedIn();
     }
+    match /responses/{rid} {
+      // Students create their own responses; must include consent
+      allow create: if signedIn()
+        && request.resource.data.uid == myUid()
+        && request.resource.data.consent == true;
+
+      // Immutable once created (prevent edits)
+      allow update: if false;
+
+      // Reads: staff/admin; a student can read their own response
+      allow read: if (signedIn() && resource.data.uid == myUid())
+                  || isAdmin() || isStaff();
+
+      allow delete: if isAdmin();
+    }
+
+    
   }
 }
