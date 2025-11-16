@@ -6,7 +6,7 @@ import type {
   User,
   QuestionBankItem,
   Survey,
-  Question,
+  // Question,
   Response,
   ConsentGrant,
   Mail,
@@ -485,7 +485,10 @@ async function seedResponses() {
         { question_id: 'engagement_q2_voice', value: 'Sometimes' },
         { question_id: 'engagement_q3_attendance', value: 3 },
         { question_id: 'engagement_q4_extracurricular', value: 'No' },
-        { question_id: 'engagement_q5_home_resources', value: 'Most of the time' },
+        {
+          question_id: 'engagement_q5_home_resources',
+          value: 'Most of the time',
+        },
       ],
     },
   ]
