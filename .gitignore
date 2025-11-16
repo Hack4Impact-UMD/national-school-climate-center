@@ -41,7 +41,7 @@ playwright-report/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
-src/firebase/serviceAccountKey.json
+src/firebase/service-account.json
 
 # ──────────────── OS / Temp files ────────────────
 .DS_Store
@@ -84,6 +84,3 @@ CLAUDE.md
 *.swp
 *~
 .history/
-
-# Firebase
-src/firebase/serviceAccountKey.json

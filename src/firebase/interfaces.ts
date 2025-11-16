@@ -4,7 +4,7 @@ export interface User {
   uid: string
   email: string
   name: string
-  role: 'admin' | 'leader' | 'student' | 'parent'
+  role: 'admin' | 'super_admin' | 'student' | 'school_personnel'
   school_id: string
   district_id: string
   createdAt: Timestamp | FieldValue
@@ -22,7 +22,7 @@ export interface Survey {
   id: string
   title: string
   description: string
-  type: string
+  type: 'pulse' | 'challenge' | 'custom'
   status: string
   visibility: string
   school_id: string
@@ -47,6 +47,7 @@ export interface Response {
   district_id: string
   answers: Answer[]
   submittedAt: Timestamp | FieldValue
+  consent: boolean
 }
 
 export interface ConsentGrant {
@@ -59,7 +60,7 @@ export interface ConsentGrant {
 export interface QuestionBankItem {
   id: string
   text: string
-  domain: string
+  domain: 'leadership' | 'safety' | 'learning' | 'relationships' | 'environment'
   type: string
   options?: any[]
   validation?: any

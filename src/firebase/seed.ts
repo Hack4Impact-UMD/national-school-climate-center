@@ -2,14 +2,6 @@
  script populating the database with initial data for all collections defined in 'interfaces.ts'.
  */
 
-import {
-  collection,
-  addDoc,
-  setDoc,
-  doc,
-  writeBatch,
-  Timestamp,
-} from 'firebase/firestore'
 import type {
   User,
   QuestionBankItem,
@@ -20,10 +12,13 @@ import type {
   ConsentGrant,
   Mail,
 } from './interfaces'
-import { db } from './seed-config'
+import { db } from './admin-seed-config'
+import { FieldValue } from 'firebase-admin/firestore'
 
 const SAMPLE_STUDENT_UID = 'sample-student-uid-for-testing'
 const SAMPLE_LEADER_UID = 'sample-leader-uid-for-testing'
+const SAMPLE_ADMIN_UID = 'sample-admin-uid-for-testing'
+const SAMPLE_SUPER_ADMIN_UID = 'sample-super-admin-uid-for-testing'
 const SAMPLE_SURVEY_ID = 'sample-survey-id-for-testing'
 
 /**
@@ -41,7 +36,7 @@ async function seedUsers() {
         role: 'student',
         school_id: 'sample-school-123',
         district_id: 'sample-district-abc',
-        createdAt: Timestamp.now(),
+        createdAt: FieldValue.serverTimestamp(),
       },
     },
     {
@@ -49,38 +44,49 @@ async function seedUsers() {
       data: {
         email: 'leader@example.com',
         name: 'Sample Leader',
-        role: 'leader',
+        role: 'school_personnel',
         school_id: 'sample-school-123',
         district_id: 'sample-district-abc',
-        createdAt: Timestamp.now(),
+        createdAt: FieldValue.serverTimestamp(),
       },
     },
     {
-      uid: 'sample-parent-uid-for-testing',
+      uid: SAMPLE_ADMIN_UID,
       data: {
-        email: 'parent@example.com',
-        name: 'Sample Parent',
-        role: 'parent',
-        school_id: 'sample-school-123',
-        district_id: 'sample-district-abc',
-        createdAt: Timestamp.now(),
+        email: 'admint@example.com',
+        name: 'Sample Admin',
+        role: 'admin',
+        school_id: 'all-schools',
+        district_id: 'all-districts',
+        createdAt: FieldValue.serverTimestamp(),
+      },
+    },
+    {
+      uid: SAMPLE_SUPER_ADMIN_UID,
+      data: {
+        email: 'super-admin@example.com',
+        name: 'Sample Super Admin',
+        role: 'super_admin',
+        school_id: 'all-schools',
+        district_id: 'all-districts',
+        createdAt: FieldValue.serverTimestamp(),
       },
     },
   ]
 
   try {
-    const batch = writeBatch(db)
-    const collectionRef = collection(db, 'users')
+    const batch = db.batch()
+    const collectionRef = db.collection('members')
 
     usersToCreate.forEach((user) => {
-      const docRef = doc(collectionRef, user.uid)
+      const docRef = collectionRef.doc(user.uid)
       batch.set(docRef, user.data)
     })
 
     await batch.commit()
-    console.log(`✅ Seeded ${usersToCreate.length} users.`)
+    console.log(`✅ Seeded ${usersToCreate.length} members.`)
   } catch (error) {
-    console.error('Error seeding users:', error)
+    console.error('Error seeding members:', error)
   }
 }
 
@@ -89,31 +95,57 @@ async function seedUsers() {
  */
 async function seedQuestionBank() {
   console.log('Seeding question bank...')
+
   const questions: Omit<QuestionBankItem, 'id' | 'validation'>[] = [
     {
       text: 'How satisfied are you with the school environment?',
-      domain: 'school-climate',
+      domain: 'environment',
       type: 'rating-5',
       options: [],
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     },
     {
       text: 'Do you feel safe at school?',
       domain: 'safety',
       type: 'multiple-choice',
       options: ['Yes', 'No', 'Sometimes'],
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    {
+      text: 'How often do you feel supported by school staff?',
+      domain: 'relationships',
+      type: 'multiple-choice',
+      options: ['Always', 'Often', 'Sometimes', 'Rarely', 'Never'],
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    {
+      text: 'Do you have access to the learning resources you need?',
+      domain: 'learning',
+      type: 'multiple-choice',
+      options: ['Yes', 'No'],
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    {
+      text: 'Does school leadership communicate effectively with students?',
+      domain: 'leadership',
+      type: 'multiple-choice',
+      options: ['Yes', 'No', 'Sometimes'],
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     },
   ]
 
   try {
-    const batch = writeBatch(db)
-    const collectionRef = collection(db, 'questionBank')
+    const batch = db.batch()
+    const collectionRef = db.collection('questionBank')
 
     questions.forEach((q) => {
-      const docRef = doc(collectionRef) // Auto-generate ID
+      // Auto-generate ID
+      const docRef = collectionRef.doc()
       batch.set(docRef, q)
     })
 
@@ -143,26 +175,37 @@ async function seedSurvey() {
       required: true,
       text: 'Do you feel safe at school?',
     },
+    {
+      question_id: 'q3_support',
+      order: 3,
+      required: false,
+      text: 'How often do you feel supported by school staff?',
+    },
+    {
+      question_id: 'q4_resources',
+      order: 4,
+      required: false,
+      text: 'Do you have access to the learning resources you need?',
+    },
   ]
 
   const newSurvey: Omit<Survey, 'id'> = {
     title: 'Sample School Climate Survey',
     description: 'A sample survey created by the seed script.',
-    type: 'school-climate',
+    type: 'custom',
     status: 'published',
     visibility: 'public',
     school_id: 'all-schools',
     district_id: 'all-districts',
     questions: surveyQuestions,
     createdBy: 'system-seed-script',
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
   }
 
   try {
-    // Use setDoc with a predictable ID so other functions can reference it
-    const surveyRef = doc(db, 'surveys', SAMPLE_SURVEY_ID)
-    await setDoc(surveyRef, newSurvey)
+    const surveyRef = db.collection('surveys').doc(SAMPLE_SURVEY_ID)
+    await surveyRef.set(newSurvey)
     console.log(`✅ Seeded draft survey with ID: ${SAMPLE_SURVEY_ID}`)
   } catch (error) {
     console.error('Error seeding draft survey:', error)
@@ -186,12 +229,14 @@ async function seedResponse() {
     uid: SAMPLE_STUDENT_UID,
     school_id: 'sample-school-123',
     district_id: 'sample-district-abc',
+    consent: true,
     answers: sampleAnswers,
-    submittedAt: Timestamp.now(),
+    submittedAt: FieldValue.serverTimestamp(),
   }
 
   try {
-    const docRef = await addDoc(collection(db, 'responses'), newResponse)
+    const responsesRef = db.collection('responses')
+    const docRef = await responsesRef.add(newResponse)
     console.log(`✅ Seeded sample response with ID: ${docRef.id}`)
   } catch (error) {
     console.error('Error seeding sample response:', error)
@@ -204,18 +249,17 @@ async function seedResponse() {
 async function seedConsent() {
   console.log('Seeding sample consent grant...')
 
-  // The schema implies the grantId is a composite key
   const grantId = `${SAMPLE_SURVEY_ID}:${SAMPLE_STUDENT_UID}`
 
   const newGrant: Omit<ConsentGrant, 'grantId'> = {
     surveyId: SAMPLE_SURVEY_ID,
     respondentKey: SAMPLE_STUDENT_UID,
-    grantedAt: Timestamp.now(),
+    grantedAt: FieldValue.serverTimestamp(),
   }
 
   try {
-    const grantRef = doc(db, 'consentGrants', grantId)
-    await setDoc(grantRef, newGrant)
+    const grantRef = db.collection('consentGrants').doc(grantId)
+    await grantRef.set(newGrant)
     console.log(`✅ Seeded sample consent grant with ID: ${grantId}`)
   } catch (error) {
     console.error('Error seeding sample consent grant:', error)
@@ -229,7 +273,11 @@ async function seedMail() {
   console.log('Seeding sample mail queue item...')
 
   const newMail: Omit<Mail, 'id' | 'sentAt'> = {
-    to: ['student@example.com'],
+    to: [
+      'student1@example.com',
+      'student2@example.com',
+      'student3@example.com',
+    ],
     template: {
       name: 'surveyInvite',
       data: {
@@ -238,11 +286,12 @@ async function seedMail() {
       },
     },
     status: 'pending',
-    createdAt: Timestamp.now(),
+    createdAt: FieldValue.serverTimestamp(),
   }
 
   try {
-    const docRef = await addDoc(collection(db, 'mail'), newMail)
+    const mailRef = db.collection('mail')
+    const docRef = await mailRef.add(newMail)
     console.log(`✅ Seeded sample mail item with ID: ${docRef.id}`)
   } catch (error) {
     console.error('Error seeding sample mail item:', error)
@@ -255,7 +304,6 @@ async function seedMail() {
 async function seedDatabase() {
   console.log('--- Starting Database Seed ---')
 
-  // Seed all collections from models.ts
   await seedUsers()
   await seedQuestionBank()
   await seedSurvey()
@@ -269,6 +317,6 @@ async function seedDatabase() {
 // Run the seed script
 seedDatabase().catch((error) => {
   console.error('Unhandled error in seed script:', error)
-  // @ts-ignore
+  // eslint-disable-next-line n/no-process-exit
   process.exit(1)
 })
