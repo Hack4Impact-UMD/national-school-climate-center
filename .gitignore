@@ -1,17 +1,18 @@
-# Dependencies
+# ──────────────── Dependencies ────────────────
 node_modules
 .pnp
 .pnp.js
 
-# Build outputs
+# ──────────────── Build outputs ────────────────
 dist
 dist-ssr
 build
 .next
 out
 *.tsbuildinfo
+*.tsbuildinfo.tmp
 
-# Logs
+# ──────────────── Logs ────────────────
 logs
 *.log
 npm-debug.log*
@@ -20,7 +21,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Testing
+# ──────────────── Testing ────────────────
 coverage
 *.lcov
 .nyc_output
@@ -28,41 +29,24 @@ coverage
 test-results/
 playwright-report/
 
-# Environment variables
+# ──────────────── Environment variables ────────────────
 .env
 .env.*
 .env.local
 .env.*.local
 !.env.example
 
-# Firebase
+# ──────────────── Firebase ────────────────
 .firebase/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+src/firebase/service-account.json
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-.idea
+# ──────────────── OS / Temp files ────────────────
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-*.swp
-*~
-.history/
-
-# OS files
 Thumbs.db
 Desktop.ini
-
-# Temporary files
 *.tmp
 *.temp
 .cache
@@ -70,7 +54,7 @@ Desktop.ini
 .vite/
 vite.config.*.timestamp-*
 
-# Package manager
+# ──────────────── Package manager ────────────────
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -79,13 +63,24 @@ vite.config.*.timestamp-*
 !.yarn/versions
 .pnpm-debug.log
 
-# Miscellaneous
+# ──────────────── Miscellaneous ────────────────
 *.local
 .eslintcache
-
-# Claude Code local settings
 .claude/
 CLAUDE.md
 
-# TypeScript
-*.tsbuildinfo.tmp
+# ──────────────── Editor directories and files ────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*~
+.history/

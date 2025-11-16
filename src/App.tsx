@@ -23,11 +23,15 @@ export default function App() {
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
+          {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
 
           {/* Action-gated */}
           <Route element={<ProtectedRoute requiredAction="create" />}>
             <Route path="/surveys/builder" element={<SurveyBuilder />} />
-            <Route path="/surveys/create/challenge" element={<CreateChallengeSurvey />} />
+            <Route
+              path="/surveys/create/challenge"
+              element={<CreateChallengeSurvey />}
+            />
             <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/analytics" element={<Analytics />} />
           </Route>

@@ -10,6 +10,6 @@ const policy: Record<Role, Action[]> = {
 }
 
 export function can(role: Role | null | undefined, action: Action): boolean {
-  if (!role) return false
+  if (!role) return false // deny by default
   return policy[role].includes(action)
 }
