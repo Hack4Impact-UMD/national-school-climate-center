@@ -72,11 +72,20 @@ service cloud.firestore {
 
     // Surveys collection
     match /surveys/{surveyID} {
-      // Admins and school personnel can read surveys
-      allow read: if isAdmin() || isSchoolPersonnel();
+      // Allow any authenticated member to read surveys (UI still restricts by role)
+      allow read: if signedIn();
 
       // Only admins can create, update, or delete surveys
       allow create, update, delete: if isAdmin();
+    }
+
+    // Survey responses collection
+    match /responses/{responseID} {
+      // Allow any authenticated member to read aggregated response data
+      allow read: if signedIn();
+
+      // Allow any signed-in user (e.g., students) to submit responses
+      allow create: if signedIn();
     }
   }
 }
