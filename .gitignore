@@ -91,4 +91,4 @@ CLAUDE.md
 *.tsbuildinfo.tmp
 
 # Firebase
-src/firebase/serviceAccountKey.json
+src/firebase/service-account.json

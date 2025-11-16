@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "tsx src/firebase/seed.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
