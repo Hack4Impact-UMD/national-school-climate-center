@@ -89,6 +89,11 @@ export default function CreateChallengeSurvey() {
     })
   }
 
+  function duplicateQuestion(q: Question) {
+    const id = crypto.randomUUID()
+    setQuestions((prev) => [...prev, { ...q, id, name: `${q.name} (Copy)` }])
+  }
+
   return (
     <div className="mx-auto max-w-6xl p-6">
       <img
@@ -138,6 +143,7 @@ export default function CreateChallengeSurvey() {
                 )
               }
               onDelete={deleteQuestion}
+              onDuplicate={duplicateQuestion}
             />
 
             <Card className="border-primary rounded-2xl">
