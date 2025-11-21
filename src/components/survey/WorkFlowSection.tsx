@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Trash2, PencilLine, Plus } from 'lucide-react'
@@ -14,15 +15,24 @@ export type WorkflowQuestion = {
 }
 
 export default function WorkflowSection({
-  questions = defaultQuestions,
+  questions,
   onEdit,
   onDelete,
+  onSelect,
+  onRename,
+  setTab,
+  selectedId,
+  setSelectedId,
 }: {
-  questions?: WorkflowQuestion[]
+  questions: WorkflowQuestion[]
+  onSelect: (id: string) => void
+  onRename: (id: string, name: string) => void
   onEdit?: (q: WorkflowQuestion) => void
   onDelete?: (q: WorkflowQuestion) => void
+  setTab: (tab: string) => void
+  selectedId: string
+  setSelectedId: (id: string) => void
 }) {
-  const [selectedId, setSelectedId] = useState(questions[0]?.id)
   const selected = questions.find((q) => q.id === selectedId)
 
   return (
@@ -32,11 +42,15 @@ export default function WorkflowSection({
           {questions.map((q, i) => (
             <div key={q.id} className="relative">
               <WorkflowRow
-                index={`${i + 1}.`}
+                index={`${i + 1}`}
+                question={q}
                 label={q.label}
                 active={q.id === selectedId}
-                onClick={() => setSelectedId(q.id)}
-                onEdit={() => onEdit?.(q)}
+                onSelect={() => {
+                  setSelectedId(q.id)
+                  onSelect(q.id)
+                }}
+                onRename={(newName) => onRename(q.id, newName)}
                 onDelete={() => onDelete?.(q)}
               />
               {i < questions.length - 1 && (
@@ -95,7 +109,12 @@ export default function WorkflowSection({
                   </ol>
                 </>
               )}
-              <Button className="mt-2 w-fit bg-secondary">Edit Question</Button>
+              <Button
+                onClick={() => setTab('question')}
+                className="mt-2 w-fit bg-secondary"
+              >
+                Edit Question
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -112,55 +131,72 @@ export default function WorkflowSection({
 
 function WorkflowRow({
   index,
-  label,
+  question,
   active,
-  onClick,
-  onEdit,
+  label,
+  onSelect,
   onDelete,
+  onRename,
 }: {
   index: string
   label: string
+  question: WorkflowQuestion
   active?: boolean
-  onClick?: () => void
-  onEdit?: () => void
+  onSelect: () => void
   onDelete?: () => void
+  onRename: (name: string) => void
 }) {
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(label)
+
+  // Sync local name if parent label changes
+  useEffect(() => setName(label), [label])
+
   return (
     <div className="flex items-center gap-3">
-      <div className="w-8 select-none text-right text-sm">{index}</div>
+      <div className="w-8 text-right text-sm">{index}.</div>
       <Card
-        onClick={onClick}
-        className={cn(
-          'flex-1 cursor-pointer rounded-2xl border-primary transition-colors',
+        onClick={onSelect}
+        className={`flex-1 cursor-pointer rounded-2xl border-primary transition-colors ${
           active ? 'bg-blue-50 border-primary' : 'hover:bg-muted/40'
-        )}
+        }`}
       >
         <CardContent className="flex items-center justify-between p-2 md:p-3">
-          <div className="w-full rounded-2xl px-4 text-left text-base py-3">
-            {label}
+          <div className="flex-1">
+            {editing ? (
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => {
+                  onRename(name.trim() || label)
+                  setEditing(false)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onRename(name.trim() || label)
+                    setEditing(false)
+                  }
+                }}
+                autoFocus
+              />
+            ) : (
+              <span>{label}</span>
+            )}
           </div>
-          <div className="ml-3 flex items-center gap-1">
+          <div className="flex items-center gap-1">
             <Button
               size="icon"
               variant="ghost"
+              onClick={onDelete}
               aria-label="Delete"
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete?.()
-              }}
-              className="shadow-none hover:bg-transparent"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
             <Button
               size="icon"
               variant="ghost"
-              aria-label="Edit"
-              onClick={(e) => {
-                e.stopPropagation()
-                onEdit?.()
-              }}
-              className="shadow-none hover:bg-transparent"
+              onClick={() => setEditing(true)}
+              aria-label="Edit Name"
             >
               <PencilLine className="h-4 w-4" />
             </Button>
@@ -179,31 +215,3 @@ function ConnectorVertical({ className }: { className?: string }) {
     </div>
   )
 }
-
-/// sample data
-const defaultQuestions: WorkflowQuestion[] = [
-  {
-    id: 'q1',
-    label: 'Question Name 1',
-    prompt: 'What is your favorite color?',
-    inputType: 'Single Choice',
-    optionsType: 'Multiple Choice',
-    options: ['Red', 'Blue', 'Green', 'Yellow'],
-  },
-  {
-    id: 'q2',
-    label: 'Question Name 2',
-    prompt: 'How many hours do you work per day?',
-    inputType: 'Number',
-    optionsType: 'N/A',
-    options: [],
-  },
-  {
-    id: 'q3',
-    label: 'Question Name 3',
-    prompt: 'Select your preferred working style:',
-    inputType: 'Multiple Choice',
-    optionsType: 'Dropdown',
-    options: ['Remote', 'Hybrid', 'On-site'],
-  },
-]

@@ -23,23 +23,19 @@ export default function CreateChallengeSurvey() {
       const duplicatedQuestions: EditableQuestion[] = location.state.questions
 
       // Convert EditableQuestion[] to Question[] format for compatibility
-      const convertedQuestions: Question[] = duplicatedQuestions.map((eq) => {
-        const prompt = eq.textOverride || eq.text
-
-        return {
-          id: eq.id,
-          prompt,
-          name: prompt,
-          questionType: (eq.type === 'multiple-choice'
-            ? 'multiple-choice'
-            : 'open-ended') as 'multiple-choice' | 'open-ended',
-          inputType: (eq.type === 'multiple-choice' ? 'single' : 'text') as
-            | 'single'
-            | 'multi'
-            | 'text',
-          options: eq.options || [],
-        }
-      })
+      const convertedQuestions: Question[] = duplicatedQuestions.map((eq) => ({
+        id: eq.id,
+        name: `Question ${eq.order}`,
+        prompt: eq.textOverride || eq.text,
+        questionType: (eq.type === 'multiple-choice'
+          ? 'multiple-choice'
+          : 'open-ended') as 'multiple-choice' | 'open-ended',
+        inputType: (eq.type === 'multiple-choice' ? 'single' : 'text') as
+          | 'single'
+          | 'multi'
+          | 'text',
+        options: eq.options || [],
+      }))
 
       return convertedQuestions
     }
@@ -167,7 +163,32 @@ export default function CreateChallengeSurvey() {
         </TabsContent>
 
         <TabsContent value="workflow">
-          <WorkflowSection />
+          <WorkflowSection
+            questions={questions.map((q) => ({
+              id: q.id,
+              label: q.name,
+              prompt: q.prompt,
+              inputType: q.inputType,
+              optionsType:
+                q.questionType === 'multiple-choice'
+                  ? 'Multiple Choice'
+                  : 'Open-ended',
+              options: q.options,
+            }))}
+            selectedId={activeId}
+            setSelectedId={setActiveId}
+            onSelect={(id) => setActiveId(id)}
+            onRename={(id, newLabel) => {
+              setQuestions((prev) =>
+                prev.map((q) => (q.id === id ? { ...q, name: newLabel } : q))
+              )
+            }}
+            onEdit={(q) => {}}
+            onDelete={(q) =>
+              setQuestions((prev) => prev.filter((p) => p.id !== q.id))
+            }
+            setTab={setTab}
+          />
         </TabsContent>
       </Tabs>
     </div>
