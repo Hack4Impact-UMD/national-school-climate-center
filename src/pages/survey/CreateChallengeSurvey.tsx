@@ -40,17 +40,7 @@ export default function CreateChallengeSurvey() {
       return convertedQuestions
     }
 
-    // Default sample question
-    return [
-      {
-        id: 'q1',
-        name: 'How satisfied are you with your current experience?',
-        prompt: 'How satisfied are you with your current experience?',
-        questionType: 'multiple-choice' as const,
-        inputType: 'single' as const,
-        options: ['Very satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'],
-      },
-    ]
+    return []
   }, [location.state])
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
