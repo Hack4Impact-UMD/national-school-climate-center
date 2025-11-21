@@ -1,29 +1,29 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Trash2, PencilLine, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Trash2, PencilLine, Plus } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export type WorkflowQuestion = {
-  id: string;
-  label: string;
-  prompt: string;
-  inputType: string;
-  optionsType: string;
-  options: string[];
-};
+  id: string
+  label: string
+  prompt: string
+  inputType: string
+  optionsType: string
+  options: string[]
+}
 
 export default function WorkflowSection({
   questions = defaultQuestions,
   onEdit,
   onDelete,
 }: {
-  questions?: WorkflowQuestion[];
-  onEdit?: (q: WorkflowQuestion) => void;
-  onDelete?: (q: WorkflowQuestion) => void;
+  questions?: WorkflowQuestion[]
+  onEdit?: (q: WorkflowQuestion) => void
+  onDelete?: (q: WorkflowQuestion) => void
 }) {
-  const [selectedId, setSelectedId] = useState(questions[0]?.id);
-  const selected = questions.find((q) => q.id === selectedId);
+  const [selectedId, setSelectedId] = useState(questions[0]?.id)
+  const selected = questions.find((q) => q.id === selectedId)
 
   return (
     <div className="flex flex-col md:flex-row gap-6 font-body">
@@ -47,7 +47,9 @@ export default function WorkflowSection({
 
           <Card className="rounded-2xl border-primary">
             <CardContent className="flex items-center justify-between p-3 md:p-4">
-              <div className="text-sm md:text-base text-primary">Add a Schedule Workflow</div>
+              <div className="text-sm md:text-base text-primary">
+                Add a Schedule Workflow
+              </div>
               <Button
                 size="icon"
                 variant="ghost"
@@ -60,7 +62,7 @@ export default function WorkflowSection({
           </Card>
 
           <div className="mt-8 flex justify-center">
-            <Button className="px-6">Review Survey</Button>
+            <Button className="px-6">Publish Survey</Button>
           </div>
         </div>
       </div>
@@ -69,15 +71,19 @@ export default function WorkflowSection({
         {selected ? (
           <Card className="rounded-2xl border-primary h-full">
             <CardHeader>
-              <CardTitle className="text-lg md:text-xl font-body">{selected.label}</CardTitle>
+              <CardTitle className="text-lg md:text-xl font-body">
+                {selected.label}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <p className="whitespace-pre-wrap">{selected.prompt}</p>
               <div className="font-semibold">
-                Input Type: <span className="font-normal">{selected.inputType}</span>
+                Input Type:{' '}
+                <span className="font-normal">{selected.inputType}</span>
               </div>
               <div className="font-semibold">
-                Options Type: <span className="font-normal">{selected.optionsType}</span>
+                Options Type:{' '}
+                <span className="font-normal">{selected.optionsType}</span>
               </div>
               {selected.options.length > 0 && (
                 <>
@@ -99,7 +105,7 @@ export default function WorkflowSection({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 /* ---------------- helpers ---------------- */
@@ -112,12 +118,12 @@ function WorkflowRow({
   onEdit,
   onDelete,
 }: {
-  index: string;
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
+  index: string
+  label: string
+  active?: boolean
+  onClick?: () => void
+  onEdit?: () => void
+  onDelete?: () => void
 }) {
   return (
     <div className="flex items-center gap-3">
@@ -125,20 +131,22 @@ function WorkflowRow({
       <Card
         onClick={onClick}
         className={cn(
-          "flex-1 cursor-pointer rounded-2xl border-primary transition-colors",
-          active ? "bg-blue-50 border-primary" : "hover:bg-muted/40"
+          'flex-1 cursor-pointer rounded-2xl border-primary transition-colors',
+          active ? 'bg-blue-50 border-primary' : 'hover:bg-muted/40'
         )}
       >
         <CardContent className="flex items-center justify-between p-2 md:p-3">
-          <div className="w-full rounded-2xl px-4 text-left text-base py-3">{label}</div>
+          <div className="w-full rounded-2xl px-4 text-left text-base py-3">
+            {label}
+          </div>
           <div className="ml-3 flex items-center gap-1">
             <Button
               size="icon"
               variant="ghost"
               aria-label="Delete"
               onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.();
+                e.stopPropagation()
+                onDelete?.()
               }}
               className="shadow-none hover:bg-transparent"
             >
@@ -149,8 +157,8 @@ function WorkflowRow({
               variant="ghost"
               aria-label="Edit"
               onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.();
+                e.stopPropagation()
+                onEdit?.()
               }}
               className="shadow-none hover:bg-transparent"
             >
@@ -160,42 +168,42 @@ function WorkflowRow({
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
 
 function ConnectorVertical({ className }: { className?: string }) {
   return (
-    <div className={cn("pointer-events-none absolute -z-10", className)}>
+    <div className={cn('pointer-events-none absolute -z-10', className)}>
       <div className="h-full border-l-2 border-dashed border-muted-foreground/50" />
       <div className="mx-[1px] h-0 w-0 border-x-4 border-t-8 border-x-transparent border-t-muted-foreground/50" />
     </div>
-  );
+  )
 }
 
 /// sample data
 const defaultQuestions: WorkflowQuestion[] = [
   {
-    id: "q1",
-    label: "Question Name 1",
-    prompt: "What is your favorite color?",
-    inputType: "Single Choice",
-    optionsType: "Multiple Choice",
-    options: ["Red", "Blue", "Green", "Yellow"],
+    id: 'q1',
+    label: 'Question Name 1',
+    prompt: 'What is your favorite color?',
+    inputType: 'Single Choice',
+    optionsType: 'Multiple Choice',
+    options: ['Red', 'Blue', 'Green', 'Yellow'],
   },
   {
-    id: "q2",
-    label: "Question Name 2",
-    prompt: "How many hours do you work per day?",
-    inputType: "Number",
-    optionsType: "N/A",
+    id: 'q2',
+    label: 'Question Name 2',
+    prompt: 'How many hours do you work per day?',
+    inputType: 'Number',
+    optionsType: 'N/A',
     options: [],
   },
   {
-    id: "q3",
-    label: "Question Name 3",
-    prompt: "Select your preferred working style:",
-    inputType: "Multiple Choice",
-    optionsType: "Dropdown",
-    options: ["Remote", "Hybrid", "On-site"],
+    id: 'q3',
+    label: 'Question Name 3',
+    prompt: 'Select your preferred working style:',
+    inputType: 'Multiple Choice',
+    optionsType: 'Dropdown',
+    options: ['Remote', 'Hybrid', 'On-site'],
   },
-];
+]
