@@ -83,22 +83,22 @@ service cloud.firestore {
     match /responses/{responseID} {
       // Allow any authenticated member to read aggregated response data
       allow read: if signedIn();
-
-      // Allow any signed-in user (e.g., students) to submit responses
-      allow create: if signedIn();
     }
     match /responses/{rid} {
-      // Students create their own responses; must include consent
-      allow create: if signedIn()
-        && request.resource.data.uid == myUid()
-        && request.resource.data.consent == true;
+      // - Pulse surveys: must be signed in, include uid equal to caller, and consent true
+      // - Challenge surveys: anonymous allowed (no uid), but must include consent true
+      allow create: if request.resource.data.consent == true && (
+          (request.resource.data.surveyType == 'pulse' && signedIn() && request.resource.data.uid == myUid())
+          ||
+          (request.resource.data.surveyType == 'challenge' && !request.resource.data.keys().hasAny(['uid']))
+        );
 
       // Immutable once created (prevent edits)
       allow update: if false;
 
       // Reads: staff/admin; a student can read their own response
       allow read: if (signedIn() && resource.data.uid == myUid())
-                  || isAdmin() || isStaff();
+                  || isAdmin() || isSchoolPersonnel();
 
       allow delete: if isAdmin();
     }
