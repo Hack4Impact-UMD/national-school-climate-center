@@ -10,6 +10,7 @@ import AllSurveys from './pages/surveys/AllSurveys'
 import CreateChallengeSurvey from './pages/CreateChallengeSurvey'
 import Layout from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import Contact from './pages/Contact'
 
 export default function App() {
   return (
@@ -17,6 +18,11 @@ export default function App() {
       {/* Public */}
       <Route path="/login" element={<Login />} />
 
+      <Route element={<Layout />}>
+      <Route path="/contact" element={<Contact />} />
+      </Route>
+
+      
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
         <Route element={<Layout />}>
