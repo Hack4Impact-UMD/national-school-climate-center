@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,19 +23,23 @@ export default function CreateChallengeSurvey() {
       const duplicatedQuestions: EditableQuestion[] = location.state.questions
 
       // Convert EditableQuestion[] to Question[] format for compatibility
-      const convertedQuestions: Question[] = duplicatedQuestions.map((eq) => ({
-        id: eq.id,
-        name: `Question ${eq.order}`,
-        prompt: eq.textOverride || eq.text,
-        questionType: (eq.type === 'multiple-choice'
-          ? 'multiple-choice'
-          : 'open-ended') as 'multiple-choice' | 'open-ended',
-        inputType: (eq.type === 'multiple-choice' ? 'single' : 'text') as
-          | 'single'
-          | 'multi'
-          | 'text',
-        options: eq.options || [],
-      }))
+      const convertedQuestions: Question[] = duplicatedQuestions.map((eq) => {
+        const prompt = eq.textOverride || eq.text
+
+        return {
+          id: eq.id,
+          prompt,
+          name: prompt,
+          questionType: (eq.type === 'multiple-choice'
+            ? 'multiple-choice'
+            : 'open-ended') as 'multiple-choice' | 'open-ended',
+          inputType: (eq.type === 'multiple-choice' ? 'single' : 'text') as
+            | 'single'
+            | 'multi'
+            | 'text',
+          options: eq.options || [],
+        }
+      })
 
       return convertedQuestions
     }
@@ -44,7 +48,7 @@ export default function CreateChallengeSurvey() {
     return [
       {
         id: 'q1',
-        name: 'Sample Question 1',
+        name: 'How satisfied are you with your current experience?',
         prompt: 'How satisfied are you with your current experience?',
         questionType: 'multiple-choice' as const,
         inputType: 'single' as const,
