@@ -70,6 +70,15 @@ service cloud.firestore {
         get(/databases/$(database)/documents/invitations/$(id)).data.role in ['school_personnel','student'];
     }
 
+    // Question Bank collection - reusable questions
+    match /questionBank/{questionID} {
+      // Allow any authenticated member to read questions
+      allow read: if signedIn();
+
+      // Only admins can create, update, or delete questions
+      allow create, update, delete: if isAdmin();
+    }
+
     // Surveys collection
     match /surveys/{surveyID} {
       // Allow any authenticated member to read surveys (UI still restricts by role)

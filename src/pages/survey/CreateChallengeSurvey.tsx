@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,25 +7,49 @@ import { Plus } from "lucide-react";
 import { SurveyHeader } from "@/components/survey/SurveyHeader";
 import { QuestionForm } from "@/components/survey/QuestionForm";
 import { QuestionList } from "@/components/survey/QuestionList";
-import type { Question } from "@/types/surveybuilder";
+import type { Question, EditableQuestion } from "@/types/surveybuilder";
 import WorkflowSection from "@/components/survey/WorkFlowSection";
 
 
 export default function CreateChallengeSurvey() {
+  const location = useLocation();
 
-  // Default just for UI
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: "q1",
-      name: "Sample Question 1",
-      prompt: "How satisfied are you with your current experience?",
-      questionType: "multiple-choice",
-      inputType: "single",
-      options: ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied"],
-    },
-  ]);
+  // Initialize tab from location state or default to "question"
+  const initialTab = location.state?.defaultTab || "question";
 
-  const [activeId, setActiveId] = useState<string>("q1");
+  // Load questions from location state or use default sample
+  const initialQuestions = useMemo(() => {
+    if (location.state?.questions) {
+      const duplicatedQuestions: EditableQuestion[] = location.state.questions;
+
+      // Convert EditableQuestion[] to Question[] format for compatibility
+      const convertedQuestions: Question[] = duplicatedQuestions.map((eq) => ({
+        id: eq.id,
+        name: `Question ${eq.order}`,
+        prompt: eq.textOverride || eq.text,
+        questionType: (eq.type === 'multiple-choice' ? 'multiple-choice' : 'open-ended') as "multiple-choice" | "open-ended",
+        inputType: (eq.type === 'multiple-choice' ? 'single' : 'text') as "single" | "multi" | "text",
+        options: eq.options || [],
+      }));
+
+      return convertedQuestions;
+    }
+
+    // Default sample question
+    return [
+      {
+        id: "q1",
+        name: "Sample Question 1",
+        prompt: "How satisfied are you with your current experience?",
+        questionType: "multiple-choice" as const,
+        inputType: "single" as const,
+        options: ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied"],
+      },
+    ];
+  }, [location.state]);
+
+  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [activeId, setActiveId] = useState<string>(initialQuestions[0]?.id || "q1");
 
   const active = useMemo(
     () => questions.find((q) => q.id === activeId) ?? questions[0],
@@ -62,7 +87,7 @@ export default function CreateChallengeSurvey() {
       <img src="/logo.png" alt="National School Climate Center" className="w-40" />
       <SurveyHeader title="Survey – Challenge" subtitle="" />
 
-      <Tabs defaultValue="question" className="mt-4">
+      <Tabs defaultValue={initialTab} className="mt-4">
         <TabsList className="w-full justify-start bg-transparent">
           <TabsTrigger value="question">Question</TabsTrigger>
           <TabsTrigger value="list">List</TabsTrigger>
