@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { X, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import QuestionSetting from "@/components/QuestionSetting";
+import QuestionSetting from "@/components/survey/QuestionSetting";
 import type { Question } from "@/types/surveybuilder";
 
 export function QuestionForm({

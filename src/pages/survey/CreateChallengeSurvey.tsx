@@ -3,11 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { SurveyHeader } from "../components/SurveyHeader";
-import { QuestionForm } from "../components/QuestionForm";
-import { QuestionList } from "../components/QuestionList";
+import { SurveyHeader } from "@/components/survey/SurveyHeader";
+import { QuestionForm } from "@/components/survey/QuestionForm";
+import { QuestionList } from "@/components/survey/QuestionList";
 import type { Question } from "@/types/surveybuilder";
-import WorkflowSection from "@/components/WorkFlowSection";
+import WorkflowSection from "@/components/survey/WorkFlowSection";
 
 
 export default function CreateChallengeSurvey() {

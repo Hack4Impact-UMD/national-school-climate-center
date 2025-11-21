@@ -3,7 +3,7 @@ import { signOut } from 'firebase/auth'
 import { useAuth } from '@/contexts/AuthContext'
 import { can } from '@/pages/auth/rbac'
 import { auth } from '@/firebase/config'
-import pfpSample from '@/assets/pfp_sample.jpg'
+import pfpSample from '@/assets/team-headshots/pfp_sample.jpg'
 import {
   ClipboardList,
   CheckSquare,

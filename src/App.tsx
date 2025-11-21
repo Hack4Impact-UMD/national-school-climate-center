@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/Home'
-import About from './pages/About'
+import Home from './pages/public/Home'
+import About from './pages/public/About'
+import Analytics from './pages/public/Analytics'
 import Login from './pages/auth/Login'
 import ManageUsers from './pages/Admin'
 import Analytics from './pages/Analytics'
@@ -33,7 +34,10 @@ export default function App() {
           {/* Action-gated */}
           <Route element={<ProtectedRoute requiredAction="create" />}>
             <Route path="/surveys/builder" element={<SurveyBuilder />} />
-            <Route path="/surveys/create/challenge" element={<CreateChallengeSurvey />} />
+            <Route
+              path="/surveys/create/challenge"
+              element={<CreateChallengeSurvey />}
+            />
             <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/analytics" element={<Analytics />} />
           </Route>
@@ -42,6 +46,7 @@ export default function App() {
             <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/general" element={<General />} />
           </Route>
+          {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
         </Route>
       </Route>
 
