@@ -42,7 +42,8 @@ export interface Response {
   id: string
   survey_id: string
   surveyTitle: string
-  uid: string
+  uid?: string | null
+  surveyType?: 'pulse' | 'challenge'
   school_id: string
   district_id: string
   answers: Answer[]
