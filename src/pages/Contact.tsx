@@ -1,3 +1,5 @@
+import { Icon } from "@iconify/react"
+
 export default function Contact() {
   return (
     <div className="p-6 md:p-12 max-w-6xl mx-auto bg-[#ffffff] min-h-screen">
@@ -12,12 +14,12 @@ export default function Contact() {
 
         <div className="space-y-4 font-body text-[#6C7A89]">
           <div className="flex items-center gap-3">
-            <span className="text-[#2F6CC0] text-xl">📧</span>
+            <Icon icon="material-symbols:mail" className="w-6 h-6" />
             <p className="text-lg">nscc@gmail.com</p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[#2F6CC0] text-xl">📞</span>
+            <Icon icon="ic:round-phone" className="w-6 h-6" />
             <p className="text-lg">123-456-789</p>
           </div>
         </div>
@@ -30,17 +32,19 @@ export default function Contact() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="border border-[#2F6CC0] rounded-xl p-6 hover:bg-[#269ACF22] transition cursor-pointer">
-          <div className="text-[#2F6CC0] text-2xl mb-3">arrow icon</div>
-          <h3 className="font-heading font-semibold text-lg text-[#2F6CC0]">
-            Getting Started
-          </h3>
-          <p className="font-body text-[#6C7A89] text-sm mt-1">
-            How to get started.
-          </p>
-        </div>
-        <div className="border border-[#2F6CC0] rounded-xl p-6 hover:bg-[#269ACF22] transition cursor-pointer">
-          <div className="text-[#2F6CC0] text-2xl mb-3">👤</div>
+        <a href="/home" className="flex">
+          <div className="border border-[#2F6CC0] rounded-xl p-6 hover:bg-[#269ACF22] transition cursor-pointer flex flex-col items-start gap-2 w-full h-full">
+            <Icon icon="ei:arrow-right" className="w-10 h-10 text-[#2F6CC0] -ml-1.5" />
+            <h3 className="font-heading font-semibold text-lg text-[#2F6CC0]">
+              Getting Started
+            </h3>
+            <p className="font-body text-[#6C7A89] text-sm mt-1">
+              How to get started.
+            </p>
+          </div>
+        </a>
+        <div className="border border-[#2F6CC0] rounded-xl p-6 hover:bg-[#269ACF22] transition cursor-pointer flex flex-col items-start gap-2 w-full h-full">
+          <Icon icon="codicon:account" className="w-8 h-8 text-[#2F6CC0] -ml-1 mb-2" />
           <h3 className="font-heading font-semibold text-lg text-[#2F6CC0]">
             Account Settings
           </h3>
@@ -48,8 +52,8 @@ export default function Contact() {
             Manage your accounting information.
           </p>
         </div>
-        <div className="border border-[#2F6CC0] rounded-xl p-6 hover:bg-[#269ACF22] transition cursor-pointer">
-          <div className="text-[#2F6CC0] text-2xl mb-3">🔒</div>
+        <div className="border border-[#2F6CC0] rounded-xl p-6 hover:bg-[#269ACF22] transition cursor-pointer flex flex-col items-start gap-2 w-full h-full">
+          <Icon icon="f7:lock-circle" className="w-8 h-8 text-[#2F6CC0] -ml-1" />
           <h3 className="font-heading font-semibold text-lg text-[#2F6CC0]">
             Privacy and Security
           </h3>
