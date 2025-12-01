@@ -8,6 +8,7 @@ import { QuestionForm } from "@/components/survey/QuestionForm";
 import { QuestionList } from "@/components/survey/QuestionList";
 import type { Question } from "@/types/surveybuilder";
 import WorkflowSection from "@/components/survey/WorkFlowSection";
+import { useNavigate } from "react-router-dom";
 
 
 export default function CreateChallengeSurvey() {
@@ -30,6 +31,8 @@ export default function CreateChallengeSurvey() {
     () => questions.find((q) => q.id === activeId) ?? questions[0],
     [questions, activeId]
   );
+
+  const navigate = useNavigate();
 
   function addBlankQuestion() {
     const id = crypto.randomUUID();
@@ -54,6 +57,16 @@ export default function CreateChallengeSurvey() {
       const filtered = prev.filter((q) => q.id !== id);
       if (activeId === id) setActiveId(filtered[0]?.id ?? "");
       return filtered;
+    });
+  }
+
+  function handleReviewSurvey() {
+    navigate("/surveys/create/challenge/review", {
+      state: {
+        questions,
+        surveyTitle: "Challenge Survey",
+        surveyType: "challenge",
+      },
     });
   }
 
@@ -110,14 +123,14 @@ export default function CreateChallengeSurvey() {
                 </Button>
               </CardContent>
             </Card>
-            <Button className="text-sm">
+            <Button className="text-sm cursor-pointer" onClick={handleReviewSurvey}>
               Review Survey
             </Button>
           </div>
         </TabsContent>
 
         <TabsContent value="workflow">
-           <WorkflowSection />
+           <WorkflowSection onReview={handleReviewSurvey}/>
         </TabsContent>
       </Tabs>
     </div>

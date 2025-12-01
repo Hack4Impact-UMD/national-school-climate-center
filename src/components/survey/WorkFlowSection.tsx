@@ -17,10 +17,12 @@ export default function WorkflowSection({
   questions = defaultQuestions,
   onEdit,
   onDelete,
+  onReview,
 }: {
   questions?: WorkflowQuestion[];
   onEdit?: (q: WorkflowQuestion) => void;
   onDelete?: (q: WorkflowQuestion) => void;
+  onReview?: () => void;
 }) {
   const [selectedId, setSelectedId] = useState(questions[0]?.id);
   const selected = questions.find((q) => q.id === selectedId);
@@ -60,7 +62,7 @@ export default function WorkflowSection({
           </Card>
 
           <div className="mt-8 flex justify-center">
-            <Button className="px-6">Review Survey</Button>
+            <Button className="px-6 cursor-pointer" onClick={onReview}>Review Survey</Button>
           </div>
         </div>
       </div>
