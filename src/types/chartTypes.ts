@@ -1,1 +1,1 @@
-export type ChartType = 'bar' | 'pie' | 'x'
+export type ChartType = 'bar' | 'pie' | 'map' | 'cloud'

@@ -10,11 +10,11 @@ type Props = {
 }
 
 export default function ChartTypeSelector({ value, onChange }: Props) {
-  // options you support
   const options: { label: string; value: ChartType }[] = [
     { label: 'Bar Chart', value: 'bar' },
     { label: 'Pie Chart', value: 'pie' },
-    { label: 'Another', value: 'x' },
+    { label: 'Geo Map', value: 'map' },
+    { label: 'Word Cloud', value: 'cloud' },
   ]
 
   return (
