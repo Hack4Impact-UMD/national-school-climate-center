@@ -3,6 +3,8 @@ import Home from './pages/public/Home'
 import About from './pages/public/About'
 import Analytics from './pages/public/Analytics'
 import Login from './pages/auth/Login'
+import CreateAccountNSCC from './pages/auth/CreateAccountNSCC'
+import CreateAccountSchool from './pages/auth/CreateAccountSchool'
 import ManageUsers from './pages/admin/ManageUsers'
 import General from './pages/admin/General'
 import SurveyBuilder from './pages/survey/SurveyBuilder'
@@ -16,6 +18,8 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<Login />} />
+      <Route path="/create-account/nscc" element={<CreateAccountNSCC />} />
+      <Route path="/create-account/school" element={<CreateAccountSchool />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
