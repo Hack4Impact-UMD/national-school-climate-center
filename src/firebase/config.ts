@@ -28,8 +28,15 @@ declare global {
 
 const reCaptchaSiteKey = import.meta.env.VITE_FIREBASE_RECAPTCHA_SITE_KEY
 
+const debugToken = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN
+
 if (window.location.hostname === 'localhost') {
-  window.FIREBASE_APPCHECK_DEBUG_TOKEN = true
+  if (debugToken) {
+    window.FIREBASE_APPCHECK_DEBUG_TOKEN = debugToken
+  } else {
+    // one-time generation: console will print a token you can copy & register
+    window.FIREBASE_APPCHECK_DEBUG_TOKEN = true
+  }
 }
 let appCheck: AppCheck | null = null
 
