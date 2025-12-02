@@ -6,6 +6,9 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { auth, db } from '@/firebase/config'
 
 interface CreateAccountFormData {
   firstName: string
@@ -52,18 +55,47 @@ export default function CreateAccountSchool() {
     setIsLoading(true)
 
     try {
-      console.log('Form data:', {
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        school: data.school.trim(),
-        district: data.district.trim(),
+      // TODO: Update firestore.rules to allow self-creation of member records on signup
+      // Current rules require admin to create members. Need to add:
+      // allow create: if request.auth != null && request.auth.uid == uid
+
+      // 1. Create Firebase Auth account
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        data.email.trim(),
+        data.password
+      )
+
+      const uid = userCredential.user.uid
+
+      // 2. Create member document in Firestore 'members' collection
+      await setDoc(doc(db, 'members', uid), {
         email: data.email.trim(),
-        password: data.password,
+        displayName: `${data.firstName.trim()} ${data.lastName.trim()}`,
+        role: 'school_personnel',
+        school_id: data.school.trim(),
+        district_id: data.district.trim(),
+        joinedAt: serverTimestamp(),
       })
-      // TODO: Add Firebase account creation in Phase 2
-      alert('Account created successfully! (Check console for data)')
+
+      // 3. Navigate to home
+      navigate('/home')
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error creating account:', error)
+
+      // Handle specific Firebase errors
+      if (error instanceof Error && 'code' in error) {
+        const firebaseError = error as { code: string }
+        if (firebaseError.code === 'auth/email-already-in-use') {
+          alert('An account with this email already exists')
+        } else if (firebaseError.code === 'auth/weak-password') {
+          alert('Password is too weak')
+        } else {
+          alert('Failed to create account. Please try again.')
+        }
+      } else {
+        alert('Failed to create account. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
