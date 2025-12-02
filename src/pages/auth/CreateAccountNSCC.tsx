@@ -96,7 +96,7 @@ export default function CreateAccountNSCC() {
                         value.trim().length > 0 ||
                         'First name cannot be empty',
                     })}
-                    className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-body shadow-none"
+                    className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                   />
                   {errors.firstName && (
                     <p className="text-sm text-red-500 font-body">
@@ -117,7 +117,7 @@ export default function CreateAccountNSCC() {
                       validate: (value) =>
                         value.trim().length > 0 || 'Last name cannot be empty',
                     })}
-                    className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-body shadow-none"
+                    className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                   />
                   {errors.lastName && (
                     <p className="text-sm text-red-500 font-body">
@@ -142,7 +142,7 @@ export default function CreateAccountNSCC() {
                       message: 'Invalid email address',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-body shadow-none"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.email && (
                   <p className="text-sm text-red-500 font-body">
@@ -178,7 +178,7 @@ export default function CreateAccountNSCC() {
                       return true
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-body shadow-none"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500 font-body">
@@ -273,7 +273,7 @@ export default function CreateAccountNSCC() {
                     validate: (value) =>
                       value === watchPassword || 'Passwords do not match',
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-body shadow-none"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-red-500 font-body">

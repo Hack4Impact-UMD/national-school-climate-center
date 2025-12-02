@@ -157,7 +157,7 @@ export default function Login() {
                       message: 'Invalid email address',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-body shadow-none"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.email && (
                   <p className="text-sm text-red-500 font-body">
@@ -179,7 +179,7 @@ export default function Login() {
                       message: 'Password must be at least 6 characters',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-body shadow-none"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500 font-body">
