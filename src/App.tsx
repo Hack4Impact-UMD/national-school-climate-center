@@ -34,6 +34,9 @@ export default function App() {
               element={<CreateChallengeSurvey />}
             />
             <Route path="/surveys" element={<AllSurveys />} />
+          </Route>
+
+          <Route element={<ProtectedRoute requiredAction="read" />}>
             <Route path="/analytics" element={<Analytics />} />
           </Route>
 

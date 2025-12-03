@@ -66,6 +66,16 @@ export default function NavBar() {
                   All Surveys
                 </h3>
               </Link>
+            </div>
+          </>
+        )}
+
+        {can(role, 'read') && (
+          <>
+            <h3 className="font-heading text-2xl text-heading text-white">
+              Insights
+            </h3>
+            <div className="mt-3 text-lg space-y-2 mb-10">
               <Link
                 to="/analytics"
                 className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
@@ -76,11 +86,7 @@ export default function NavBar() {
                 </h3>
               </Link>
             </div>
-          </>
-        )}
 
-        {can(role, 'read') && (
-          <>
             <p className="font-heading text-2xl text-heading text-white">
               Settings
             </p>
