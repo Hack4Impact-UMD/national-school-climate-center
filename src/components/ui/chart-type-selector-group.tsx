@@ -22,9 +22,7 @@ RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
 /* RadioGroupItem as a button */
 interface RadioButtonProps
   extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
-    ButtonVariants {
-  asChild?: boolean
-}
+    ButtonVariants {}
 
 {
   /* Refactored RadioButton component that uses Button inside RadioGroup.Item */
@@ -32,14 +30,13 @@ interface RadioButtonProps
 const RadioButton = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Item>,
   RadioButtonProps
->(({ className, variant, size, asChild = true, children, ...props }, ref) => {
+>(({ className, variant, size, children, ...props }, ref) => {
   return (
     <RadioGroupPrimitive.Item ref={ref} asChild {...props}>
       <Button
         className={cn('h-7 rounded-md px-4', className)}
         variant={variant}
         size={size}
-        asChild={asChild}
       >
         {children} {/* <-- This ensures the label shows */}
       </Button>
