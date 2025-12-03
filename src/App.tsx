@@ -2,16 +2,15 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/public/Home'
 import About from './pages/public/About'
 import Analytics from './pages/public/Analytics'
+import Contact from './pages/public/Contact'
 import Login from './pages/auth/Login'
-import ManageUsers from './pages/Admin'
-import Analytics from './pages/Analytics'
-import SurveyBuilder from './pages/SurveyBuilder'
-import General from './pages/General'
-import AllSurveys from './pages/surveys/AllSurveys'
-import CreateChallengeSurvey from './pages/CreateChallengeSurvey'
-import Layout from './components/Layout'
-import { ProtectedRoute } from './components/ProtectedRoute'
-import Contact from './pages/Contact'
+import ManageUsers from './pages/admin/ManageUsers'
+import General from './pages/admin/General'
+import SurveyBuilder from './pages/survey/SurveyBuilder'
+import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
+import AllSurveys from './pages/survey/AllSurveys'
+import Layout from './components/layout/Layout'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
 export default function App() {
   return (
@@ -19,17 +18,13 @@ export default function App() {
       {/* Public */}
       <Route path="/login" element={<Login />} />
 
-      <Route element={<Layout />}>
-      <Route path="/contact" element={<Contact />} />
-      </Route>
-
-      
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
         <Route element={<Layout />}>
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
 
           {/* Action-gated */}
           <Route element={<ProtectedRoute requiredAction="create" />}>
