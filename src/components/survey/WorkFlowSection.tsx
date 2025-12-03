@@ -16,7 +16,6 @@ export type WorkflowQuestion = {
 
 export default function WorkflowSection({
   questions,
-  onEdit,
   onDelete,
   onSelect,
   onRename,
@@ -27,7 +26,6 @@ export default function WorkflowSection({
   questions: WorkflowQuestion[]
   onSelect: (id: string) => void
   onRename: (id: string, name: string) => void
-  onEdit?: (q: WorkflowQuestion) => void
   onDelete?: (q: WorkflowQuestion) => void
   setTab: (tab: string) => void
   selectedId: string
@@ -43,7 +41,6 @@ export default function WorkflowSection({
             <div key={q.id} className="relative">
               <WorkflowRow
                 index={`${i + 1}`}
-                question={q}
                 label={q.label}
                 active={q.id === selectedId}
                 onSelect={() => {
@@ -131,7 +128,6 @@ export default function WorkflowSection({
 
 function WorkflowRow({
   index,
-  question,
   active,
   label,
   onSelect,
@@ -140,7 +136,6 @@ function WorkflowRow({
 }: {
   index: string
   label: string
-  question: WorkflowQuestion
   active?: boolean
   onSelect: () => void
   onDelete?: () => void
@@ -187,7 +182,10 @@ function WorkflowRow({
             <Button
               size="icon"
               variant="ghost"
-              onClick={onDelete}
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete?.()
+              }}
               aria-label="Delete"
             >
               <Trash2 className="h-4 w-4" />
@@ -195,7 +193,10 @@ function WorkflowRow({
             <Button
               size="icon"
               variant="ghost"
-              onClick={() => setEditing(true)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setEditing(true)
+              }}
               aria-label="Edit Name"
             >
               <PencilLine className="h-4 w-4" />
