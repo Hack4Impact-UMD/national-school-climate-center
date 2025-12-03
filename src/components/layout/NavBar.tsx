@@ -8,7 +8,7 @@ import {
   ClipboardList,
   CheckSquare,
   BarChart3,
-  LifeBuoy,
+  Phone,
   Settings,
   Users,
 } from 'lucide-react'
@@ -82,16 +82,9 @@ export default function NavBar() {
         {can(role, 'read') && (
           <>
             <p className="font-heading text-2xl text-heading text-white">
-              {can(role, 'manage_users') ? 'Settings' : 'Dashboard'}
+              Settings
             </p>
             <div className="mt-3 text-lg space-y-2">
-              <Link
-                to="/contact"
-                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
-              >
-                <LifeBuoy className="w-5 h-5" />
-                <h3 className="font-heading text-2xl text-inherit">Support</h3>
-              </Link>
               <Link
                 to="/general"
                 className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
@@ -110,6 +103,15 @@ export default function NavBar() {
                   </h3>
                 </Link>
               )}
+              <Link
+                to="/contact"
+                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+              >
+                <Phone className="w-5 h-5" />
+                <h3 className="font-heading text-2xl text-inherit">
+                  Contact Us
+                </h3>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md w-full"
