@@ -1,9 +1,16 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Mail, Phone, Settings, Shield, User } from 'lucide-react'
+import { ArrowRight, Mail, Phone, Settings, Shield } from 'lucide-react'
 
 const SUPPORT_EMAIL = 'nscc@gmail.com'
 const SUPPORT_PHONE = '123-456-789'
+
+type ResourceCardProps = {
+  to: string
+  title: string
+  description: string
+  icon: ReactNode
+}
 
 export default function Contact() {
   return (
@@ -55,13 +62,6 @@ export default function Contact() {
       </section>
     </div>
   )
-}
-
-type ContactRowProps = {
-  to: string
-  title: string
-  description: string
-  icon: ReactNode
 }
 
 function ResourceCard({ to, title, description, icon }: ResourceCardProps) {

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'
 import { db } from './config'
+import type { User } from './interfaces'
 
 export default function DatabaseDemo() {
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -17,7 +18,9 @@ export default function DatabaseDemo() {
           usersSnapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }))
         )
         setUsers(
-          usersSnapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }))
+          usersSnapshot.docs.map(
+            (doc) => ({ uid: doc.id, ...doc.data() } as User)
+          )
         )
       } catch (error) {
         console.error('Firebase error:', error)
@@ -28,18 +31,27 @@ export default function DatabaseDemo() {
             name: 'Sample Student',
             email: 'student@example.com',
             role: 'student',
+            school_id: '',
+            district_id: '',
+            createdAt: new Date() as unknown as User['createdAt'],
           },
           {
             uid: '2',
             name: 'Sample Leader',
             email: 'leader@example.com',
             role: 'leader',
+            school_id: '',
+            district_id: '',
+            createdAt: new Date() as unknown as User['createdAt'],
           },
           {
             uid: '3',
             name: 'Sample Parent',
             email: 'parent@example.com',
             role: 'parent',
+            school_id: '',
+            district_id: '',
+            createdAt: new Date() as unknown as User['createdAt'],
           },
         ])
       } finally {

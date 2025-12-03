@@ -591,6 +591,5 @@ async function seedDatabase() {
 // Run the seed script
 seedDatabase().catch((error) => {
   console.error('Unhandled error in seed script:', error)
-  // eslint-disable-next-line n/no-process-exit
   process.exit(1)
 })

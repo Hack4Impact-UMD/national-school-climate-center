@@ -108,7 +108,7 @@ export default function Login() {
       }
 
       navigate('/home')
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Sign in error:', e)
       setAuthError('Failed to login with Google. Please try again.')
     } finally {

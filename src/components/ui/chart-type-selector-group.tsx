@@ -38,6 +38,8 @@ const RadioButton = React.forwardRef<
       <Button
         className={cn('h-7 rounded-md px-4', className)}
         variant={variant}
+        size={size}
+        asChild={asChild}
       >
         {children} {/* <-- This ensures the label shows */}
       </Button>
