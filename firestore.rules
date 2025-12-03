@@ -80,10 +80,6 @@ service cloud.firestore {
     }
 
     // Survey responses collection
-    match /responses/{responseID} {
-      // Allow any authenticated member to read aggregated response data
-      allow read: if signedIn();
-    }
     match /responses/{rid} {
       // - Pulse surveys: must be signed in, include uid equal to caller, and consent true
       // - Challenge surveys: anonymous allowed (no uid), but must include consent true
