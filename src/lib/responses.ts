@@ -38,7 +38,10 @@ export async function submitSurveyResponse(params: SubmitSurveyResponseParams) {
 
   // Build a Firestore document matching our Response schema (minus the id),
   // with an extra optional field `respondent_group` used by analytics.
-  const base: Omit<Response, 'id'> & { respondent_group?: string } = {
+  const base: Omit<Response, 'id'> & {
+    respondent_group?: string
+    uid?: string | null
+  } = {
     survey_id: surveyId,
     surveyTitle: surveyTitle ?? '',
     surveyType,
@@ -47,7 +50,6 @@ export async function submitSurveyResponse(params: SubmitSurveyResponseParams) {
     submittedAt: serverTimestamp(),
     school_id: schoolId,
     district_id: districtId,
-    uid: null,
   }
   if (respondentGroup) base.respondent_group = respondentGroup
 
@@ -66,5 +68,4 @@ export async function submitSurveyResponse(params: SubmitSurveyResponseParams) {
   const docRef = await addDoc(colRef, base)
   return docRef.id
 }
-
 
