@@ -32,7 +32,7 @@ export default function NavBar() {
   }
 
   return (
-    <nav className="bg-primary text-primary-foreground min-h-screen w-80 flex flex-col">
+    <nav className="bg-primary text-primary-foreground w-80 flex flex-col h-full overflow-y-auto">
       <div className="flex items-center bg-white border border-r-primary p-2 w-80 justify-center">
         <img
           src="/logo.png"
