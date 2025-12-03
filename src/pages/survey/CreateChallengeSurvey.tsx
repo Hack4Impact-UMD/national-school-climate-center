@@ -17,36 +17,58 @@ export default function CreateChallengeSurvey() {
   const initialTab = location.state?.defaultTab || 'question'
   const [tab, setTab] = useState(initialTab)
 
-  // Load questions from location state or use default sample
-  const initialQuestions = useMemo(() => {
-    if (location.state?.questions) {
+  const mapEditableToQuestion = (eq: EditableQuestion): Question => {
+    const ratingMatch = /^rating-(\d+)/.exec(eq.type ?? '')
+    const ratingMax = ratingMatch ? Number(ratingMatch[1]) : null
+
+    const optionsFromType =
+      eq.options && eq.options.length
+        ? eq.options.map(String)
+        : ratingMax && ratingMax > 0
+          ? Array.from({ length: ratingMax }, (_, idx) => `${idx + 1}`)
+          : []
+
+    const questionType: Question['questionType'] =
+      optionsFromType.length > 0 ? 'multiple-choice' : 'open-ended'
+    const inputType: Question['inputType'] =
+      questionType === 'multiple-choice' ? 'single' : 'text'
+
+    const fallbackName = eq.textOverride || eq.text || `Question ${eq.order}`
+    const prompt = eq.textOverride || eq.text || fallbackName
+
+    return {
+      id: eq.id,
+      name: fallbackName,
+      prompt,
+      questionType,
+      inputType,
+      options: optionsFromType,
+    }
+  }
+
+  const createBlankQuestion = (index: number): Question => {
+    const name = `Question ${index}`
+    return {
+      id: crypto.randomUUID(),
+      name,
+      prompt: name,
+      questionType: 'multiple-choice',
+      inputType: 'single',
+      options: ['Option 1', 'Option 2'],
+    }
+  }
+
+  // Load questions from location state or create an initial blank entry
+  const [questions, setQuestions] = useState<Question[]>(() => {
+    if (location.state?.questions && location.state.questions.length > 0) {
       const duplicatedQuestions: EditableQuestion[] = location.state.questions
-
-      // Convert EditableQuestion[] to Question[] format for compatibility
-      const convertedQuestions: Question[] = duplicatedQuestions.map((eq) => ({
-        id: eq.id,
-        name: `Question ${eq.order}`,
-        prompt: eq.textOverride || eq.text,
-        questionType: (eq.type === 'multiple-choice'
-          ? 'multiple-choice'
-          : 'open-ended') as 'multiple-choice' | 'open-ended',
-        inputType: (eq.type === 'multiple-choice' ? 'single' : 'text') as
-          | 'single'
-          | 'multi'
-          | 'text',
-        options: eq.options || [],
-      }))
-
-      return convertedQuestions
+      return duplicatedQuestions.map(mapEditableToQuestion)
     }
 
-    return []
-  }, [location.state])
+    return [createBlankQuestion(1)]
+  })
 
-  const [questions, setQuestions] = useState<Question[]>(initialQuestions)
-  const [activeId, setActiveId] = useState<string>(
-    initialQuestions[0]?.id || 'q1'
-  )
+  const [activeId, setActiveId] = useState<string>(questions[0]?.id ?? '')
 
   const active = useMemo(
     () => questions.find((q) => q.id === activeId) ?? questions[0],
@@ -54,15 +76,8 @@ export default function CreateChallengeSurvey() {
   )
 
   function addBlankQuestion() {
-    const id = crypto.randomUUID()
-    const next: Question = {
-      id,
-      name: `Question ${questions.length + 1}`,
-      prompt: '',
-      questionType: 'multiple-choice',
-      inputType: 'single',
-      options: ['Option 1', 'Option 2'],
-    }
+    const next = createBlankQuestion(questions.length + 1)
+    const id = next.id
     setQuestions((prev) => [...prev, next])
     setActiveId(id)
   }
@@ -179,10 +194,7 @@ export default function CreateChallengeSurvey() {
                 prev.map((q) => (q.id === id ? { ...q, name: newLabel } : q))
               )
             }}
-            onEdit={(q) => {}}
-            onDelete={(q) =>
-              setQuestions((prev) => prev.filter((p) => p.id !== q.id))
-            }
+            onDelete={(q) => deleteQuestion(q.id)}
             setTab={setTab}
           />
         </TabsContent>
