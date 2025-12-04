@@ -11,6 +11,7 @@ import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
 import AllSurveys from './pages/survey/AllSurveys'
 import Layout from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
 
 export default function App() {
   return (
@@ -32,6 +33,10 @@ export default function App() {
             <Route
               path="/surveys/create/challenge"
               element={<CreateChallengeSurvey />}
+            />
+            <Route 
+              path="/surveys/create/challenge/review"
+              element={<ReviewSurveyPage defaultSurveyType="challenge" />}
             />
             <Route path="/surveys" element={<AllSurveys />} />
           </Route>

@@ -13,12 +13,12 @@ export function QuestionList({
   onDelete,
   onDuplicate,
 }: {
-  items: Question[]
-  activeId?: string
-  onSelect: (id: string) => void
-  onRename: (id: string, name: string) => void
-  onDelete: (id: string) => void
-  onDuplicate: (q: Question) => void
+  items: Question[];
+  activeId?: string;
+  onSelect: (id: string) => void;
+  onRename: (id: string, name: string) => void;
+  onDelete: (id: string) => void;
+  onDuplicate?: (id: string) => void;
 }) {
   return (
     <div className="w-full space-y-3">
@@ -31,7 +31,7 @@ export function QuestionList({
           onSelect={() => onSelect(q.id)}
           onRename={(name) => onRename(q.id, name)}
           onDelete={() => onDelete(q.id)}
-          onDuplicate={() => onDuplicate(q)}
+          onDuplicate={() => onDuplicate?.(q.id)}
         />
       ))}
     </div>
@@ -47,13 +47,13 @@ function QuestionRow({
   onDelete,
   onDuplicate,
 }: {
-  index: number
-  question: Question
-  active?: boolean
-  onSelect: () => void
-  onRename: (name: string) => void
-  onDelete: () => void
-  onDuplicate: () => void
+  index: number;
+  question: Question;
+  active?: boolean;
+  onSelect: () => void;
+  onRename: (name: string) => void;
+  onDelete: () => void;
+  onDuplicate?: () => void;
 }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(question.name)
@@ -105,6 +105,7 @@ function QuestionRow({
               variant="ghost"
               aria-label="Duplicate"
               onClick={onDuplicate}
+              disabled={!onDuplicate}
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -120,5 +121,5 @@ function QuestionRow({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

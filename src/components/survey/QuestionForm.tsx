@@ -28,8 +28,27 @@ export function QuestionForm({
     onChange({ ...value, [key]: next })
   }
 
-  const showOptions =
-    value.inputType !== 'text' && value.questionType === 'multiple-choice'
+  function handleQuestionTypeChange(nextType: Question["questionType"]) {
+    if (nextType === "open-ended") {
+      onChange({
+        ...value,
+        questionType: nextType,
+        inputType: "text",
+        options: [],
+      });
+      return;
+    }
+
+    // Restore defaults for multiple choice while preserving any existing options/input selections.
+    onChange({
+      ...value,
+      questionType: nextType,
+      inputType: value.inputType === "text" ? "single" : value.inputType,
+      options: value.options.length ? value.options : ["Option 1", "Option 2"],
+    });
+  }
+
+  const showOptions = value.inputType !== "text" && value.questionType === "multiple-choice";
 
   return (
     <div className="grid gap-6">
@@ -38,11 +57,9 @@ export function QuestionForm({
           <Label htmlFor={`${baseId}-qtype`}>Question Type</Label>
           <Select
             value={value.questionType}
-            onValueChange={(v) =>
-              update('questionType', v as Question['questionType'])
-            }
+            onValueChange={(v) => handleQuestionTypeChange(v as Question["questionType"])}
           >
-            <SelectTrigger id={`${baseId}-qtype`}>
+            <SelectTrigger id={`${baseId}-qtype`} className="bg-white">
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>

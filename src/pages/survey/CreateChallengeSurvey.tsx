@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,77 +6,103 @@ import { Plus } from 'lucide-react'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
 import { QuestionForm } from '@/components/survey/QuestionForm'
 import { QuestionList } from '@/components/survey/QuestionList'
-import type { Question, EditableQuestion } from '@/types/surveybuilder'
+import type { Question } from '@/types/surveybuilder'
 import WorkflowSection from '@/components/survey/WorkFlowSection'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+const DEFAULT_QUESTIONS: Question[] = [
+  {
+    id: 'q1',
+    name: 'Sample Question 1',
+    prompt: 'How satisfied are you with your current experience?',
+    questionType: 'multiple-choice',
+    inputType: 'single',
+    options: ['Very satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'],
+  },
+]
+
+type IncomingQuestion = Partial<Question> & {
+  id?: string
+  text?: string
+  textOverride?: string
+  order?: number
+  type?: string
+}
 
 export default function CreateChallengeSurvey() {
   const location = useLocation()
+  const incomingState = (location.state ?? {}) as {
+    questions?: IncomingQuestion[]
+    activeId?: string
+    activeTab?: 'question' | 'list' | 'workflow'
+    defaultTab?: 'question' | 'list' | 'workflow'
+    surveyTitle?: string
+    surveyType?: 'challenge' | 'pulse'
+  }
 
-  // Initialize tab from location state or default to "question"
-  const initialTab = location.state?.defaultTab || 'question'
-  const [tab, setTab] = useState(initialTab)
-
-  const mapEditableToQuestion = (eq: EditableQuestion): Question => {
-    const ratingMatch = /^rating-(\d+)/.exec(eq.type ?? '')
+  function normalizeQuestion(q: IncomingQuestion, index: number): Question {
+    const ratingMatch = q.type ? /^rating-(\d+)/.exec(q.type) : null
     const ratingMax = ratingMatch ? Number(ratingMatch[1]) : null
 
-    const optionsFromType =
-      eq.options && eq.options.length
-        ? eq.options.map(String)
+    const normalizedOptions =
+      q.options && q.options.length
+        ? q.options.map(String)
         : ratingMax && ratingMax > 0
           ? Array.from({ length: ratingMax }, (_, idx) => `${idx + 1}`)
           : []
 
     const questionType: Question['questionType'] =
-      optionsFromType.length > 0 ? 'multiple-choice' : 'open-ended'
+      q.questionType ?? (normalizedOptions.length ? 'multiple-choice' : 'open-ended')
     const inputType: Question['inputType'] =
-      questionType === 'multiple-choice' ? 'single' : 'text'
+      q.inputType ??
+      (questionType === 'multiple-choice'
+        ? 'single'
+        : 'text')
 
-    const fallbackName = eq.textOverride || eq.text || `Question ${eq.order}`
-    const prompt = eq.textOverride || eq.text || fallbackName
+    const fallbackName = q.textOverride || q.text || q.prompt || q.name || `Question ${index}`
+    const prompt = q.prompt || q.textOverride || q.text || fallbackName
 
     return {
-      id: eq.id,
-      name: fallbackName,
+      id: q.id ?? crypto.randomUUID(),
+      name: q.name ?? fallbackName,
       prompt,
       questionType,
       inputType,
-      options: optionsFromType,
+      options: normalizedOptions,
     }
   }
 
-  const createBlankQuestion = (index: number): Question => {
-    const name = `Question ${index}`
-    return {
-      id: crypto.randomUUID(),
-      name,
-      prompt: name,
-      questionType: 'multiple-choice',
-      inputType: 'single',
-      options: ['Option 1', 'Option 2'],
-    }
-  }
+  const initialQuestions =
+    incomingState.questions && incomingState.questions.length
+      ? incomingState.questions.map((q, idx) => normalizeQuestion(q, idx + 1))
+      : DEFAULT_QUESTIONS
 
-  // Load questions from location state or create an initial blank entry
-  const [questions, setQuestions] = useState<Question[]>(() => {
-    if (location.state?.questions && location.state.questions.length > 0) {
-      const duplicatedQuestions: EditableQuestion[] = location.state.questions
-      return duplicatedQuestions.map(mapEditableToQuestion)
-    }
+  const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
-    return [createBlankQuestion(1)]
-  })
-
-  const [activeId, setActiveId] = useState<string>(questions[0]?.id ?? '')
+  const [activeId, setActiveId] = useState<string>(
+    incomingState.activeId ?? initialQuestions[0]?.id ?? 'q1'
+  )
+  const [tab, setTab] = useState<'question' | 'list' | 'workflow'>(
+    incomingState.activeTab ?? incomingState.defaultTab ?? 'question'
+  )
 
   const active = useMemo(
     () => questions.find((q) => q.id === activeId) ?? questions[0],
     [questions, activeId]
   )
 
+  const navigate = useNavigate()
+
   function addBlankQuestion() {
-    const next = createBlankQuestion(questions.length + 1)
-    const id = next.id
+    const id = crypto.randomUUID()
+    const next: Question = {
+      id,
+      name: `Question ${questions.length + 1}`,
+      prompt: '',
+      questionType: 'multiple-choice',
+      inputType: 'single',
+      options: ['Option 1', 'Option 2'],
+    }
     setQuestions((prev) => [...prev, next])
     setActiveId(id)
   }
@@ -94,9 +119,30 @@ export default function CreateChallengeSurvey() {
     })
   }
 
-  function duplicateQuestion(q: Question) {
-    const id = crypto.randomUUID()
-    setQuestions((prev) => [...prev, { ...q, id, name: `${q.name} (Copy)` }])
+  function handleReviewSurvey() {
+    navigate('/surveys/create/challenge/review', {
+      state: {
+        questions,
+        surveyTitle: 'Challenge Survey',
+        surveyType: 'challenge',
+        activeId,
+        activeTab: tab,
+      },
+    })
+  }
+
+  function duplicateQuestion(id: string) {
+    const original = questions.find((q) => q.id === id)
+    if (!original) return
+    const nextId = crypto.randomUUID()
+    const next: Question = {
+      ...original,
+      id: nextId,
+      name: `${original.name} (Copy)`,
+    }
+    setQuestions((prev) => [...prev, next])
+    setActiveId(nextId)
+    setTab('question')
   }
 
   return (
@@ -108,7 +154,7 @@ export default function CreateChallengeSurvey() {
       />
       <SurveyHeader title="Survey – Challenge" subtitle="" />
 
-      <Tabs value={tab} onValueChange={setTab} className="mt-4">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-4">
         <TabsList className="w-full justify-start bg-transparent">
           <TabsTrigger value="question">Question</TabsTrigger>
           <TabsTrigger value="list">List</TabsTrigger>
@@ -167,7 +213,10 @@ export default function CreateChallengeSurvey() {
                 </Button>
               </CardContent>
             </Card>
-            <Button onClick={() => setTab('workflow')} className="text-sm">
+            <Button
+              className="text-sm cursor-pointer"
+              onClick={handleReviewSurvey}
+            >
               Review Survey
             </Button>
           </div>
@@ -186,16 +235,14 @@ export default function CreateChallengeSurvey() {
                   : 'Open-ended',
               options: q.options,
             }))}
+            onEdit={(q) => {
+              setActiveId(q.id)
+              setTab('question')
+            }}
+            onReview={handleReviewSurvey}
             selectedId={activeId}
             setSelectedId={setActiveId}
             onSelect={(id) => setActiveId(id)}
-            onRename={(id, newLabel) => {
-              setQuestions((prev) =>
-                prev.map((q) => (q.id === id ? { ...q, name: newLabel } : q))
-              )
-            }}
-            onDelete={(q) => deleteQuestion(q.id)}
-            setTab={setTab}
           />
         </TabsContent>
       </Tabs>
