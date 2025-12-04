@@ -21,19 +21,60 @@ const DEFAULT_QUESTIONS: Question[] = [
   },
 ]
 
+type IncomingQuestion = Partial<Question> & {
+  id?: string
+  text?: string
+  textOverride?: string
+  order?: number
+  type?: string
+}
+
 export default function CreateChallengeSurvey() {
   const location = useLocation()
   const incomingState = (location.state ?? {}) as {
-    questions?: Question[]
+    questions?: IncomingQuestion[]
     activeId?: string
     activeTab?: 'question' | 'list' | 'workflow'
+    defaultTab?: 'question' | 'list' | 'workflow'
     surveyTitle?: string
     surveyType?: 'challenge' | 'pulse'
   }
 
+  function normalizeQuestion(q: IncomingQuestion, index: number): Question {
+    const ratingMatch = q.type ? /^rating-(\d+)/.exec(q.type) : null
+    const ratingMax = ratingMatch ? Number(ratingMatch[1]) : null
+
+    const normalizedOptions =
+      q.options && q.options.length
+        ? q.options.map(String)
+        : ratingMax && ratingMax > 0
+          ? Array.from({ length: ratingMax }, (_, idx) => `${idx + 1}`)
+          : []
+
+    const questionType: Question['questionType'] =
+      q.questionType ?? (normalizedOptions.length ? 'multiple-choice' : 'open-ended')
+    const inputType: Question['inputType'] =
+      q.inputType ??
+      (questionType === 'multiple-choice'
+        ? 'single'
+        : 'text')
+
+    const fallbackName = q.textOverride || q.text || q.prompt || q.name || `Question ${index}`
+    const prompt = q.prompt || q.textOverride || q.text || fallbackName
+
+    return {
+      id: q.id ?? crypto.randomUUID(),
+      name: q.name ?? fallbackName,
+      prompt,
+      questionType,
+      inputType,
+      options: normalizedOptions,
+    }
+  }
+
   const initialQuestions =
     incomingState.questions && incomingState.questions.length
-      ? incomingState.questions
+      ? incomingState.questions.map((q, idx) => normalizeQuestion(q, idx + 1))
       : DEFAULT_QUESTIONS
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
@@ -41,8 +82,8 @@ export default function CreateChallengeSurvey() {
   const [activeId, setActiveId] = useState<string>(
     incomingState.activeId ?? initialQuestions[0]?.id ?? 'q1'
   )
-  const [activeTab, setActiveTab] = useState<'question' | 'list' | 'workflow'>(
-    incomingState.activeTab ?? 'question'
+  const [tab, setTab] = useState<'question' | 'list' | 'workflow'>(
+    incomingState.activeTab ?? incomingState.defaultTab ?? 'question'
   )
 
   const active = useMemo(
@@ -84,8 +125,24 @@ export default function CreateChallengeSurvey() {
         questions,
         surveyTitle: 'Challenge Survey',
         surveyType: 'challenge',
+        activeId,
+        activeTab: tab,
       },
     })
+  }
+
+  function duplicateQuestion(id: string) {
+    const original = questions.find((q) => q.id === id)
+    if (!original) return
+    const nextId = crypto.randomUUID()
+    const next: Question = {
+      ...original,
+      id: nextId,
+      name: `${original.name} (Copy)`,
+    }
+    setQuestions((prev) => [...prev, next])
+    setActiveId(nextId)
+    setTab('question')
   }
 
   return (
@@ -97,11 +154,7 @@ export default function CreateChallengeSurvey() {
       />
       <SurveyHeader title="Survey – Challenge" subtitle="" />
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as typeof activeTab)}
-        className="mt-4"
-      >
+      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-4">
         <TabsList className="w-full justify-start bg-transparent">
           <TabsTrigger value="question">Question</TabsTrigger>
           <TabsTrigger value="list">List</TabsTrigger>
@@ -141,6 +194,7 @@ export default function CreateChallengeSurvey() {
                 )
               }
               onDelete={deleteQuestion}
+              onDuplicate={duplicateQuestion}
             />
 
             <Card className="border-primary rounded-2xl">
@@ -175,14 +229,20 @@ export default function CreateChallengeSurvey() {
               label: q.name,
               prompt: q.prompt,
               inputType: q.inputType,
-              optionsType: q.questionType,
+              optionsType:
+                q.questionType === 'multiple-choice'
+                  ? 'Multiple Choice'
+                  : 'Open-ended',
               options: q.options,
             }))}
             onEdit={(q) => {
               setActiveId(q.id)
-              setActiveTab('question')
+              setTab('question')
             }}
             onReview={handleReviewSurvey}
+            selectedId={activeId}
+            setSelectedId={setActiveId}
+            onSelect={(id) => setActiveId(id)}
           />
         </TabsContent>
       </Tabs>

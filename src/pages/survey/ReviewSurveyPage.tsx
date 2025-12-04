@@ -83,6 +83,7 @@ export default function ReviewSurveyPage({
         surveyTitle: effectiveTitle,
         surveyType: effectiveSurveyType,
         activeTab: "question",
+        activeId: questions[0]?.id,
       },
     });
   }

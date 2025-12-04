@@ -18,13 +18,21 @@ export default function WorkflowSection({
   onEdit,
   onDelete,
   onReview,
+  selectedId: controlledSelectedId,
+  setSelectedId: setControlledSelectedId,
+  onSelect,
 }: {
   questions?: WorkflowQuestion[];
   onEdit?: (q: WorkflowQuestion) => void;
   onDelete?: (q: WorkflowQuestion) => void;
   onReview?: () => void;
+  selectedId?: string;
+  setSelectedId?: (id: string) => void;
+  onSelect?: (id: string) => void;
 }) {
-  const [selectedId, setSelectedId] = useState(questions[0]?.id);
+  const [internalSelectedId, setInternalSelectedId] = useState(questions[0]?.id);
+  const selectedId = controlledSelectedId ?? internalSelectedId;
+  const setSelectedId = setControlledSelectedId ?? setInternalSelectedId;
   const selected = questions.find((q) => q.id === selectedId);
 
   return (
@@ -37,7 +45,10 @@ export default function WorkflowSection({
                 index={`${i + 1}.`}
                 label={q.label}
                 active={q.id === selectedId}
-                onClick={() => setSelectedId(q.id)}
+                onClick={() => {
+                  setSelectedId(q.id);
+                  onSelect?.(q.id);
+                }}
                 onEdit={() => onEdit?.(q)}
                 onDelete={() => onDelete?.(q)}
               />

@@ -11,12 +11,14 @@ export function QuestionList({
   onSelect,
   onRename,
   onDelete,
+  onDuplicate,
 }: {
   items: Question[];
   activeId?: string;
   onSelect: (id: string) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
+  onDuplicate?: (id: string) => void;
 }) {
   return (
     <div className="w-full space-y-3">
@@ -29,6 +31,7 @@ export function QuestionList({
           onSelect={() => onSelect(q.id)}
           onRename={(name) => onRename(q.id, name)}
           onDelete={() => onDelete(q.id)}
+          onDuplicate={() => onDuplicate?.(q.id)}
         />
       ))}
     </div>
@@ -42,6 +45,7 @@ function QuestionRow({
   onSelect,
   onRename,
   onDelete,
+  onDuplicate,
 }: {
   index: number;
   question: Question;
@@ -49,6 +53,7 @@ function QuestionRow({
   onSelect: () => void;
   onRename: (name: string) => void;
   onDelete: () => void;
+  onDuplicate?: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(question.name);
@@ -88,7 +93,13 @@ function QuestionRow({
             <Button size="icon" variant="ghost" onClick={onDelete} aria-label="Delete">
               <Trash2 className="h-4 w-4" />
             </Button>
-            <Button size="icon" variant="ghost" aria-label="Duplicate" onClick={() => {}}>
+            <Button
+              size="icon"
+              variant="ghost"
+              aria-label="Duplicate"
+              onClick={onDuplicate}
+              disabled={!onDuplicate}
+            >
               <Copy className="h-4 w-4" />
             </Button>
             <Button size="icon" variant="ghost" onClick={() => setEditing((v) => !v)} aria-label="Edit">
