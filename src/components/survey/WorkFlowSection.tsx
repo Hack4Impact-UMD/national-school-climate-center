@@ -16,6 +16,7 @@ export type WorkflowQuestion = {
 
 export default function WorkflowSection({
   questions,
+  onEdit,
   onDelete,
   onReview,
   selectedId: controlledSelectedId,
@@ -139,6 +140,7 @@ export default function WorkflowSection({
 
 function WorkflowRow({
   index,
+  label,
   active,
   onSelect,
   onEdit,
