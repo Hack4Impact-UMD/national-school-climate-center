@@ -44,12 +44,11 @@ export default function ManageUsers() {
   
 
   useEffect(() => {
-    let unsub: (() => void) | undefined
     getMembers()
       .then(setMembers)
       .catch(console.error)
       .finally(() => setLoading(false))
-    unsub = listenMembers((m) => setMembers(m))
+    const unsub = listenMembers((m) => setMembers(m))
     return () => unsub && unsub()
   }, [])
 

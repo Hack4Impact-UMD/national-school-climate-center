@@ -517,6 +517,9 @@ async function seedConsents() {
     const batch = db.batch()
     responsesSnapshot.forEach((doc) => {
       const data = doc.data() as Response
+      if (!data.uid) {
+        return
+      }
       const pairKey = `${data.survey_id}:${data.uid}`
       if (consentPairs.has(pairKey)) {
         return
@@ -591,6 +594,5 @@ async function seedDatabase() {
 // Run the seed script
 seedDatabase().catch((error) => {
   console.error('Unhandled error in seed script:', error)
-  // eslint-disable-next-line n/no-process-exit
   process.exit(1)
 })
