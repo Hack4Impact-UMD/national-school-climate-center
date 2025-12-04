@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, googleProvider, db } from '@/firebase/config'
+import { auth, googleProvider, db, appCheckInitialized } from '@/firebase/config'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -31,6 +31,7 @@ export default function Login() {
     setAuthError(null)
 
     try {
+      await appCheckInitialized
       await signInWithEmailAndPassword(auth, data.email, data.password)
       navigate('/home')
     } catch (error) {
@@ -85,6 +86,7 @@ export default function Login() {
     setIsLoading(true)
     setAuthError(null)
     try {
+      await appCheckInitialized
       const cred = await signInWithPopup(auth, googleProvider)
       const uid = cred.user.uid
 
