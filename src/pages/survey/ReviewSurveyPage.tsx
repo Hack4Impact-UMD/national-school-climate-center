@@ -71,6 +71,22 @@ export default function ReviewSurveyPage({
     }
   }
 
+  function handleEdit() {
+    const targetPath =
+      effectiveSurveyType === "pulse"
+        ? "/surveys/create/pulse"
+        : "/surveys/create/challenge";
+
+    navigate(targetPath, {
+      state: {
+        questions,
+        surveyTitle: effectiveTitle,
+        surveyType: effectiveSurveyType,
+        activeTab: "question",
+      },
+    });
+  }
+
   if (!questions.length) {
     return (
       <div className="mx-auto max-w-6xl p-6">
@@ -100,6 +116,7 @@ export default function ReviewSurveyPage({
         <button
           type="button"
           className="pb-2 font-body text-base text-body cursor-pointer"
+          onClick={handleEdit}
         >
           Edit
         </button>

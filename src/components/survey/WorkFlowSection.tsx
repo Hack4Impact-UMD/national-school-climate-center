@@ -91,7 +91,12 @@ export default function WorkflowSection({
                   </ol>
                 </>
               )}
-              <Button className="mt-2 w-fit bg-secondary">Edit Question</Button>
+              <Button
+                className="mt-2 w-fit bg-secondary"
+                onClick={() => onEdit?.(selected)}
+              >
+                Edit Question
+              </Button>
             </CardContent>
           </Card>
         ) : (
