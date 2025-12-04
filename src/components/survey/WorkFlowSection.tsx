@@ -15,8 +15,7 @@ export type WorkflowQuestion = {
 }
 
 export default function WorkflowSection({
-  questions = defaultQuestions,
-  onEdit,
+  questions,
   onDelete,
   onReview,
   selectedId: controlledSelectedId,
@@ -49,7 +48,7 @@ export default function WorkflowSection({
           {safeQuestions.map((q, i) => (
             <div key={q.id} className="relative">
               <WorkflowRow
-                index={`${i + 1}.`}
+                index={`${i + 1}`}
                 label={q.label}
                 active={q.id === selectedId}
                 onSelect={() => {
@@ -140,7 +139,6 @@ export default function WorkflowSection({
 
 function WorkflowRow({
   index,
-  label,
   active,
   onSelect,
   onEdit,
@@ -162,7 +160,7 @@ function WorkflowRow({
 
   return (
     <div className="flex items-center gap-3">
-      <div className="w-8 select-none text-right text-sm">{index}</div>
+      <div className="w-8 text-right text-sm">{index}.</div>
       <Card
         onClick={onSelect}
         className={cn(
@@ -198,19 +196,17 @@ function WorkflowRow({
             <Button
               size="icon"
               variant="ghost"
-              aria-label="Delete"
               onClick={(e) => {
                 e.stopPropagation()
                 onDelete?.()
               }}
-              className="shadow-none hover:bg-transparent"
+              aria-label="Delete"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
             <Button
               size="icon"
               variant="ghost"
-              aria-label="Edit"
               onClick={(e) => {
                 e.stopPropagation()
                 if (onRename) {
@@ -219,7 +215,7 @@ function WorkflowRow({
                 }
                 onEdit?.()
               }}
-              className="shadow-none hover:bg-transparent"
+              aria-label="Edit Name"
             >
               <PencilLine className="h-4 w-4" />
             </Button>

@@ -14,7 +14,7 @@ export interface Question {
   question_id: string
   order: number
   required: boolean
-  overrides?: any
+  overrides?: Record<string, unknown>
   text?: string
 }
 
@@ -35,14 +35,15 @@ export interface Survey {
 
 export interface Answer {
   question_id: string
-  value: any
+  value: unknown
 }
 
 export interface Response {
   id: string
   survey_id: string
   surveyTitle: string
-  uid: string
+  uid?: string | null
+  surveyType?: 'pulse' | 'challenge'
   school_id: string
   district_id: string
   answers: Answer[]
@@ -62,8 +63,8 @@ export interface QuestionBankItem {
   text: string
   domain: 'leadership' | 'safety' | 'learning' | 'relationships' | 'environment'
   type: string
-  options?: any[]
-  validation?: any
+  options?: unknown[]
+  validation?: Record<string, unknown>
   createdAt: Timestamp | FieldValue
   updatedAt: Timestamp | FieldValue
 }
@@ -73,7 +74,7 @@ export interface Mail {
   to: string[]
   template: {
     name: string
-    data: any
+    data: Record<string, unknown>
   }
   status: string
   createdAt: Timestamp | FieldValue

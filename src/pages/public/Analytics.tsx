@@ -9,6 +9,7 @@ import { FilterBar } from '@/components/analytics/FilterBar'
 import { SearchInput } from '@/components/analytics/SearchInput'
 import { FilterChips } from '@/components/analytics/FilterChips'
 import { db } from '@/firebase/config'
+import { Button } from '@/components/ui/button'
 import type { ChartType } from '@/types/chartTypes'
 import type {
   FilterState,
@@ -64,6 +65,8 @@ type ChartEntry = {
   surveyTitle: string
   chartData: { name: string; value: number }[]
 }
+
+const PAGE_SIZE = 4
 
 const defaultFilterState: FilterState = {
   school: null,
@@ -422,6 +425,24 @@ export default function Analytics() {
     }))
   }, [filteredResponses])
 
+  const [page, setPage] = useState(1)
+  const totalPages = charts.length ? Math.ceil(charts.length / PAGE_SIZE) : 0
+  const paginatedCharts = charts.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  )
+
+  useEffect(() => {
+    if (!charts.length) {
+      setPage(1)
+      return
+    }
+    const maxPage = Math.max(1, Math.ceil(charts.length / PAGE_SIZE))
+    if (page > maxPage) {
+      setPage(maxPage)
+    }
+  }, [charts, page])
+
   const ChartComponent = useMemo(() => {
     switch (chartType) {
       case 'pie':
@@ -473,9 +494,9 @@ export default function Analytics() {
     }
 
     return (
-      <div className="h-[500px] overflow-y-auto mt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4">
-          {charts.map((chart) => (
+      <div className="mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
+          {paginatedCharts.map((chart) => (
             <ResponseChart
               key={chart.questionId}
               question={`${chart.surveyTitle} • ${chart.question}`}
@@ -484,12 +505,33 @@ export default function Analytics() {
             />
           ))}
         </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-body">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
     )
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-6xl mx-auto pb-12">
       <div>
         <h1 className="font-heading text-4xl font-bold text-heading mb-1">
           Survey Analytics

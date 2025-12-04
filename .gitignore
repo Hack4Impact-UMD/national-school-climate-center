@@ -87,6 +87,9 @@ vite.config.*.timestamp-*
 .claude/
 CLAUDE.md
 
+# Codex 
+AGENTS.md
+
 # TypeScript
 *.tsbuildinfo.tmp
 
