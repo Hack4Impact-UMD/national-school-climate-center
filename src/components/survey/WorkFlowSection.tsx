@@ -30,29 +30,30 @@ export default function WorkflowSection({
   setSelectedId?: (id: string) => void;
   onSelect?: (id: string) => void;
 }) {
-  const [internalSelectedId, setInternalSelectedId] = useState(questions[0]?.id);
+  const safeQuestions = (questions && questions.length ? questions : defaultQuestions) ?? [];
+  const [internalSelectedId, setInternalSelectedId] = useState(safeQuestions[0]?.id);
   const selectedId = controlledSelectedId ?? internalSelectedId;
   const setSelectedId = setControlledSelectedId ?? setInternalSelectedId;
-  const selected = questions.find((q) => q.id === selectedId);
+  const selected = safeQuestions.find((q) => q.id === selectedId);
 
   return (
     <div className="flex flex-col md:flex-row gap-6 font-body">
       <div className="flex-1 rounded-2xl border-none p-4 md:p-6">
         <div className="relative space-y-6">
-          {questions.map((q, i) => (
+          {safeQuestions.map((q, i) => (
             <div key={q.id} className="relative">
               <WorkflowRow
                 index={`${i + 1}.`}
                 label={q.label}
                 active={q.id === selectedId}
-                onClick={() => {
+                onSelectRow={() => {
                   setSelectedId(q.id);
                   onSelect?.(q.id);
                 }}
                 onEdit={() => onEdit?.(q)}
                 onDelete={() => onDelete?.(q)}
               />
-              {i < questions.length - 1 && (
+              {i < safeQuestions.length - 1 && (
                 <ConnectorVertical className="left-6 md:left-7 top-full h-8" />
               )}
             </div>
@@ -126,14 +127,14 @@ function WorkflowRow({
   index,
   label,
   active,
-  onClick,
+  onSelectRow,
   onEdit,
   onDelete,
 }: {
   index: string;
   label: string;
   active?: boolean;
-  onClick?: () => void;
+  onSelectRow?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
@@ -141,7 +142,7 @@ function WorkflowRow({
     <div className="flex items-center gap-3">
       <div className="w-8 select-none text-right text-sm">{index}</div>
       <Card
-        onClick={onClick}
+        onClick={onSelectRow}
         className={cn(
           "flex-1 cursor-pointer rounded-2xl border-primary transition-colors",
           active ? "bg-blue-50 border-primary" : "hover:bg-muted/40"
