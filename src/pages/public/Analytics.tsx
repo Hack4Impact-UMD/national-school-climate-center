@@ -1,13 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
 import SimpleBarChart from '@/components/analytics/BarChart'
 import SimplePieChart from '@/components/analytics/PieChart'
 import type { ChartType } from '@/types/chartTypes'
+import WordCloud2, {
+  type WordCloudDatum,
+} from '@/components/wordcloud/WordCloud2'
+import WordCloud1 from '@/components/wordcloud/WordCloud1'
 
 export default function Analytics() {
   const [chartType, setChartType] = useState<ChartType>('bar')
+  const [words, setWords] = useState<WordCloudDatum[]>([])
 
   const charts = [
     {
@@ -48,6 +53,18 @@ export default function Analytics() {
     },
   ]
 
+  useEffect(() => {
+    // Call your Cloud Function
+    fetch('http://127.0.0.1:5001/national-school-climate-center/us-central1/getWordCloud')
+      .then((res) => res.json())
+      .then((data: WordCloudDatum[]) => {
+        setWords(data)
+      })
+      .catch((err) => {
+        console.error('Error fetching word cloud:', err)
+      })
+  }, [])
+
   return (
     <div className="p-6">
       <h1 className="font-heading text-4xl font-bold text-heading mb-4">
@@ -80,6 +97,11 @@ export default function Analytics() {
             )
           })}
         </div>
+      </div>
+
+      {/* Word Cloud */}
+      <div>
+        <WordCloud2 words={words} />
       </div>
     </div>
   )

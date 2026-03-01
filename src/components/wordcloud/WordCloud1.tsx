@@ -4,69 +4,84 @@
 // - Optional rotation toggled via a checkbox
 // - Tailwind handles layout/styling (no styled-jsx)
 // - Data source: simple frequency map from a text fixture (Toto - Africa)
-import { useState } from 'react';
-import { Text } from '@visx/text';
-import { scaleLog } from '@visx/scale';
-import Wordcloud from '@visx/wordcloud/lib/Wordcloud';
-import { totoAfricaLyrics } from './text.fixture';
+import { useState } from 'react'
+import { Text } from '@visx/text'
+import { scaleLog } from '@visx/scale'
+import Wordcloud from '@visx/wordcloud/lib/Wordcloud'
+import { totoAfricaLyrics } from './text.fixture'
+import { getWordCloud } from '@/functions/wordcloud'
+import { r1, r2, r3, r4, r5 } from "./responses";
+
 
 // Public props for the demo component
 interface ExampleProps {
-  width: number;
-  height: number;
-  showControls?: boolean;
-  colors?: string[];
+  width: number
+  height: number
+  showControls?: boolean
+  colors?: string[]
 }
 
 // Shape of each word datum
 export interface WordData {
-  text: string;
-  value: number;
+  text: string
+  value: number
 }
 
 // A small palette to color words; rotates through by index
-const DEFAULT_COLORS = ['#6D28D9', '#A855F7', '#C084FC'];
+const DEFAULT_COLORS = ['#6D28D9', '#A855F7', '#C084FC']
 
 // Convert a block of text into [{ text, value }] by counting words.
 // Very simple tokenization for demo purposes.
 function wordFreq(text: string): WordData[] {
-  const words: string[] = text.replace(/\./g, '').split(/\s/);
-  const freqMap: Record<string, number> = {};
+  const words: string[] = text.replace(/\./g, '').split(/\s/)
+  const freqMap: Record<string, number> = {}
 
   for (const w of words) {
-    if (!freqMap[w]) freqMap[w] = 0;
-    freqMap[w] += 1;
+    if (!freqMap[w]) freqMap[w] = 0
+    freqMap[w] += 1
   }
-  return Object.keys(freqMap).map((word) => ({ text: word, value: freqMap[word] }));
+  return Object.keys(freqMap).map((word) => ({
+    text: word,
+    value: freqMap[word],
+  }))
 }
 
 // Provide a small random rotation (± up to ~60°) when enabled
 function getRotationDegree() {
-  const rand = Math.random();
-  const degree = rand > 0.5 ? 60 : -60;
-  return rand * degree;
+  const rand = Math.random()
+  const degree = rand > 0.5 ? 60 : -60
+  return rand * degree
 }
 
 // Build the words array once from the lyrics
-const words = wordFreq(totoAfricaLyrics);
+const words = wordFreq(totoAfricaLyrics)
 
 // Log scale gives nicer distribution across large frequency ranges
 const fontScale = scaleLog({
-  domain: [Math.min(...words.map((w) => w.value)), Math.max(...words.map((w) => w.value))],
+  domain: [
+    Math.min(...words.map((w) => w.value)),
+    Math.max(...words.map((w) => w.value)),
+  ],
   range: [10, 100],
-});
-const fontSizeSetter = (datum: WordData) => fontScale(datum.value);
+})
+const fontSizeSetter = (datum: WordData) => fontScale(datum.value)
 
 // Fix the random seed so layout is stable between renders
-const fixedValueGenerator = () => 0.5;
+const fixedValueGenerator = () => 0.5
 
-type SpiralType = 'archimedean' | 'rectangular';
+type SpiralType = 'archimedean' | 'rectangular'
 
 // Example word cloud with optional UI controls (spiral + rotation)
-export default function Example({ width, height, showControls, colors }: ExampleProps) {
-  const [spiralType, setSpiralType] = useState<SpiralType>('archimedean');
-  const [withRotation, setWithRotation] = useState(false);
-  const palette = colors && colors.length > 0 ? colors : DEFAULT_COLORS;
+export default function WordCloud1({
+  width,
+  height,
+  showControls,
+  colors,
+}: ExampleProps) {
+  const [spiralType, setSpiralType] = useState<SpiralType>('archimedean')
+  const [withRotation, setWithRotation] = useState(false)
+  const palette = colors && colors.length > 0 ? colors : DEFAULT_COLORS
+
 
   return (
     <div className="flex flex-col select-none">
@@ -88,7 +103,7 @@ export default function Example({ width, height, showControls, colors }: Example
             cloudWords.map((w, i) => (
               <Text
                 key={w.text}
-                  fill={palette[i % palette.length]}
+                fill={palette[i % palette.length]}
                 textAnchor={'middle'}
                 transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
                 fontSize={w.size}
@@ -130,5 +145,5 @@ export default function Example({ width, height, showControls, colors }: Example
         </div>
       )}
     </div>
-  );
+  )
 }
