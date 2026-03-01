@@ -118,8 +118,8 @@ export default function Analytics() {
 
       try {
         const [surveySnap, responseSnap] = await Promise.all([
-          getDocs(collection(db, 'surveys')),
-          getDocs(collection(db, 'responses')),
+          getDocs(collection(db, 'surveys2')),
+          getDocs(collection(db, 'responses2')),
         ])
 
         const surveyQuestions = new Map<
@@ -179,7 +179,6 @@ export default function Analytics() {
             })
           })
         })
-
         if (isMounted) {
           setResponses(responseRecords)
         }
@@ -428,10 +427,7 @@ export default function Analytics() {
 
   const [page, setPage] = useState(1)
   const totalPages = charts.length ? Math.ceil(charts.length / PAGE_SIZE) : 0
-  const paginatedCharts = charts.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
-  )
+  const paginatedCharts = charts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   useEffect(() => {
     if (!charts.length) {
