@@ -1,7 +1,15 @@
-import type { Survey } from "@/types/survey";
+import { collection, addDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
+import { db } from '@/firebase/config'
+import type { Survey } from '@/types/survey'
 
-export function createSurvey(_survey :Survey) {
-    
+export async function createSurvey(survey: Survey): Promise<DocumentReference> {
+  const surveysRef = collection(db, 'surveys')
+  const docRef = await addDoc(surveysRef, {
+    ...survey,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+  return docRef
 }
 
 export function updateSurvey(_survey :Survey) {
