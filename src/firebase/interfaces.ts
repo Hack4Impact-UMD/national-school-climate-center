@@ -1,4 +1,5 @@
-import { Timestamp, FieldValue } from 'firebase/firestore'
+import type { Timestamp } from 'firebase-admin/firestore'
+import type { FieldValue } from 'firebase-admin/firestore'
 
 export interface User {
   uid: string
@@ -22,16 +23,17 @@ export interface Survey {
   title: string
   description: string
   createdBy: string
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  createdAt: Timestamp | FieldValue
+  updatedAt: Timestamp | FieldValue
   status: 'Draft' | 'Published' | 'Closed'
   visibility: 'School' | 'District' | 'Public'
   questionCount: number
   responseCount: number
-  schoolId: string
-  districtId: string
+  school_id: string
+  district_id: string
   tags: string[]
   type: 'Pulse' | 'Challenge' | 'Custom'
+  questions?: Question[] // optional for listing surveys without loading all questions, but should be included when fetching a single survey for editing or responding
 }
 
 export interface Answer {
@@ -80,4 +82,8 @@ export interface Mail {
   status: string
   createdAt: Timestamp | FieldValue
   sentAt?: Timestamp | FieldValue
+}
+
+export interface SurveyWithId extends Survey {
+  id: string
 }

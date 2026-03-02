@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
-import type { Survey } from '@/firebase/interfaces'
+import type { Survey, SurveyWithId } from '@/firebase/interfaces'
 
 interface UseSurveysReturn {
-  surveys: Survey[]
+  surveys: SurveyWithId[]
   loading: boolean
   error: string | null
 }
@@ -13,7 +13,7 @@ interface UseSurveysReturn {
  * Hook to fetch all surveys from Firestore
  */
 export function useSurveys(): UseSurveysReturn {
-  const [surveys, setSurveys] = useState<Survey[]>([])
+  const [surveys, setSurveys] = useState<SurveyWithId[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,10 +26,13 @@ export function useSurveys(): UseSurveysReturn {
         const surveysRef = collection(db, 'surveys')
         const snapshot = await getDocs(surveysRef)
 
-        const surveysData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Survey[]
+        const surveysData: SurveyWithId[] = snapshot.docs.map((doc) => {
+          const data = doc.data() as Omit<Survey, 'id'>;
+          return {
+            id: doc.id,
+            ...data,
+          };
+        });
 
         setSurveys(surveysData)
       } catch (err) {
@@ -56,7 +59,7 @@ interface UseSurveyReturn {
  * Hook to fetch a specific survey by ID from Firestore
  */
 export function useSurvey(surveyId: string | null): UseSurveyReturn {
-  const [survey, setSurvey] = useState<Survey | null>(null)
+  const [survey, setSurvey] = useState<SurveyWithId | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -75,10 +78,13 @@ export function useSurvey(surveyId: string | null): UseSurveyReturn {
         const snapshot = await getDoc(surveyRef)
 
         if (snapshot.exists()) {
-          setSurvey({
-            id: snapshot.id,
-            ...snapshot.data(),
-          } as Survey)
+          setSurvey(() => {
+            const data = snapshot.data() as Omit<Survey, 'id'>;
+            return {
+              id: snapshot.id,
+              ...data,
+            };
+          });
         } else {
           setError('Survey not found')
         }

@@ -1,6 +1,6 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
-import type { Survey, QuestionBankItem } from '@/firebase/interfaces'
+import type { Survey, QuestionBankItem, SurveyWithId } from '@/firebase/interfaces'
 import type { EditableQuestion } from '@/types/surveybuilder'
 
 /**
@@ -20,13 +20,14 @@ export async function loadSurveyQuestions(
       throw new Error('Survey not found')
     }
 
-    const survey = {
+    const data = surveySnapshot.data() as Omit<Survey, 'id'>;
+    const survey: SurveyWithId = {
       id: surveySnapshot.id,
-      ...surveySnapshot.data(),
-    } as Survey
+      ...data,
+    };
 
-    // Step 2: Extract question IDs from the survey
-    const questionIds = survey.questions.map((q) => q.question_id)
+    // Safe access to questions
+    const questionIds = survey.questions?.map((q) => q.question_id) ?? [];
 
     if (questionIds.length === 0) {
       return []
@@ -58,8 +59,8 @@ export async function loadSurveyQuestions(
     })
 
     // Step 5: Combine questionBank data with survey metadata
-    const editableQuestions: EditableQuestion[] = survey.questions
-      .map((surveyQuestion) => {
+    const editableQuestions: EditableQuestion[] =
+      survey.questions?.map((surveyQuestion) => {
         const bankItem = questionBankMap.get(surveyQuestion.question_id)
 
         if (!bankItem) {
@@ -69,18 +70,14 @@ export async function loadSurveyQuestions(
           return null
         }
 
-        // Combine QuestionBankItem with survey-specific metadata
-        const editableQuestion: EditableQuestion = {
+        return {
           ...bankItem,
           order: surveyQuestion.order,
           required: surveyQuestion.required,
           overrides: surveyQuestion.overrides,
           textOverride: surveyQuestion.text,
-        }
-
-        return editableQuestion
-      })
-      .filter((q): q is EditableQuestion => q !== null)
+        } as EditableQuestion
+      }).filter((q): q is EditableQuestion => q !== null) ?? []
 
     // Step 6: Sort by order
     editableQuestions.sort((a, b) => a.order - b.order)
