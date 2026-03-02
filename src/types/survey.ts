@@ -1,6 +1,4 @@
 import type { Timestamp } from "firebase-admin/firestore"
-import type { Question } from "./surveybuilder";
-import type { Response } from "./response";
 
 export type Survey = {
   title: string
