@@ -22,15 +22,17 @@ export interface Survey {
   id: string
   title: string
   description: string
-  type: 'pulse' | 'challenge' | 'custom'
-  status: string
-  visibility: string
-  school_id: string
-  district_id: string
-  questions: Question[]
   createdBy: string
-  createdAt: Timestamp | FieldValue
-  updatedAt: Timestamp | FieldValue
+  createdAt: Timestamp
+  status: 'Draft' | 'Published' | 'Closed'
+  questionCount: number
+  responseCount: number
+  visibility: boolean
+  school: string
+  district: string
+  tags: string[]
+  type: string
+  updatedAt: Timestamp
 }
 
 export interface Answer {
