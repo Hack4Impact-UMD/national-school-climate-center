@@ -50,7 +50,7 @@ export function useSurveys(): UseSurveysReturn {
 }
 
 interface UseSurveyReturn {
-  survey: Survey | null
+  survey: SurveyWithId | null
   loading: boolean
   error: string | null
 }
