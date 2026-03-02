@@ -1,4 +1,4 @@
-import { collection, addDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
+import { collection, addDoc, setDoc, deleteDoc, updateDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import type { Survey } from '@/types/survey'
 
@@ -27,10 +27,13 @@ export async function saveSurvey(docRef: DocumentReference, survey :Survey) {
     }, {merge: true});
 }
 
-export function deleteSurvey(_survey :Survey) {
-
+export async function deleteSurvey(docRef: DocumentReference) {
+    await deleteDoc(docRef);
 }
 
-export function editSurvey(_survey :Survey) {
-
+export async function editSurvey(docRef: DocumentReference, survey :Survey) {
+    await updateDoc(docRef, {
+        ...survey,
+        updatedAt: serverTimestamp(),
+    });
 }
