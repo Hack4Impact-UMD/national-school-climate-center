@@ -1,4 +1,4 @@
-import { collection, addDoc, setDoc, deleteDoc, updateDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
+import { collection, doc, addDoc, setDoc, deleteDoc, updateDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import type { Survey } from '@/types/survey'
 
@@ -12,10 +12,15 @@ export async function createSurvey(survey: Survey): Promise<DocumentReference> {
   return docRef
 }
 
-export function updateSurvey(_survey :Survey) {
-
+export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
+  const surveyRef = doc(db, 'surveys', surveyId)
+  await updateDoc(surveyRef, {
+    ...updates,
+    updatedAt: serverTimestamp(),
+  })
 }
 
+// tbd
 export function reviewSurvey(_survey :Survey) {
 
 }
