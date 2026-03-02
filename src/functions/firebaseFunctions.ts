@@ -27,6 +27,8 @@ export async function saveSurvey(docRef: DocumentReference, survey :Survey) {
     }, {merge: true});
 }
 
+
+// need to check for subcollections?
 export async function deleteSurvey(docRef: DocumentReference) {
     await deleteDoc(docRef);
 }
