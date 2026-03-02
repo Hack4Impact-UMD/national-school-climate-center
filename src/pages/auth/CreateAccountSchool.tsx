@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, type UserCredential } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '@/firebase/config'
 
@@ -50,7 +50,9 @@ export default function CreateAccountSchool() {
   }
 
   const passwordReqs = checkPasswordRequirements(watchPassword)
-
+  const cleanupFirebaseError = async (userCredential: UserCredential) => {
+    await userCredential.user.delete()
+  }
   const onSubmit = async (data: CreateAccountFormData) => {
     setIsLoading(true)
 
@@ -74,13 +76,13 @@ export default function CreateAccountSchool() {
           email: data.email.trim(),
           displayName: `${data.firstName.trim()} ${data.lastName.trim()}`,
           role: 'school_personnel',
-          school_id: 'all-schools',
-          district_id: 'all-districts',
+          school_id: data.school.trim(),
+          district_id: data.district.trim(),
           joinedAt: serverTimestamp(),
         })
       } catch (firestoreError) {
         // Cleanup orphan Auth account
-        await userCredential.user.delete()
+        await cleanupFirebaseError(userCredential)
         throw firestoreError
       }
 
