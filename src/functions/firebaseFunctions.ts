@@ -1,10 +1,7 @@
 import type { Survey } from "@/types/survey";
 
-
-
-
 export function createSurvey(_survey :Survey) {
-
+    
 }
 
 export function updateSurvey(_survey :Survey) {

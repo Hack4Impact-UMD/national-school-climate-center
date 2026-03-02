@@ -19,20 +19,19 @@ export interface Question {
 }
 
 export interface Survey {
-  id: string
   title: string
   description: string
   createdBy: string
   createdAt: Timestamp
+  updatedAt: Timestamp
   status: 'Draft' | 'Published' | 'Closed'
+  visibility: 'School' | 'District' | 'Public'
   questionCount: number
   responseCount: number
-  visibility: boolean
-  school: string
-  district: string
+  schoolId: string
+  districtId: string
   tags: string[]
-  type: string
-  updatedAt: Timestamp
+  type: 'Pulse' | 'Challenge' | 'Custom'
 }
 
 export interface Answer {
