@@ -67,14 +67,20 @@ export default function CreateAccountNSCC() {
       const uid = userCredential.user.uid
 
       // 2. Create member document in Firestore 'members' collection
-      await setDoc(doc(db, 'members', uid), {
-        email: data.email.trim(),
-        displayName: `${data.firstName.trim()} ${data.lastName.trim()}`,
-        role: 'admin',
-        school_id: 'all-schools',
-        district_id: 'all-districts',
-        joinedAt: serverTimestamp(),
-      })
+      try {
+        await setDoc(doc(db, 'members', uid), {
+          email: data.email.trim(),
+          displayName: `${data.firstName.trim()} ${data.lastName.trim()}`,
+          role: 'admin',
+          school_id: 'all-schools',
+          district_id: 'all-districts',
+          joinedAt: serverTimestamp(),
+        })
+      } catch (firestoreError) {
+        // Cleanup orphan Auth account
+        await userCredential.user.delete()
+        throw firestoreError
+      }
 
       // 3. Navigate to home
       navigate('/home')
