@@ -8,7 +8,6 @@ import type { ChartType } from '@/types/chartTypes'
 import WordCloud2, {
   type WordCloudDatum,
 } from '@/components/wordcloud/WordCloud2'
-import WordCloud1 from '@/components/wordcloud/WordCloud1'
 
 export default function Analytics() {
   const [chartType, setChartType] = useState<ChartType>('bar')
@@ -55,7 +54,7 @@ export default function Analytics() {
 
   useEffect(() => {
     // Call your Cloud Function
-    fetch('http://127.0.0.1:5001/national-school-climate-center/us-central1/getWordCloud')
+    fetch('http://127.0.0.1:5001/national-school-climate-center/us-central1/generateWordCloud')
       .then((res) => res.json())
       .then((data: WordCloudDatum[]) => {
         setWords(data)
