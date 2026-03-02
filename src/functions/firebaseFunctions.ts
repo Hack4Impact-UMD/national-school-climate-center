@@ -1,21 +1,47 @@
-import type { Survey } from "@/types/survey";
+import { collection, doc, addDoc, setDoc, deleteDoc, updateDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
+import { db } from '@/firebase/config'
+import type { Survey } from '@/types/survey'
 
-export function saveSurvey(_survey :Survey) { 
+export async function createSurvey(survey: Survey): Promise<DocumentReference> {
+  const surveysRef = collection(db, 'surveys')
+  const docRef = await addDoc(surveysRef, {
+    ...survey,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+  return docRef
+}
+
+export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
+  const surveyRef = doc(db, 'surveys', surveyId)
+  await updateDoc(surveyRef, {
+    ...updates,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+// tbd
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function reviewSurvey(_survey: Survey) {
 
 }
 
-export function deleteSurvey(_survey :Survey) {
-
+export async function saveSurvey(docRef: DocumentReference, survey: Survey) {
+  await setDoc(docRef, {
+    ...survey,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
 }
 
-export function reviewSurvey(_survey :Survey) {
 
+// need to check for subcollections?
+export async function deleteSurvey(docRef: DocumentReference) {
+  await deleteDoc(docRef);
 }
 
-export function createSurvey(_survey :Survey) {
-
-}
-
-export function editSurvey(_survey :Survey) {
-
+export async function editSurvey(docRef: DocumentReference, survey: Survey) {
+  await updateDoc(docRef, {
+    ...survey,
+    updatedAt: serverTimestamp(),
+  });
 }
