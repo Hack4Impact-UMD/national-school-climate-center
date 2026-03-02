@@ -3,8 +3,18 @@ import type { Question } from "./surveybuilder";
 import type { Response } from "./response";
 
 export type Survey = {
+    title: string;
+    description: string;
+    createdBy: string;
+    createdAt: Timestamp;
+    status: "Draft" | "Published" | "Closed";
+    questionCount: number;
+    responseCount: number;
+    isAnonymous: boolean;
+    school: string;
+    district: string;
+    tags: string[];
     creationDate: Timestamp;
-    createdBy: number;
     questions: Question[];
     responses: Response[];
 
