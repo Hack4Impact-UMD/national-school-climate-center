@@ -21,26 +21,27 @@ export async function updateSurvey(surveyId: string, updates: Partial<Survey>): 
 }
 
 // tbd
-export function reviewSurvey(_survey :Survey) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function reviewSurvey(_survey: Survey) {
 
 }
 
-export async function saveSurvey(docRef: DocumentReference, survey :Survey) { 
-    await setDoc(docRef, {
-        ...survey,
-        updatedAt: serverTimestamp(),
-    }, {merge: true});
+export async function saveSurvey(docRef: DocumentReference, survey: Survey) {
+  await setDoc(docRef, {
+    ...survey,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
 }
 
 
 // need to check for subcollections?
 export async function deleteSurvey(docRef: DocumentReference) {
-    await deleteDoc(docRef);
+  await deleteDoc(docRef);
 }
 
-export async function editSurvey(docRef: DocumentReference, survey :Survey) {
-    await updateDoc(docRef, {
-        ...survey,
-        updatedAt: serverTimestamp(),
-    });
+export async function editSurvey(docRef: DocumentReference, survey: Survey) {
+  await updateDoc(docRef, {
+    ...survey,
+    updatedAt: serverTimestamp(),
+  });
 }
