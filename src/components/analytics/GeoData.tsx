@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   MapContainer,
   TileLayer,
@@ -264,9 +264,10 @@ const RESPONSES: Resp[] = [
 
 // ===== helpers =====
 
-function isNum(v: unknown): v is number {
-  return typeof v === 'number' && Number.isFinite(v)
-}
+// function isNum(v: unknown): v is number {
+//   return typeof v === 'number' && Number.isFinite(v)
+// }
+
 // 1..5 => red->yellow->green; null => gray
 function scoreToColor(avg: number | null): string {
   if (avg == null) return '#888'
