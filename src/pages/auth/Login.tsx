@@ -33,7 +33,7 @@ export default function Login() {
     try {
       await appCheckInitialized
       await signInWithEmailAndPassword(auth, data.email, data.password)
-      navigate('/home')
+      navigate('/analytics')
     } catch (error) {
       // Handle Firebase authentication errors
       let errorMessage = 'An error occurred during login'
@@ -109,7 +109,7 @@ export default function Login() {
         return
       }
 
-      navigate('/home')
+      navigate('/analytics')
     } catch (e: unknown) {
       console.error('Sign in error:', e)
       setAuthError('Failed to login with Google. Please try again.')
