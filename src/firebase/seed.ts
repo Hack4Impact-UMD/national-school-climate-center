@@ -249,9 +249,9 @@ async function seedSurveys() {
       data: {
         title: 'School Climate Benchmark',
         description: 'Baseline climate data for all students.',
-        type: 'custom',
-        status: 'published',
-        visibility: 'public',
+        type: 'Custom',
+        status: 'Published',
+        visibility: 'Public',
         school_id: 'all-schools',
         district_id: 'all-districts',
         questions: [
@@ -286,6 +286,9 @@ async function seedSurveys() {
             text: 'Does school leadership communicate effectively with students?',
           },
         ],
+        questionCount: 5,                  // <-- added
+        responseCount: 0,                  // <-- added
+        tags: ['climate', 'baseline'],     // <-- added
         createdBy: 'system-seed-script',
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
@@ -296,9 +299,9 @@ async function seedSurveys() {
       data: {
         title: 'Student Safety Pulse',
         description: 'Quick pulse-check on day-to-day safety concerns.',
-        type: 'pulse',
-        status: 'published',
-        visibility: 'district',
+        type: 'Pulse',
+        status: 'Published',
+        visibility: 'District',
         school_id: SAMPLE_SCHOOL_ID,
         district_id: SAMPLE_DISTRICT_ID,
         questions: [
@@ -327,6 +330,9 @@ async function seedSurveys() {
             text: 'Do adults intervene quickly when issues arise?',
           },
         ],
+        questionCount: 4,                  // <-- added
+        responseCount: 0,                  // <-- added
+        tags: ['safety', 'pulse'],         // <-- added
         createdBy: 'system-seed-script',
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
@@ -338,9 +344,9 @@ async function seedSurveys() {
         title: 'Community Engagement Challenge',
         description:
           'Understanding how engaged students feel with the school community.',
-        type: 'challenge',
-        status: 'published',
-        visibility: 'school',
+        type: 'Challenge',
+        status: 'Published',
+        visibility: 'School',
         school_id: SAMPLE_SCHOOL_ID,
         district_id: SAMPLE_DISTRICT_ID,
         questions: [
@@ -375,6 +381,9 @@ async function seedSurveys() {
             text: 'Do you have the tools needed to complete assignments at home?',
           },
         ],
+        questionCount: 5,                  // <-- added
+        responseCount: 0,                  // <-- added
+        tags: ['engagement', 'challenge'], // <-- added
         createdBy: 'system-seed-script',
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),

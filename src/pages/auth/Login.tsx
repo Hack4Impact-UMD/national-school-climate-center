@@ -140,13 +140,13 @@ export default function Login() {
                   aria-live="polite"
                   className="p-3 rounded-lg bg-red-50 border border-red-200"
                 >
-                  <p className="text-sm text-red-600 font-heading">
+                  <p className="text-sm text-red-600 font-body">
                     {authError}
                   </p>
                 </div>
               )}
               <div className="space-y-2">
-                <label className="text-sm font-heading text-primary">
+                <label className="text-sm font-body text-primary">
                   Email
                 </label>
                 <Input
@@ -159,16 +159,16 @@ export default function Login() {
                       message: 'Invalid email address',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-heading"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-500 font-heading">
+                  <p className="text-sm text-red-500 font-body">
                     {errors.email.message}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-heading text-primary">
+                <label className="text-sm font-body text-primary">
                   Password
                 </label>
                 <Input
@@ -181,10 +181,10 @@ export default function Login() {
                       message: 'Password must be at least 6 characters',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-heading"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.password && (
-                  <p className="text-sm text-red-500 font-heading">
+                  <p className="text-sm text-red-500 font-body">
                     {errors.password.message}
                   </p>
                 )}
@@ -216,7 +216,7 @@ export default function Login() {
 
         <button
           type="button"
-          className="font-heading text-md text-secondary underline text-center mt-4 font-bold w-full cursor-pointer bg-transparent border-0 p-0"
+          className="font-body text-md text-secondary underline text-center mt-4 font-bold w-full cursor-pointer bg-transparent border-0 p-0"
         >
           Forgot Password
         </button>

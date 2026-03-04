@@ -27,7 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
-    "firebase": "^12.3.0",
+    "firebase": "^12.9.0",
     "firebase-admin": "^13.6.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.0",
