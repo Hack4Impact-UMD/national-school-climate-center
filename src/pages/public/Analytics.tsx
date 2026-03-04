@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, getDocs, type Timestamp } from 'firebase/firestore'
+import GeoMapDemo from '@/components/analytics/GeoData'
 import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
@@ -116,25 +117,22 @@ export default function Analytics() {
       setError(null)
 
       try {
-        const [surveySnap, responseSnap] = await Promise.all([
-          getDocs(collection(db, 'surveys')),
-          getDocs(collection(db, 'responses')),
-        ])
-
-        const surveyQuestions = new Map<
-          string,
-          {
-            text: string
-            surveyTitle: string
-            surveyType: string | null
-            questionType: string | null
-          }
-        >()
-
-        surveySnap.docs.forEach((doc) => {
-          const data = doc.data() as FirestoreSurvey
+        const surveySnap = await getDocs(collection(db, 'surveys'))
+        const responseRecords: ResponseRecord[] = []
+        for (const surveyDoc of surveySnap.docs) {
+          const data = surveyDoc.data() as FirestoreSurvey
           const surveyTitle = data.title ?? 'Untitled Survey'
           const surveyType = data.type ?? null
+          const surveyQuestions = new Map<
+            string,
+            {
+              text: string
+              surveyTitle: string
+              surveyType: string | null
+              questionType: string | null
+            }
+          >()
+
           data.questions?.forEach((question) => {
             if (!question.question_id) return
             surveyQuestions.set(question.question_id, {
@@ -144,41 +142,40 @@ export default function Analytics() {
               questionType: question.questionType ?? 'multiple-choice',
             })
           })
-        })
+          const responseSnap = await getDocs(
+            collection(db, 'surveys', surveyDoc.id, 'responses')
+          )
+          responseSnap.docs.forEach((doc) => {
+            const data = doc.data() as FirestoreResponse
+            const date = extractDateString(data.submittedAt)
+            const school = data.school_id ?? null
+            const respondentGroup = data.respondent_group ?? 'students'
 
-        const responseRecords: ResponseRecord[] = []
+            data.answers?.forEach((answer, index) => {
+              if (!answer.question_id) return
+              const questionMetadata = surveyQuestions.get(answer.question_id)
 
-        responseSnap.docs.forEach((doc) => {
-          const data = doc.data() as FirestoreResponse
-          const date = extractDateString(data.submittedAt)
-          const school = data.school_id ?? null
-          const respondentGroup = data.respondent_group ?? 'students'
-
-          data.answers?.forEach((answer, index) => {
-            if (!answer.question_id) return
-            const questionMetadata = surveyQuestions.get(answer.question_id)
-
-            responseRecords.push({
-              id: `${doc.id}-${answer.question_id}-${index}`,
-              questionId: answer.question_id,
-              question: questionMetadata?.text ?? answer.question_id,
-              surveyTitle:
-                questionMetadata?.surveyTitle ??
-                data.surveyTitle ??
-                'Unknown Survey',
-              surveyType: questionMetadata?.surveyType ?? null,
-              questionType: questionMetadata?.questionType ?? null,
-              school,
-              respondentGroup,
-              date,
-              answerValue:
-                typeof answer.value === 'number'
-                  ? String(answer.value)
-                  : (answer.value as string) || 'No response',
+              responseRecords.push({
+                id: `${doc.id}-${answer.question_id}-${index}`,
+                questionId: answer.question_id,
+                question: questionMetadata?.text ?? answer.question_id,
+                surveyTitle:
+                  questionMetadata?.surveyTitle ??
+                  data.surveyTitle ??
+                  'Unknown Survey',
+                surveyType: questionMetadata?.surveyType ?? null,
+                questionType: questionMetadata?.questionType ?? null,
+                school,
+                respondentGroup,
+                date,
+                answerValue:
+                  typeof answer.value === 'number'
+                    ? String(answer.value)
+                    : (answer.value as string) || 'No response',
+              })
             })
           })
-        })
-
+        }
         if (isMounted) {
           setResponses(responseRecords)
         }
@@ -427,10 +424,7 @@ export default function Analytics() {
 
   const [page, setPage] = useState(1)
   const totalPages = charts.length ? Math.ceil(charts.length / PAGE_SIZE) : 0
-  const paginatedCharts = charts.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
-  )
+  const paginatedCharts = charts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   useEffect(() => {
     if (!charts.length) {
@@ -564,6 +558,17 @@ export default function Analytics() {
       </div>
 
       {renderContent()}
+
+      <div>
+        <h2 className="font-heading text-2xl font-bold text-heading mb-1">
+          Geographic Response Map
+        </h2>
+        <p className="font-body text-base text-body mb-4">
+          View survey response distribution and average scores by school
+          location.
+        </p>
+        <GeoMapDemo />
+      </div>
     </div>
   )
 }
