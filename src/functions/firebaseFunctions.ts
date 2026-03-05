@@ -1,6 +1,7 @@
-import { collection, doc, addDoc, setDoc, deleteDoc, updateDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
+import { collection, doc, addDoc, setDoc, deleteDoc, updateDoc, getDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import type { Survey } from '@/types/survey'
+import type { Question } from '@/firebase/interfaces'
 
 export async function createSurvey(survey: Survey): Promise<DocumentReference> {
   const surveysRef = collection(db, 'surveys')
@@ -44,4 +45,111 @@ export async function editSurvey(docRef: DocumentReference, survey: Survey) {
     ...survey,
     updatedAt: serverTimestamp(),
   });
+}
+
+/**
+ * Edit a question's metadata within a survey
+ * @param surveyId - The ID of the survey containing the question
+ * @param order - The order/position of the question to edit (0-indexed)
+ * @param updates - Partial updates to apply (question_id, required, text, overrides)
+ * @throws Error if survey not found, no questions exist, or order is invalid
+ */
+export async function editQuestion(
+  surveyId: string,
+  order: number,
+  updates: Partial<Omit<Question, 'order'>>
+): Promise<void> {
+  // Get survey reference and fetch current data
+  const surveyRef = doc(db, 'surveys', surveyId)
+  const surveySnapshot = await getDoc(surveyRef)
+
+  // Validate survey exists
+  if (!surveySnapshot.exists()) {
+    throw new Error(`Survey with ID ${surveyId} not found`)
+  }
+
+  const survey = surveySnapshot.data() as Survey
+
+  // Validate questions array exists and is not empty
+  if (!survey.questions || survey.questions.length === 0) {
+    throw new Error(`Survey ${surveyId} has no questions`)
+  }
+
+  // Find the question by order
+  const questionIndex = survey.questions.findIndex(q => q.order === order)
+  if (questionIndex === -1) {
+    throw new Error(`Question with order ${order} not found in survey ${surveyId}`)
+  }
+
+  // Create updated questions array with merged updates
+  const updatedQuestions = [...survey.questions]
+  updatedQuestions[questionIndex] = {
+    ...updatedQuestions[questionIndex],
+    ...updates,
+  }
+
+  // Update the survey document
+  await updateDoc(surveyRef, {
+    questions: updatedQuestions,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+/**
+ * Delete a question from a survey and renumber remaining questions sequentially
+ * @param surveyId - The ID of the survey containing the question
+ * @param order - The order/position of the question to delete (0-indexed)
+ * @throws Error if survey not found, no questions exist, or order is invalid
+ */
+export async function deleteQuestion(
+  surveyId: string,
+  order: number
+): Promise<void> {
+  // Get survey reference and fetch current data
+  const surveyRef = doc(db, 'surveys', surveyId)
+  const surveySnapshot = await getDoc(surveyRef)
+
+  // Validate survey exists
+  if (!surveySnapshot.exists()) {
+    throw new Error(`Survey with ID ${surveyId} not found`)
+  }
+
+  const survey = surveySnapshot.data() as Survey
+
+  // Validate questions array exists and is not empty
+  if (!survey.questions || survey.questions.length === 0) {
+    throw new Error(`Survey ${surveyId} has no questions`)
+  }
+
+  // Find the question by order
+  const questionIndex = survey.questions.findIndex(q => q.order === order)
+  if (questionIndex === -1) {
+    throw new Error(`Question with order ${order} not found in survey ${surveyId}`)
+  }
+
+  // Remove the question
+  const updatedQuestions = survey.questions.filter(q => q.order !== order)
+
+  // Renumber remaining questions sequentially (0, 1, 2, 3...)
+  updatedQuestions.forEach((q, index) => {
+    q.order = index
+  })
+
+  // Prepare update object
+  const updateData: {
+    questions: Question[]
+    updatedAt: ReturnType<typeof serverTimestamp>
+    questionCount?: number
+  } = {
+    questions: updatedQuestions,
+    updatedAt: serverTimestamp(),
+  }
+
+  // Update questionCount if it exists
+  if (typeof survey.questionCount === 'number') {
+    updateData.questionCount = survey.questionCount - 1
+  }
+
+  // Update the survey document
+  await updateDoc(surveyRef, updateData)
 }
