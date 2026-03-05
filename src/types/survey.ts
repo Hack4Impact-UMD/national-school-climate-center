@@ -1,91 +1,28 @@
-import { Timestamp } from "firebase/firestore";
+import type { FieldValue, Timestamp } from "firebase-admin/firestore"
+import type { Question } from "./surveybuilder"
 
-//enums
-export type SurveyStatus =
-  | "Draft"
-  | "Published"
-  | "Closed";
-
-
-export type QuestionType =
-  | "Multiple_Choice"
-  | "Text"
-  | "Rating"
-  | "Checkbox"
-  | "Dropdown";
-
-
-export type UserRole =
-  | "Admin"
-  | "Creator"
-  | "Respondent";
-
-
-  //main survey type
 export interface Survey {
-  title: string;
-  description: string;
-  createdBy: string;        
-  createdAt: Timestamp;
-  status: SurveyStatus;
+  title: string
+  description: string
+  createdBy: string
+  createdAt: Timestamp | FieldValue
+  updatedAt: Timestamp | FieldValue
+  status: 'Draft' | 'Published' | 'Closed'
+  visibility: 'School' | 'District' | 'Public'
+  questionCount: number
+  responseCount: number
+  school_id: string
+  district_id: string
+  tags: string[]
+  type: 'Pulse' | 'Challenge' | 'Custom'
+  questions?: Question[] // optional for listing surveys without loading all questions, but should be included when fetching a single survey for editing or responding
+}
 
-  questionCount: number;
-  responseCount: number;
-
-  isAnonymous: boolean;
-
+export type PulseSurvey = Survey & {
   school: string;
-  district: string;
-
-  tags: string[];
+  schoolDistrict: string;
 }
 
+export type ChallenegeSurvey = Survey & {
 
-
-export interface QuestionOption {
-  id: string;
-  label: string;
-}
-
-export interface RatingScale {
-  min: number;
-  max: number;
-}
-
-export interface Question {
-  type: QuestionType;
-  text: string;
-  required: boolean;
-  order: number;
-
-  options?: QuestionOption[];  
-  scale?: RatingScale;          
-}
-
-
-export type answerType =
-  | string
-  | number
-  | boolean
-  | string[]
-  | null;
-
-export interface Answer {
-  question_id: string
-  value: string | number | boolean
-}
-
-
-// all survey responses
-export interface Responses {
-  userId: string | null;
-  submittedAt: Timestamp;
-  answers: Answer[];
-}
-
-export interface UserProfile {
-  name: string;
-  email: string;
-  role: UserRole;
-  createdAt: Timestamp;
 }

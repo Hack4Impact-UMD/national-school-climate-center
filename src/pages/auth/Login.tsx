@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, googleProvider, db } from '@/firebase/config'
+import { auth, googleProvider, db, appCheckInitialized } from '@/firebase/config'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -31,6 +31,7 @@ export default function Login() {
     setAuthError(null)
 
     try {
+      await appCheckInitialized
       await signInWithEmailAndPassword(auth, data.email, data.password)
       navigate('/home')
     } catch (error) {
@@ -85,6 +86,7 @@ export default function Login() {
     setIsLoading(true)
     setAuthError(null)
     try {
+      await appCheckInitialized
       const cred = await signInWithPopup(auth, googleProvider)
       const uid = cred.user.uid
 
@@ -108,7 +110,7 @@ export default function Login() {
       }
 
       navigate('/home')
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Sign in error:', e)
       setAuthError('Failed to login with Google. Please try again.')
     } finally {
@@ -138,13 +140,13 @@ export default function Login() {
                   aria-live="polite"
                   className="p-3 rounded-lg bg-red-50 border border-red-200"
                 >
-                  <p className="text-sm text-red-600 font-heading">
+                  <p className="text-sm text-red-600 font-body">
                     {authError}
                   </p>
                 </div>
               )}
               <div className="space-y-2">
-                <label className="text-sm font-heading text-primary">
+                <label className="text-sm font-body text-primary">
                   Email
                 </label>
                 <Input
@@ -157,16 +159,16 @@ export default function Login() {
                       message: 'Invalid email address',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-heading"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-500 font-heading">
+                  <p className="text-sm text-red-500 font-body">
                     {errors.email.message}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-heading text-primary">
+                <label className="text-sm font-body text-primary">
                   Password
                 </label>
                 <Input
@@ -179,10 +181,10 @@ export default function Login() {
                       message: 'Password must be at least 6 characters',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body/30 focus:border-primary font-heading"
+                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
                 />
                 {errors.password && (
-                  <p className="text-sm text-red-500 font-heading">
+                  <p className="text-sm text-red-500 font-body">
                     {errors.password.message}
                   </p>
                 )}
@@ -214,7 +216,7 @@ export default function Login() {
 
         <button
           type="button"
-          className="font-heading text-md text-secondary underline text-center mt-4 font-bold w-full cursor-pointer bg-transparent border-0 p-0"
+          className="font-body text-md text-secondary underline text-center mt-4 font-bold w-full cursor-pointer bg-transparent border-0 p-0"
         >
           Forgot Password
         </button>

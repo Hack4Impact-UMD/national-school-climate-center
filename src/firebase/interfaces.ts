@@ -1,4 +1,5 @@
-import { Timestamp, FieldValue } from 'firebase/firestore'
+import type { Timestamp } from 'firebase-admin/firestore'
+import type { FieldValue } from 'firebase-admin/firestore'
 
 export interface User {
   uid: string
@@ -14,35 +15,38 @@ export interface Question {
   question_id: string
   order: number
   required: boolean
-  overrides?: any
+  overrides?: Record<string, unknown>
   text?: string
 }
 
 export interface Survey {
-  id: string
   title: string
   description: string
-  type: 'pulse' | 'challenge' | 'custom'
-  status: string
-  visibility: string
-  school_id: string
-  district_id: string
-  questions: Question[]
   createdBy: string
   createdAt: Timestamp | FieldValue
   updatedAt: Timestamp | FieldValue
+  status: 'Draft' | 'Published' | 'Closed'
+  visibility: 'School' | 'District' | 'Public'
+  questionCount: number
+  responseCount: number
+  school_id: string
+  district_id: string
+  tags: string[]
+  type: 'Pulse' | 'Challenge' | 'Custom'
+  questions?: Question[] // optional for listing surveys without loading all questions, but should be included when fetching a single survey for editing or responding
 }
 
 export interface Answer {
   question_id: string
-  value: any
+  value: unknown
 }
 
 export interface Response {
   id: string
   survey_id: string
   surveyTitle: string
-  uid: string
+  uid?: string | null
+  surveyType?: 'pulse' | 'challenge'
   school_id: string
   district_id: string
   answers: Answer[]
@@ -62,8 +66,8 @@ export interface QuestionBankItem {
   text: string
   domain: 'leadership' | 'safety' | 'learning' | 'relationships' | 'environment'
   type: string
-  options?: any[]
-  validation?: any
+  options?: unknown[]
+  validation?: Record<string, unknown>
   createdAt: Timestamp | FieldValue
   updatedAt: Timestamp | FieldValue
 }
@@ -73,9 +77,13 @@ export interface Mail {
   to: string[]
   template: {
     name: string
-    data: any
+    data: Record<string, unknown>
   }
   status: string
   createdAt: Timestamp | FieldValue
   sentAt?: Timestamp | FieldValue
+}
+
+export interface SurveyWithId extends Survey {
+  id: string
 }

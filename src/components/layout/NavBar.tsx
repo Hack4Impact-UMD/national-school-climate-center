@@ -8,6 +8,7 @@ import {
   ClipboardList,
   CheckSquare,
   BarChart3,
+  Phone,
   Settings,
   Users,
 } from 'lucide-react'
@@ -31,7 +32,7 @@ export default function NavBar() {
   }
 
   return (
-    <nav className="bg-primary text-primary-foreground min-h-screen w-80 flex flex-col">
+    <nav className="bg-primary text-primary-foreground w-80 flex flex-col h-full overflow-y-auto">
       <div className="flex items-center bg-white border border-r-primary p-2 w-80 justify-center">
         <img
           src="/logo.png"
@@ -65,6 +66,16 @@ export default function NavBar() {
                   All Surveys
                 </h3>
               </Link>
+            </div>
+          </>
+        )}
+
+        {can(role, 'read') && (
+          <>
+            <h3 className="font-heading text-2xl text-heading text-white">
+              Insights
+            </h3>
+            <div className="mt-3 text-lg space-y-2 mb-10">
               <Link
                 to="/analytics"
                 className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
@@ -75,13 +86,9 @@ export default function NavBar() {
                 </h3>
               </Link>
             </div>
-          </>
-        )}
 
-        {can(role, 'read') && (
-          <>
             <p className="font-heading text-2xl text-heading text-white">
-              {can(role, 'manage_users') ? 'Settings' : 'Dashboard'}
+              Settings
             </p>
             <div className="mt-3 text-lg space-y-2">
               <Link
@@ -102,6 +109,15 @@ export default function NavBar() {
                   </h3>
                 </Link>
               )}
+              <Link
+                to="/contact"
+                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+              >
+                <Phone className="w-5 h-5" />
+                <h3 className="font-heading text-2xl text-inherit">
+                  Contact Us
+                </h3>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md w-full"
