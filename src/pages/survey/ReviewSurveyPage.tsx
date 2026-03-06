@@ -42,8 +42,9 @@ export default function ReviewSurveyPage({
     setError(null);
 
     try {
-      const questionDocs = questions.map((q) => ({
+      const questionDocs = questions.map((q, index) => ({
         question_id: q.id,
+        order: index,
         text: q.prompt || q.name,
         questionType: q.questionType,
       }));
