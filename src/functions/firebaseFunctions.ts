@@ -144,7 +144,7 @@ export async function deleteQuestion(
 
   // Update questionCount if it exists
   if (typeof survey.questionCount === 'number') {
-    updateData.questionCount = survey.questionCount - 1
+    updateData.questionCount = Math.max(0, survey.questionCount - 1)
   }
 
   // Update the survey document
