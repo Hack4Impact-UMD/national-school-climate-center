@@ -127,13 +127,10 @@ export async function deleteQuestion(
     throw new Error(`Question with order ${order} not found in survey ${surveyId}`)
   }
 
-  // Remove the question
-  const updatedQuestions = survey.questions.filter(q => q.order !== order)
-
-  // Renumber remaining questions sequentially (0, 1, 2, 3...)
-  updatedQuestions.forEach((q, index) => {
-    q.order = index
-  })
+  // Remove the question and renumber remaining questions sequentially (0, 1, 2, 3...)
+  const updatedQuestions = survey.questions
+    .filter(q => q.order !== order)
+    .map((q, index) => ({ ...q, order: index }))
 
   // Prepare update object
   const updateData: {
