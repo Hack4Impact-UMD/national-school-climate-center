@@ -14,6 +14,13 @@ export default function GenerateReport({setExport, chartsData}: any) {
     await new Promise(r => setTimeout(r, 6000))
     const data = document.getElementById("analyticsInsight")
 
+    if (!data){
+      console.error("Can't find the report element")
+      return
+    }
+
+
+
     try {
       const canvas = await html2canvas(data,  {scale: 2})
       const imgData = canvas.toDataURL("image/png")
@@ -77,7 +84,7 @@ export default function GenerateReport({setExport, chartsData}: any) {
 
 
 
-  
+
   return (
     <div className="relative inline-block">
       <Button variant="secondary" onClick={() => setDrop(!drop)}>Generate Report <RiArrowDropDownLine /></Button>
