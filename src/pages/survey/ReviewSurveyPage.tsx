@@ -42,8 +42,9 @@ export default function ReviewSurveyPage({
     setError(null);
 
     try {
-      const questionDocs = questions.map((q) => ({
+      const questionDocs = questions.map((q, index) => ({
         question_id: q.id,
+        order: index,
         text: q.prompt || q.name,
         questionType: q.questionType,
       }));
@@ -125,7 +126,7 @@ export default function ReviewSurveyPage({
 
       <div className="mt-8 space-y-10 text-left">
         {questions.map((q, idx) => (
-          <div key={q.id} className="space-y-4">
+          <div key={`${q.id}-${idx}`} className="space-y-4">
             <p className="font-body">
               Question {idx + 1}
             </p>

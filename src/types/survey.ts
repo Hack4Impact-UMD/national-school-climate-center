@@ -1,5 +1,5 @@
 import type { FieldValue, Timestamp } from "firebase-admin/firestore"
-import type { Question } from "./surveybuilder"
+import type { Question } from "@/firebase/interfaces"
 
 export interface Survey {
   title: string
