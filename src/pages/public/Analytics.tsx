@@ -20,6 +20,7 @@ import type {
   QuestionType,
   SurveyType,
 } from '@/types/analytics'
+import WordCloud from '@/components/wordcloud/WordCloud'
 
 type SurveyQuestion = {
   question_id: string
@@ -31,6 +32,10 @@ type FirestoreSurvey = {
   title?: string
   type?: string
   questions?: SurveyQuestion[]
+}
+type WordCloudDatum = {
+  text: string
+  value: number
 }
 
 type FirestoreAnswer = {
@@ -107,10 +112,35 @@ export default function Analytics() {
   const [responses, setResponses] = useState<ResponseRecord[]>([])
   const [filters, setFilters] = useState<FilterState>(defaultFilterState)
   const [loading, setLoading] = useState(true)
+  const [words, setWords] = useState<WordCloudDatum[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
+
+    const fetchWordCloudData = async () => {
+      try {
+        const functionName = 'generateWordCloud'
+        const baseUrl =
+          'http://127.0.0.1:5001/national-school-climate-center/us-central1'
+
+        const response = await fetch(`${baseUrl}/${functionName}`)
+
+        if (!response.ok) {
+          throw new Error(
+            `Cloud Function responded with status: ${response.status}`
+          )
+        }
+
+        const data: WordCloudDatum[] = await response.json()
+
+        if (isMounted) {
+          setWords(data)
+        }
+      } catch (err) {
+        console.error('Word Cloud fetch failed:', err)
+      }
+    }
 
     const fetchAnalyticsData = async () => {
       setLoading(true)
@@ -192,6 +222,7 @@ export default function Analytics() {
     }
 
     fetchAnalyticsData()
+    fetchWordCloudData()
 
     return () => {
       isMounted = false
@@ -568,6 +599,12 @@ export default function Analytics() {
           location.
         </p>
         <GeoMapDemo />
+      </div>
+      <div>
+        <h2 className="font-heading text-2xl font-bold text-heading mb-1">
+          Word Cloud
+        </h2>
+        <WordCloud words={words} />
       </div>
     </div>
   )
