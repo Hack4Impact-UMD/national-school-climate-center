@@ -1,6 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { useState } from "react"
 import { RiArrowDropDownLine } from "react-icons/ri";
+import html2canvas from "html2canvas"
+import jsPDF from "jspdf"
+
 
 
 export default function GenerateReport() {
@@ -8,7 +11,24 @@ export default function GenerateReport() {
 
   const handleExportPDF = async () => {
     setDrop(false)
-    window.print()
+    const data = document.getElementById("analyticsInsight")
+
+    try {
+      const canvas = await html2canvas(data,  {scale: 2})
+      const imgData = canvas.toDataURL("image/png")
+
+      const pdf = new jsPDF("p", "mm", "a4")
+      const imgWidth = 210
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      console.log("Downloading as PDF")
+      pdf.save("Analytics_Report.pdf")
+    } catch(error){
+      console.error("Failed to generate the PDF", error)
+    }
+    
+    //window.print()
   }
 
   const handleExportCSV = () => {

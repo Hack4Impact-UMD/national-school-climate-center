@@ -491,7 +491,7 @@ export default function Analytics() {
     }
 
     return (
-      <div className="mt-4">
+      <div className="mt-4" id="analyticsInsight">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
           {paginatedCharts.map((chart) => (
             <ResponseChart
