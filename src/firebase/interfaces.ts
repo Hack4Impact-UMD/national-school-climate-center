@@ -42,7 +42,6 @@ export interface Answer {
 }
 
 export interface Response {
-  id: string
   survey_id: string
   surveyTitle: string
   uid?: string | null
@@ -52,6 +51,10 @@ export interface Response {
   answers: Answer[]
   submittedAt: Timestamp | FieldValue
   consent: boolean
+}
+
+export interface ResponseWithId extends Response {
+  id: string
 }
 
 export interface ConsentGrant {

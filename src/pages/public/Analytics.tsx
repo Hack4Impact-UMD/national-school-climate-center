@@ -20,7 +20,7 @@ import type {
   QuestionType,
   SurveyType,
 } from '@/types/analytics'
-import WordCloud from '@/components/wordcloud/WordCloud'
+import { WordCloud } from '@/components/analytics/WordCloud'
 
 type SurveyQuestion = {
   question_id: string
@@ -32,10 +32,6 @@ type FirestoreSurvey = {
   title?: string
   type?: string
   questions?: SurveyQuestion[]
-}
-type WordCloudDatum = {
-  text: string
-  value: number
 }
 
 type FirestoreAnswer = {
@@ -58,6 +54,7 @@ type ResponseRecord = {
   question: string
   surveyTitle: string
   surveyType: string | null
+  surveyID: string
   questionType: string | null
   school: string | null
   respondentGroup: string | null
@@ -112,35 +109,10 @@ export default function Analytics() {
   const [responses, setResponses] = useState<ResponseRecord[]>([])
   const [filters, setFilters] = useState<FilterState>(defaultFilterState)
   const [loading, setLoading] = useState(true)
-  const [words, setWords] = useState<WordCloudDatum[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
-
-    const fetchWordCloudData = async () => {
-      try {
-        const functionName = 'generateWordCloud'
-        const baseUrl =
-          'http://127.0.0.1:5001/national-school-climate-center/us-central1'
-
-        const response = await fetch(`${baseUrl}/${functionName}`)
-
-        if (!response.ok) {
-          throw new Error(
-            `Cloud Function responded with status: ${response.status}`
-          )
-        }
-
-        const data: WordCloudDatum[] = await response.json()
-
-        if (isMounted) {
-          setWords(data)
-        }
-      } catch (err) {
-        console.error('Word Cloud fetch failed:', err)
-      }
-    }
 
     const fetchAnalyticsData = async () => {
       setLoading(true)
@@ -193,6 +165,7 @@ export default function Analytics() {
                   questionMetadata?.surveyTitle ??
                   data.surveyTitle ??
                   'Unknown Survey',
+                surveyID: surveyDoc.id,
                 surveyType: questionMetadata?.surveyType ?? null,
                 questionType: questionMetadata?.questionType ?? null,
                 school,
@@ -222,8 +195,6 @@ export default function Analytics() {
     }
 
     fetchAnalyticsData()
-    fetchWordCloudData()
-
     return () => {
       isMounted = false
     }
@@ -524,9 +495,9 @@ export default function Analytics() {
           {paginatedCharts.map((chart) => (
             <ResponseChart
               key={chart.questionId}
-              question={`${chart.surveyTitle} • ${chart.question}`}
+              chart={chart}
+              filteredResponses={filteredResponses}
               ChartComponent={ChartComponent}
-              chartData={chart.chartData}
             />
           ))}
         </div>
@@ -600,12 +571,12 @@ export default function Analytics() {
         </p>
         <GeoMapDemo />
       </div>
-      <div>
+      {/* <div>
         <h2 className="font-heading text-2xl font-bold text-heading mb-1">
           Word Cloud
         </h2>
-        <WordCloud words={words} />
-      </div>
+        <WordCloud width={700} height={300} surveyID="survey_1" />
+      </div> */}
     </div>
   )
 }
