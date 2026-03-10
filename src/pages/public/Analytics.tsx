@@ -109,6 +109,8 @@ export default function Analytics() {
   const [filters, setFilters] = useState<FilterState>(defaultFilterState)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exporting, setExport] = useState(false)
+
 
   useEffect(() => {
     let isMounted = true
@@ -489,9 +491,9 @@ export default function Analytics() {
     }
 
     return (
-      <div className="mt-4">
+      <div className="mt-4" id="analyticsInsight">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
-          {paginatedCharts.map((chart) => (
+          {(exporting ? charts : paginatedCharts).map((chart) => (
             <ResponseChart
               key={chart.questionId}
               chart={chart}
@@ -500,7 +502,7 @@ export default function Analytics() {
             />
           ))}
         </div>
-        {totalPages > 1 && (
+        {totalPages > 1 && !exporting &&(
           <div className="flex items-center justify-between mt-4">
             <Button
               variant="outline"
@@ -555,7 +557,7 @@ export default function Analytics() {
 
       <div className="flex flex-wrap items-center gap-4">
         <ChartTypeSelector value={chartType} onChange={setChartType} />
-        <GenerateReport />
+        <GenerateReport setExport={setExport} chartsData={charts} />
       </div>
 
       {renderContent()}
