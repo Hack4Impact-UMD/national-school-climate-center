@@ -20,7 +20,6 @@ import type {
   QuestionType,
   SurveyType,
 } from '@/types/analytics'
-import { WordCloud } from '@/components/analytics/WordCloud'
 
 type SurveyQuestion = {
   question_id: string
@@ -571,12 +570,6 @@ export default function Analytics() {
         </p>
         <GeoMapDemo />
       </div>
-      {/* <div>
-        <h2 className="font-heading text-2xl font-bold text-heading mb-1">
-          Word Cloud
-        </h2>
-        <WordCloud width={700} height={300} surveyID="survey_1" />
-      </div> */}
     </div>
   )
 }
