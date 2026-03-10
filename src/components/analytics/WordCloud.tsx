@@ -17,12 +17,14 @@ export const WordCloud = ({ responses, width, height }: WordCloudProps) => {
 
   if (!wordCloud.length) return <div>No text responses found.</div>
 
+  const Cloud = ReactWordCloud as any
+
   return (
-    <ReactWordCloud
+    <Cloud
       words={wordCloud}
       width={width}
       height={height}
-      fontSize={(word) => Math.sqrt(word.value) * 10}
+      fontSize={(word: { value: number }) => Math.sqrt(word.value) * 10}
     />
   )
 }
