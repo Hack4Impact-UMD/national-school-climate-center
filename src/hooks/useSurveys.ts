@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore'
+import { collection, getDocs, doc, getDoc, query, where, orderBy, type QueryConstraint } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import type { Survey, SurveyWithId } from '@/firebase/interfaces'
 
@@ -100,4 +100,70 @@ export function useSurvey(surveyId: string | null): UseSurveyReturn {
   }, [surveyId])
 
   return { survey, loading, error }
+}
+
+/**
+ * Hook to retrieve only the published surverys, used by the NSCC admin in the All Surveys page
+ */
+export function usePublishedSurveys(params?: {
+  type?: 'pulse' | 'challenge' | null
+}) {
+  const [surveys, setSurveys] = useState<SurveyWithId[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  /**
+   * builds FireStore query with the following constraints:
+   *  status is always published
+   *  type is the specified parameter type (optional)
+   *  ordered by date (newest at top)
+   */
+  useEffect(() => {
+    let mounted = true
+
+    const run = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const base = collection(db, 'surveys')
+        const constraints: QueryConstraint[] = [where('status', '==', 'published')]
+
+        if (params?.type) {
+          constraints.push(where('type', '==', params.type))
+        }
+
+        // use createdAt if it exists; if some docs don't have it yet, remove the orderBy (or backfill createdAt)
+        constraints.push(orderBy('createdAt', 'desc'))
+
+        const q = query(base, ...constraints)
+        const snap = await getDocs(q)
+
+        const data: SurveyWithId[] = snap.docs.map((d) => {
+          const docData = d.data() as Omit<Survey, 'id'>
+          return { id: d.id, ...docData }
+        })
+
+        if (mounted) setSurveys(data)
+      } catch (err) {
+        console.error('Error fetching published surveys:', err)
+        if (mounted) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Failed to fetch published surveys'
+          )
+        }
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+
+    run()
+    return () => {
+      mounted = false
+    }
+  }, [params?.type])
+
+  return { surveys, loading, error }
 }

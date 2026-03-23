@@ -42,14 +42,16 @@ export default function App() {
               path="/surveys/create/challenge/review"
               element={<ReviewSurveyPage defaultSurveyType="challenge" />}
             />
-            <Route path="/surveys" element={<AllSurveys />} />
+            {/* <Route path="/surveys" element={<AllSurveys />} /> (moved to NSCC admin only*/}
           </Route>
 
           <Route element={<ProtectedRoute requiredAction="read" />}>
             <Route path="/analytics" element={<Analytics />} />
           </Route>
 
+          {/* NSCC admin-only */}
           <Route element={<ProtectedRoute requiredAction="manage_users" />}>
+            <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/general" element={<General />} />
           </Route>
