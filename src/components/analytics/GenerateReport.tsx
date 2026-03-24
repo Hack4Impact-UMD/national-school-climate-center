@@ -42,7 +42,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
       let currentY = 0
       const pixelPerMM = canvas.width / pageWidth
       while (currentY < canvas.height) {
-        const availablePixels = (pageHeight - 15) * pixelPerMM
+        const availablePixels = pageHeight * pixelPerMM
         const targetY = currentY + availablePixels
         const filteredRows = rowBottoms.filter(
           (y) => y > currentY && y <= targetY
@@ -94,7 +94,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
       pdf.text(
         `Generated report as of: ${timeText}`,
         pageWidth / 2,
-        pageHeight - 15,
+        pageHeight,
         { align: 'center' }
       )
 
@@ -110,6 +110,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
 
   const handleExportCSV = () => {
     setDrop(false)
+    setGenerating(true)
     let csv = 'Survey Title, Question, Answer\n'
 
     try {
@@ -128,6 +129,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
       console.error('Failed to generate the PDF', error)
     } finally {
       setExport(false)
+      setGenerating(false)
     }
   }
 
