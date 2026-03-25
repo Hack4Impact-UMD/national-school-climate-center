@@ -53,6 +53,7 @@ export default function ReviewSurveyPage({
         title: effectiveTitle,
         type: effectiveSurveyType,
         questions: questionDocs,
+        school_name: user?.school_name || "Unknown School",
         createdBy: user?.uid ?? null,
         createdAt: serverTimestamp(),
         status: "published",
