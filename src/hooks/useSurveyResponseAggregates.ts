@@ -50,7 +50,7 @@ function toDate(value: FirestoreResponse['submittedAt']): Date | null {
  *      responded-from dropdown (filtering by school/district/state)
  *      number of responses filter (filtering by <100, 100–500, 500+)
  * 
- * Important: I think we currently store responses under surveys/{surveyId}/responses based on the Analytics page,
+ * IMPORTANT: I think we currently store responses under surveys/{surveyId}/responses based on the Analytics page,
  *  so here I use a collectionGroup('responses') query and filter by survey_id.
  *      -> this collectionGroup query grabs documents from any subcollection named responses in the database
  *      -> RELIES ON EACH RESPONSE HAVING SURVEY ID
