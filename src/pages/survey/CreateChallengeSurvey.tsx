@@ -119,6 +119,7 @@ export default function CreateChallengeSurvey() {
     })
   }
 
+  //need to add school_name here after the page is created
   function handleReviewSurvey() {
     navigate('/surveys/create/challenge/review', {
       state: {
