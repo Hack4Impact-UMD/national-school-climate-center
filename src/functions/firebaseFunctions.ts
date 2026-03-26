@@ -13,13 +13,14 @@ export async function createSurvey(survey: Survey): Promise<DocumentReference> {
   return docRef
 }
 
-export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
-  const surveyRef = doc(db, 'surveys', surveyId)
-  await updateDoc(surveyRef, {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  })
-}
+// we decided that updateSurvey and editSurvey are functionally the same, so we will just use edit. 
+// export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
+//   const surveyRef = doc(db, 'surveys', surveyId)
+//   await updateDoc(surveyRef, {
+//     ...updates,
+//     updatedAt: serverTimestamp(),
+//   })
+// }
 
 export async function saveSurvey(docRef: DocumentReference, survey: Survey) {
   await setDoc(docRef, {
