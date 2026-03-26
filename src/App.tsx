@@ -11,6 +11,7 @@ import General from './pages/admin/General'
 import SurveyBuilder from './pages/survey/SurveyBuilder'
 import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
 import AllSurveys from './pages/survey/AllSurveys'
+import SurveyDetails from './pages/survey/SurveyDetails'
 import Layout from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
@@ -52,6 +53,7 @@ export default function App() {
           {/* NSCC admin-only */}
           <Route element={<ProtectedRoute requiredAction="manage_users" />}>
             <Route path="/surveys" element={<AllSurveys />} />
+            <Route path="/surveys/:surveyId" element={<SurveyDetails />} />
             <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/general" element={<General />} />
           </Route>
