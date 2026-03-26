@@ -5,7 +5,7 @@ import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
 
 
-export default function GenerateReport({setExport, chartsData}: any) {
+export default function GenerateReport({setExport, chartsData, surveys}: any) {
   const [drop, setDrop] = useState(false)
 
   const handleExportPDF = async () => {
@@ -76,7 +76,7 @@ export default function GenerateReport({setExport, chartsData}: any) {
       console.log("Downloading as CVS")
 
     }catch (error){
-      console.error("Failed to generate the PDF", error)
+      console.error("Failed to generate the CSV", error)
     }finally{
       setExport(false)
     }

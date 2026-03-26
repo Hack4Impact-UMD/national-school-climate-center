@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePublishedSurveys } from '@/hooks/useSurveys'
 import { useSurveyResponseAggregates } from '@/hooks/useSurveyResponseAggregates'
+import jsPDF from "jspdf"
 
 const RESPONSE_RANGES = [
   { id: 'any', label: 'Any', test: (_n: number) => true },
@@ -113,6 +114,70 @@ export default function AllSurveys() {
 
   const isLoading = loading || aggLoading
   const displayError = error ?? aggError
+
+  const [drop, setDrop] = useState(false)
+  const handleExportCSV = () => {
+    try {
+      setDrop(false)
+      let csv = "Survey Title, Type, Responses, Last Response\n"
+
+      rows.forEach((row) => {
+        csv += `${row.title}", "${row.type}", "${row.responseCount}", "${formatDate(row.lastResponseAt)}"\n`
+      })
+ 
+      const encodedCSV = encodeURI(csv)
+      const downloadLink = document.createElement("a")
+      downloadLink.href = `data:text/csv;charset=utf-8,${encodedCSV}`
+      downloadLink.setAttribute("download", "Surveys_Report.csv")
+      downloadLink.click()
+      console.log("Downloading as CSV")
+      
+    } catch (error) {
+      console.error("Failed to generate the CSV", error)
+    }
+  }
+
+
+  const handleExportPDF = () => {
+    try {
+      const doc = new jsPDF()
+
+      doc.setFontSize(20)
+      doc.text("Survey Report", 15, 25)
+      
+      doc.setFontSize(14)
+      let y = 35
+
+      doc.text("Name", 15, y)
+      doc.text("Type", 90, y)
+      doc.text("Responses", 140, y)
+      doc.text("Last Response", 170, y)
+      y += 10
+
+      doc.setLineWidth(0.7)
+      doc.line(15, y, 195, y)
+      y += 7
+      rows.map((row) => {
+        doc.setFontSize(12)
+        doc.text(row.title, 15, y)
+        doc.text(row.type, 90, y)
+        doc.text(String(row.responseCount), 140, y)
+        doc.text(formatDate(row.lastResponseAt), 170, y)
+        y += 12 
+
+        if (y > 270) {
+          doc.addPage()
+          y = 25
+        }
+      })
+
+      doc.save("Surveys_Report.pdf")
+      console.log("Downloading PDF")
+
+    } catch (error) {
+      console.error("Failed to generate the PDF", error)
+    }
+  }
 
   return (
     <div className="p-6 space-y-5 max-w-6xl mx-auto pb-12">
@@ -229,13 +294,13 @@ export default function AllSurveys() {
           })}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className=" relative flex items-center gap-2">
           {/* Export is present in the design but wiring can be added later */}
           <button
             type="button"
             className="border border-primary rounded-lg px-4 py-2 text-sm bg-white text-heading hover:bg-secondary/10"
             onClick={() => {
-              // TODO: wire export
+              setDrop(!drop)
             }}
             title="Export"
           >
@@ -243,6 +308,27 @@ export default function AllSurveys() {
               Export <span aria-hidden>▾</span>
             </span>
           </button>
+
+        {drop && (
+          <div className="absolute right-0 mt-1 w-23 z-10 items-center">
+            <div onClick={() => setDrop(false)} />
+              <div className=" mt-5 absolute w-full rounded-lg overflow-hidden bg-[#2F6CC0] text-white">
+                <button onClick={() => 
+                  {handleExportPDF()
+                  setDrop(false)}}
+                  className="w-full rounded-none">
+                  PDF
+                </button>
+
+                <button onClick={() => 
+                  {handleExportCSV() 
+                  setDrop(false)}} 
+                  className="w-full rounded-none mt-1">
+                  CSV
+                </button>
+          </div>
+        </div>
+        )}
         </div>
       </div>
 
