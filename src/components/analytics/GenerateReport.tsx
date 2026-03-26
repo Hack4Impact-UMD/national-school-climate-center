@@ -9,18 +9,19 @@ export default function GenerateReport({ setExport, chartsData }: any) {
   const [generating, setGenerating] = useState(false)
 
   const handleExportPDF = async () => {
+    if (generating) return
     setDrop(false)
     setExport(true)
     setGenerating(true)
-    await new Promise((r) => setTimeout(r, 6000))
-    const data = document.getElementById('analyticsInsight')
-
-    if (!data) {
-      console.error("Can't find the report element")
-      return
-    }
 
     try {
+      await new Promise((r) => setTimeout(r, 6000))
+      const data = document.getElementById('analyticsInsight')
+
+      if (!data) {
+        console.error("Can't find the report element")
+        return
+      }
       const canvas = await html2canvas(data, { scale: 2 })
       const pdf = new jsPDF('p', 'mm', 'a4')
       const pageWidth = 210
@@ -109,21 +110,31 @@ export default function GenerateReport({ setExport, chartsData }: any) {
   }
 
   const handleExportCSV = () => {
+    if (generating) return
     setDrop(false)
     setGenerating(true)
-    let csv = 'Survey Title, Question, Answer\n'
+    const escapeCSV = (value: unknown) =>
+      `"${String(value ?? '').replace(/"/g, '""')}"`
+    let csv = 'Survey Title,Question,Answer\n'
 
     try {
-      chartsData.map((chart: any) => {
-        chart.chartData.map((item: any) => {
-          csv += `"${chart.surveyTitle}", "${chart.question}", "${item.name}"\n`
+      chartsData.forEach((chart: any) => {
+        chart.chartData.forEach((item: any) => {
+          csv +=
+            [
+              escapeCSV(chart.surveyTitle),
+              escapeCSV(chart.question),
+              escapeCSV(item.name),
+            ].join(',') + '\n'
         })
       })
-      const encodedCSV = encodeURI(csv)
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
       const downloadLink = document.createElement('a')
-      downloadLink.href = `data:text/csv;charset=utf-8, ${encodedCSV}`
+      downloadLink.href = url
       downloadLink.setAttribute('download', 'Analytics_Report.csv')
       downloadLink.click()
+      URL.revokeObjectURL(url)
       console.log('Downloading as CVS')
     } catch (error) {
       console.error('Failed to generate the PDF', error)
@@ -135,7 +146,11 @@ export default function GenerateReport({ setExport, chartsData }: any) {
 
   return (
     <div className="relative inline-block">
-      <Button variant="secondary" onClick={() => setDrop(!drop)}>
+      <Button
+        variant="secondary"
+        disabled={generating}
+        onClick={() => setDrop(!drop)}
+      >
         Generate Report <RiArrowDropDownLine />
       </Button>
       {generating && <span className="ml-2 text-body">Generating...</span>}
@@ -147,6 +162,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
           <div className=" mt-1 absolute w-full rounded-lg overflow-hidden">
             <Button
               onClick={handleExportPDF}
+              disabled={generating}
               className="w-full text-white rounded-none"
             >
               PDF
@@ -154,6 +170,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
 
             <Button
               onClick={handleExportCSV}
+              disabled={generating}
               className="w-full text-white rounded-none"
             >
               CSV
