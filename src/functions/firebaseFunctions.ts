@@ -21,12 +21,6 @@ export async function updateSurvey(surveyId: string, updates: Partial<Survey>): 
   })
 }
 
-// tbd
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function reviewSurvey(_survey: Survey) {
-
-}
-
 export async function saveSurvey(docRef: DocumentReference, survey: Survey) {
   await setDoc(docRef, {
     ...survey,
