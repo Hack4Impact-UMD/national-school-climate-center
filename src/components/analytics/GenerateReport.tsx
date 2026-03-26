@@ -4,6 +4,15 @@ import { RiArrowDropDownLine } from 'react-icons/ri'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
+/**
+ * Renders a "Generate Report" control that exports analytics as a multi-page PDF (from the DOM element with id `analyticsInsight`) or as a CSV (from `chartsData`).
+ *
+ * The component manages a dropdown UI and an internal "generating" indicator while producing the chosen export.
+ *
+ * @param setExport - Callback to toggle an external exporting flag; called with `true` at start and `false` on completion.
+ * @param chartsData - Array of chart objects used to build the CSV; each chart is expected to contain `surveyTitle`, `question`, and `chartData` entries.
+ * @returns The React element for the Generate Report control.
+ */
 export default function GenerateReport({ setExport, chartsData }: any) {
   const [drop, setDrop] = useState(false)
   const [generating, setGenerating] = useState(false)
