@@ -49,10 +49,13 @@ export default function ReviewSurveyPage({
         questionType: q.questionType,
       }));
 
+
+      //update school_name to be the school name in state, for now its dummy data. 
       const docRef = await addDoc(collection(db, "surveys"), {
         title: effectiveTitle,
         type: effectiveSurveyType,
         questions: questionDocs,
+        school_name: "School Name",
         createdBy: user?.uid ?? null,
         createdAt: serverTimestamp(),
         status: "published",
