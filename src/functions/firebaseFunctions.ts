@@ -2,6 +2,7 @@ import { collection, doc, addDoc, setDoc, deleteDoc, updateDoc, getDoc, serverTi
 import { db } from '@/firebase/config'
 import type { Survey } from '@/types/survey'
 import type { Question } from '@/firebase/interfaces'
+import type { Question as BuilderQuestion } from '@/types/surveybuilder'
 
 export async function createSurvey(survey: Survey): Promise<DocumentReference> {
   const surveysRef = collection(db, 'surveys')
@@ -45,6 +46,48 @@ export async function editSurvey(docRef: DocumentReference, survey: Survey) {
     ...survey,
     updatedAt: serverTimestamp(),
   });
+}
+
+/**
+ * Publish a survey built in the survey builder to Firestore
+ * @param questions - Questions from the survey builder
+ * @param title - Survey title
+ * @param type - Survey type ('Challenge' or 'Pulse')
+ * @param userId - UID of the user publishing the survey
+ */
+export async function publishSurvey(
+  questions: BuilderQuestion[],
+  title: string,
+  type: 'Challenge' | 'Pulse',
+  userId: string | null
+): Promise<DocumentReference> {
+  const questionDocs = questions.map((q, index) => ({
+    question_id: q.id,
+    order: index,
+    text: q.prompt || q.name,
+    questionType: q.questionType,
+    options: q.options ?? [],
+    required: false,
+  }))
+
+  const docRef = await addDoc(collection(db, 'surveys'), {
+    title,
+    type,
+    questions: questionDocs,
+    createdBy: userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    status: 'Published',
+    description: '',
+    questionCount: questions.length,
+    responseCount: 0,
+    visibility: 'School',
+    tags: [],
+    school_id: '',
+    district_id: '',
+  })
+
+  return docRef
 }
 
 /**

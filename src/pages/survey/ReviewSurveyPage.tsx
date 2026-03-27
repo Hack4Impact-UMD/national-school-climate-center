@@ -1,8 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '@/firebase/config'
 import { useAuth } from '@/contexts/AuthContext'
+import { publishSurvey } from '@/functions/firebaseFunctions'
 import type { Question } from '@/types/surveybuilder'
 import { Button } from '@/components/ui/button'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
@@ -47,21 +46,12 @@ export default function ReviewSurveyPage({
     setError(null)
 
     try {
-      const questionDocs = questions.map((q, index) => ({
-        question_id: q.id,
-        order: index,
-        text: q.prompt || q.name,
-        questionType: q.questionType,
-      }))
-
-      const docRef = await addDoc(collection(db, 'surveys'), {
-        title: effectiveTitle,
-        type: effectiveSurveyType,
-        questions: questionDocs,
-        createdBy: user?.uid ?? null,
-        createdAt: serverTimestamp(),
-        status: 'published',
-      })
+      const docRef = await publishSurvey(
+        questions,
+        effectiveTitle,
+        effectiveSurveyType,
+        user?.uid ?? null
+      )
 
       const url = `${window.location.origin}/surveys/respond/${docRef.id}`
       setShareLink(url)
