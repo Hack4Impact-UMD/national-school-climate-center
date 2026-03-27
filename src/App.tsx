@@ -42,7 +42,7 @@ export default function App() {
             />
             <Route 
               path="/surveys/create/challenge/review"
-              element={<ReviewSurveyPage defaultSurveyType="challenge" />}
+              element={<ReviewSurveyPage defaultSurveyType="Challenge" />}
             />
             <Route path="/surveys" element={<AllSurveys />} />
           </Route>
