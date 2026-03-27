@@ -37,7 +37,7 @@ export default function CreateChallengeSurvey() {
     activeTab?: 'question' | 'list' | 'workflow'
     defaultTab?: 'question' | 'list' | 'workflow'
     surveyTitle?: string
-    surveyType?: 'challenge' | 'pulse'
+    surveyType?: 'Challenge' | 'Pulse'
   }
 
   function normalizeQuestion(q: IncomingQuestion, index: number): Question {
@@ -52,14 +52,13 @@ export default function CreateChallengeSurvey() {
           : []
 
     const questionType: Question['questionType'] =
-      q.questionType ?? (normalizedOptions.length ? 'multiple-choice' : 'open-ended')
+      q.questionType ??
+      (normalizedOptions.length ? 'multiple-choice' : 'open-ended')
     const inputType: Question['inputType'] =
-      q.inputType ??
-      (questionType === 'multiple-choice'
-        ? 'single'
-        : 'text')
+      q.inputType ?? (questionType === 'multiple-choice' ? 'single' : 'text')
 
-    const fallbackName = q.textOverride || q.text || q.prompt || q.name || `Question ${index}`
+    const fallbackName =
+      q.textOverride || q.text || q.prompt || q.name || `Question ${index}`
     const prompt = q.prompt || q.textOverride || q.text || fallbackName
 
     return {
@@ -120,11 +119,13 @@ export default function CreateChallengeSurvey() {
   }
 
   function handleReviewSurvey() {
-    navigate('/surveys/create/challenge/review', {
+    const surveyType =
+      incomingState.surveyType === 'Pulse' ? 'Pulse' : 'Challenge'
+    navigate(`/surveys/create/${surveyType}/review`, {
       state: {
         questions,
-        surveyTitle: 'Challenge Survey',
-        surveyType: 'challenge',
+        surveyTitle: `${surveyType} Survey`,
+        surveyType,
         activeId,
         activeTab: tab,
       },
@@ -152,9 +153,16 @@ export default function CreateChallengeSurvey() {
         alt="National School Climate Center"
         className="w-40"
       />
-      <SurveyHeader title="Survey – Challenge" subtitle="" />
+      <SurveyHeader
+        title={`Survey – ${incomingState.surveyType}`}
+        subtitle=""
+      />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-4">
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as typeof tab)}
+        className="mt-4"
+      >
         <TabsList className="w-full justify-start bg-transparent">
           <TabsTrigger value="question">Question</TabsTrigger>
           <TabsTrigger value="list">List</TabsTrigger>
