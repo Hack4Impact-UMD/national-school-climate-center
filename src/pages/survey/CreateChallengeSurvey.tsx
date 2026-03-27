@@ -168,15 +168,12 @@ export default function CreateChallengeSurvey() {
         questions,
         surveyTitle: 'Challenge Survey',
         surveyType: 'challenge',
-        surveyId,
         activeId,
         activeTab: tab,
         surveyId: createdSurveyId, // using to keep track of surveys
       },
     })
   }
-
-
 
   function duplicateQuestion(id: string) {
     const original = questions.find((q) => q.id === id)
