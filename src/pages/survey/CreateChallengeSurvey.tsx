@@ -44,7 +44,6 @@ export default function CreateChallengeSurvey() {
     surveyType?: 'challenge' | 'pulse'
     surveyId?: string
   }
-  const surveyId = incomingState.surveyId
 
   function normalizeQuestion(q: IncomingQuestion, index: number): Question {
     const ratingMatch = q.type ? /^rating-(\d+)/.exec(q.type) : null
