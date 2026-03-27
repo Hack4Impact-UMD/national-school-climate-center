@@ -74,7 +74,7 @@ function QuestionRow({
     <div className="flex min-w-0 w-full items-start gap-4">
       <div className="w-8 shrink-0 text-right text-sm mt-4">{index}.</div>
       <div className="flex-1 min-w-0 space-y-2">
-        <Card className={active ? 'ring-2 ring-primary' : ''}>
+        <Card>
           <CardContent className="flex w-full items-center gap-3 p-2">
             <div className="flex-1 min-w-0">
               {editing ? (
