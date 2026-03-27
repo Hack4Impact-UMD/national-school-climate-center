@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
-import { QuestionForm } from '@/components/survey/QuestionForm'
 import { QuestionList } from '@/components/survey/QuestionList'
 import type { Question } from '@/types/surveybuilder'
 import WorkflowSection from '@/components/survey/WorkFlowSection'
@@ -34,8 +33,8 @@ export default function CreateChallengeSurvey() {
   const incomingState = (location.state ?? {}) as {
     questions?: IncomingQuestion[]
     activeId?: string
-    activeTab?: 'question' | 'list' | 'workflow'
-    defaultTab?: 'question' | 'list' | 'workflow'
+    activeTab?: 'list' | 'workflow'
+    defaultTab?: 'list' | 'workflow'
     surveyTitle?: string
     surveyType?: 'Challenge' | 'Pulse'
   }
@@ -81,13 +80,10 @@ export default function CreateChallengeSurvey() {
   const [activeId, setActiveId] = useState<string>(
     incomingState.activeId ?? initialQuestions[0]?.id ?? 'q1'
   )
-  const [tab, setTab] = useState<'question' | 'list' | 'workflow'>(
-    incomingState.activeTab ?? incomingState.defaultTab ?? 'question'
-  )
-
-  const active = useMemo(
-    () => questions.find((q) => q.id === activeId) ?? questions[0],
-    [questions, activeId]
+  const [tab, setTab] = useState<'list' | 'workflow'>(
+    (incomingState.activeTab === 'workflow' ? 'workflow' : null) ??
+      incomingState.defaultTab ??
+      'list'
   )
 
   const navigate = useNavigate()
@@ -143,7 +139,7 @@ export default function CreateChallengeSurvey() {
     }
     setQuestions((prev) => [...prev, next])
     setActiveId(nextId)
-    setTab('question')
+    setTab('list')
   }
 
   return (
@@ -164,31 +160,9 @@ export default function CreateChallengeSurvey() {
         className="mt-4"
       >
         <TabsList className="w-full justify-start bg-transparent">
-          <TabsTrigger value="question">Question</TabsTrigger>
           <TabsTrigger value="list">List</TabsTrigger>
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="question">
-          <Card className="mt-2 border-none shadow-none">
-            <CardHeader>
-              <CardTitle className="text-lg">Edit Question</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {active ? (
-                <QuestionForm
-                  key={active.id}
-                  value={active}
-                  onChange={updateActiveQuestion}
-                />
-              ) : (
-                <div className="text-sm text-muted-foreground">
-                  No question selected.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="list">
           <div className="w-full space-y-4">
@@ -196,13 +170,9 @@ export default function CreateChallengeSurvey() {
               items={questions}
               activeId={activeId}
               onSelect={setActiveId}
-              onRename={(id, name) =>
-                setQuestions((prev) =>
-                  prev.map((q) => (q.id === id ? { ...q, name } : q))
-                )
-              }
               onDelete={deleteQuestion}
               onDuplicate={duplicateQuestion}
+              onChange={updateActiveQuestion}
             />
 
             <Card className="border-primary rounded-2xl">
@@ -245,7 +215,7 @@ export default function CreateChallengeSurvey() {
             }))}
             onEdit={(q) => {
               setActiveId(q.id)
-              setTab('question')
+              setTab('list')
             }}
             onReview={handleReviewSurvey}
             selectedId={activeId}
