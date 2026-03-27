@@ -35,7 +35,7 @@ export async function deleteSurvey(docRef: DocumentReference) {
   await deleteDoc(docRef);
 }
 
-export async function editSurvey(docRef: DocumentReference, survey: Survey) {
+export async function editSurvey(docRef: DocumentReference, survey: Partial<Survey>) {
   await updateDoc(docRef, {
     ...survey,
     updatedAt: serverTimestamp(),

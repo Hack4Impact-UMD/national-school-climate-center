@@ -1,36 +1,51 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Question } from "@/types/surveybuilder";
+import type { Question as BuilderQuestion } from "@/types/surveybuilder";
+import type { Question as FirebaseQuestion } from "@/firebase/interfaces";
 import { Button } from "@/components/ui/button";
 import { SurveyHeader } from "@/components/survey/SurveyHeader";
+import { editSurvey } from "@/functions/firebaseFunctions";
 
 type LocationState = {
-  questions: Question[];
+  questions: BuilderQuestion[];
   surveyTitle?: string;
-  surveyType?: "challenge" | "pulse";
+  surveyType?: "Challenge" | "Pulse";
+  surveyId?: string;
 };
 
 export default function ReviewSurveyPage({
   defaultSurveyType,
 }: {
-  defaultSurveyType?: "challenge" | "pulse";
+  defaultSurveyType?: "Challenge" | "Pulse";
 }) {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { user } = useAuth();
 
-  const { questions = [], surveyTitle, surveyType } = (state || {}) as LocationState;
+  const { questions = [], surveyTitle, surveyType, surveyId } = (state || {}) as LocationState;
 
   const [publishing, setPublishing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const effectiveSurveyType = surveyType ?? defaultSurveyType ?? "challenge";
+  const effectiveSurveyType = surveyType ?? defaultSurveyType ?? "Challenge";
   const effectiveTitle =
-    surveyTitle ?? (effectiveSurveyType === "pulse" ? "Pulse Survey" : "Challenge Survey");
+    surveyTitle ?? (effectiveSurveyType === "Pulse" ? "Pulse Survey" : "Challenge Survey");
+
+    function mapQuestionsToFirebase(questions: BuilderQuestion[]): FirebaseQuestion[] {
+    return questions.map((q, index) => ({
+      question_id: q.id,
+      order: index,
+      text: q.prompt || q.name,
+      questionType: q.questionType,
+      required: false, // default to false; you can adjust if builder has a required field
+      options: q.options ?? [],
+    }));
+  }
 
   async function handlePublish() {
     if (!questions.length) {
@@ -42,23 +57,32 @@ export default function ReviewSurveyPage({
     setError(null);
 
     try {
-      const questionDocs = questions.map((q, index) => ({
-        question_id: q.id,
-        order: index,
-        text: q.prompt || q.name,
-        questionType: q.questionType,
-      }));
+      const questionDocs = mapQuestionsToFirebase(questions);
 
-      const docRef = await addDoc(collection(db, "surveys"), {
-        title: effectiveTitle,
-        type: effectiveSurveyType,
-        questions: questionDocs,
-        createdBy: user?.uid ?? null,
-        createdAt: serverTimestamp(),
-        status: "published",
-      });
+let docId = surveyId;
 
-      const url = `${window.location.origin}/surveys/respond/${docRef.id}`;
+      if (docId) {
+        const surveyRef = doc(db, "surveys", docId);
+
+        await updateDoc(surveyRef, {
+          title: effectiveTitle,
+          type: effectiveSurveyType,
+          questions: questionDocs,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        const docRef = await addDoc(collection(db, "surveys"), {
+          title: effectiveTitle,
+          type: effectiveSurveyType,
+          questions: questionDocs,
+          createdBy: user?.uid ?? null,
+          createdAt: serverTimestamp(),
+          status: "published",
+        });
+
+        docId = docRef.id;
+      }
+      const url = `${window.location.origin}/surveys/respond/${docId}`;
       setShareLink(url);
 
       if (navigator.clipboard && window.isSecureContext) {
@@ -74,20 +98,56 @@ export default function ReviewSurveyPage({
 
   function handleEdit() {
     const targetPath =
-      effectiveSurveyType === "pulse"
+      effectiveSurveyType === "Pulse"
         ? "/surveys/create/pulse"
-        : "/surveys/create/challenge";
+        : "/surveys/create/Challenge";
 
     navigate(targetPath, {
       state: {
         questions,
         surveyTitle: effectiveTitle,
         surveyType: effectiveSurveyType,
+        surveyId: state?.surveyId,
         activeTab: "question",
         activeId: questions[0]?.id,
       },
     });
   }
+
+async function handleSaveDraft() {
+  if (!questions.length) {
+    setError("There are no questions to save.");
+    return;
+  }
+
+  if (!surveyId) {
+    setError("Cannot save draft: missing survey ID.");
+    return;
+  }
+
+  setSaving(true);
+  setError(null);
+
+  try {
+    const questionDocs = mapQuestionsToFirebase(questions);
+    const surveyRef = doc(db, "surveys", surveyId);
+
+    await editSurvey(surveyRef, {
+      title: effectiveTitle,
+      type: effectiveSurveyType,
+      questions: questionDocs,
+      status: "Draft",
+    });
+
+    // Optional: show a toast or alert
+    alert("Draft saved successfully!");
+  } catch (err) {
+    console.error(err);
+    setError("Failed to save draft. Please try again.");
+  } finally {
+    setSaving(false);
+  }
+}
 
   if (!questions.length) {
     return (
@@ -151,7 +211,7 @@ export default function ReviewSurveyPage({
           </div>
         ))}
 
-        <div className="mt-6 flex flex-col items-start gap-3">
+        <div className="mt-6 flex flex-col md:flex-row items-start gap-3">
           <Button
             className="px-6 cursor-pointer"
             onClick={handlePublish}
@@ -159,6 +219,13 @@ export default function ReviewSurveyPage({
           >
             {publishing ? "Publishing..." : "Publish Survey"}
           </Button>
+          <Button
+          className="px-6 cursor-pointer"
+          onClick={handleSaveDraft}
+          disabled={publishing}
+          >
+            {saving ? "Saving..." : "Save Draft"}
+            </Button>
 
           {shareLink && (
             <div className="w-full max-w-xl space-y-1">

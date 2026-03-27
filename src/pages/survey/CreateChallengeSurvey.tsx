@@ -42,7 +42,9 @@ export default function CreateChallengeSurvey() {
     defaultTab?: 'question' | 'list' | 'workflow'
     surveyTitle?: string
     surveyType?: 'challenge' | 'pulse'
+    surveyId?: string
   }
+  const surveyId = incomingState.surveyId
 
   function normalizeQuestion(q: IncomingQuestion, index: number): Question {
     const ratingMatch = q.type ? /^rating-(\d+)/.exec(q.type) : null
@@ -166,12 +168,15 @@ export default function CreateChallengeSurvey() {
         questions,
         surveyTitle: 'Challenge Survey',
         surveyType: 'challenge',
+        surveyId,
         activeId,
         activeTab: tab,
         surveyId: createdSurveyId, // using to keep track of surveys
       },
     })
   }
+
+
 
   function duplicateQuestion(id: string) {
     const original = questions.find((q) => q.id === id)
