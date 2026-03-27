@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,9 @@ import { QuestionList } from '@/components/survey/QuestionList'
 import type { Question } from '@/types/surveybuilder'
 import WorkflowSection from '@/components/survey/WorkFlowSection'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { createSurvey } from '@/functions/firebaseFunctions'
+import { useAuth } from '@/contexts/AuthContext'
+import type { Survey } from '@/types/survey'
 
 const DEFAULT_QUESTIONS: Question[] = [
   {
@@ -31,6 +34,7 @@ type IncomingQuestion = Partial<Question> & {
 
 export default function CreateChallengeSurvey() {
   const location = useLocation()
+  const { user } = useAuth() // used for survey createdBy
   const incomingState = (location.state ?? {}) as {
     questions?: IncomingQuestion[]
     activeId?: string
@@ -85,6 +89,9 @@ export default function CreateChallengeSurvey() {
   const [tab, setTab] = useState<'question' | 'list' | 'workflow'>(
     incomingState.activeTab ?? incomingState.defaultTab ?? 'question'
   )
+  const [createdSurveyId, setCreatedSurveyId] = useState<string | null>(null)
+  const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
+
 
   const active = useMemo(
     () => questions.find((q) => q.id === activeId) ?? questions[0],
@@ -92,6 +99,40 @@ export default function CreateChallengeSurvey() {
   )
 
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // checks if a draft already exists in this session or mismatched auth
+    if (hasCreatedDraftRef.current || !user) { 
+      return
+    }
+
+    // createSurvey will be called using a skeleton object so that it exists in db
+    hasCreatedDraftRef.current = true
+    const skeletonSurvey = {
+      title: 'Challenge Survey',
+      description: 'This is a challenge survey.',
+      createdBy: user.uid,
+      createdAt: null, // unable to access timestamp till after creation in firestore
+      updatedAt: null, // which sets it
+      status: 'Draft',
+      visibility: 'School',
+      questionCount: initialQuestions.length,
+      responseCount: 0,
+      school_id: '',
+      district_id: '',
+      tags: [],
+      type: 'Challenge',
+    } as unknown as Survey // to bypass type checks on the timestamp
+
+    createSurvey(skeletonSurvey)
+      .then((docRef) => {
+        setCreatedSurveyId(docRef.id)
+      })
+      .catch((error) => {
+        hasCreatedDraftRef.current = false // so that draft retry is allowed
+        console.error('Failed to create challenge survey draft', error)
+      })
+  }, [user, initialQuestions.length])
 
   function addBlankQuestion() {
     const id = crypto.randomUUID()
@@ -127,6 +168,7 @@ export default function CreateChallengeSurvey() {
         surveyType: 'challenge',
         activeId,
         activeTab: tab,
+        surveyId: createdSurveyId, // using to keep track of surveys
       },
     })
   }
