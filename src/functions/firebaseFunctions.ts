@@ -13,19 +13,14 @@ export async function createSurvey(survey: Survey): Promise<DocumentReference> {
   return docRef
 }
 
-export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
-  const surveyRef = doc(db, 'surveys', surveyId)
-  await updateDoc(surveyRef, {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  })
-}
-
-// tbd
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function reviewSurvey(_survey: Survey) {
-
-}
+// we decided that updateSurvey and editSurvey are functionally the same, so we will just use edit. 
+// export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
+//   const surveyRef = doc(db, 'surveys', surveyId)
+//   await updateDoc(surveyRef, {
+//     ...updates,
+//     updatedAt: serverTimestamp(),
+//   })
+// }
 
 export async function saveSurvey(docRef: DocumentReference, survey: Survey) {
   await setDoc(docRef, {
@@ -40,7 +35,7 @@ export async function deleteSurvey(docRef: DocumentReference) {
   await deleteDoc(docRef);
 }
 
-export async function editSurvey(docRef: DocumentReference, survey: Survey) {
+export async function editSurvey(docRef: DocumentReference, survey: Partial<Survey>) {
   await updateDoc(docRef, {
     ...survey,
     updatedAt: serverTimestamp(),
