@@ -69,6 +69,7 @@ let docId = surveyId;
           type: effectiveSurveyType,
           questions: questionDocs,
           updatedAt: serverTimestamp(),
+          status: "Published",
         });
       } else {
         const docRef = await addDoc(collection(db, "surveys"), {
@@ -77,7 +78,7 @@ let docId = surveyId;
           questions: questionDocs,
           createdBy: user?.uid ?? null,
           createdAt: serverTimestamp(),
-          status: "published",
+          status: "Published",
         });
 
         docId = docRef.id;

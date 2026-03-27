@@ -42,7 +42,6 @@ export default function CreateChallengeSurvey() {
     defaultTab?: 'question' | 'list' | 'workflow'
     surveyTitle?: string
     surveyType?: 'challenge' | 'pulse'
-    surveyId?: string
   }
 
   function normalizeQuestion(q: IncomingQuestion, index: number): Question {

@@ -22,7 +22,7 @@ export default function SurveyBuilder() {
 
       // Navigate to editor with questions and default to List tab
       navigate('/surveys/create/challenge', {
-        state: { questions, defaultTab: 'list', surveyId }
+        state: { questions, defaultTab: 'list' }
       });
     } catch (err) {
       console.error('Error duplicating survey:', err);
