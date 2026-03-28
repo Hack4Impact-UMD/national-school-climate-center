@@ -122,7 +122,7 @@ export default function AllSurveys() {
       let csv = "Survey Title, Type, Responses, Last Response\n"
 
       rows.forEach((row) => {
-        csv += `${row.title}", "${row.type}", "${row.responseCount}", "${formatDate(row.lastResponseAt)}"\n`
+        csv += `"${row.title}", "${row.type}", "${row.responseCount}", "${formatDate(row.lastResponseAt)}"\n`
       })
  
       const encodedCSV = encodeURI(csv)
