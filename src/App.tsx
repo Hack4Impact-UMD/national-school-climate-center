@@ -13,7 +13,8 @@ import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
 import AllSurveys from './pages/survey/AllSurveys'
 import Layout from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
-import ReviewSurveyPage from './pages/survey/ReviewSurveyPage'
+import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
+import SurveyLandingPage from './pages/public/SurveyLandingPage'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/create-account/nscc" element={<CreateAccountNSCC />} />
       <Route path="/create-account/school" element={<CreateAccountSchool />} />
+      <Route path="/surveys/respond/:surveyId" element={<SurveyLandingPage />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
@@ -40,7 +42,7 @@ export default function App() {
             />
             <Route
               path="/surveys/create/challenge/review"
-              element={<ReviewSurveyPage defaultSurveyType="challenge" />}
+              element={<ReviewSurveyPage defaultSurveyType="Challenge" />}
             />
 
             <Route
