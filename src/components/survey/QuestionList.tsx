@@ -42,7 +42,6 @@ export function QuestionList({
 function QuestionRow({
   index,
   question,
-  active,
   onSelect,
   onDelete,
   onDuplicate,
