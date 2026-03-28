@@ -2,6 +2,7 @@ import { collection, doc, addDoc, setDoc, deleteDoc, updateDoc, getDoc, serverTi
 import { db } from '@/firebase/config'
 import type { Survey } from '@/types/survey'
 import type { Question } from '@/firebase/interfaces'
+import type { Question as BuilderQuestion } from '@/types/surveybuilder'
 
 export async function createSurvey(survey: Survey): Promise<DocumentReference> {
   const surveysRef = collection(db, 'surveys')
@@ -13,19 +14,14 @@ export async function createSurvey(survey: Survey): Promise<DocumentReference> {
   return docRef
 }
 
-export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
-  const surveyRef = doc(db, 'surveys', surveyId)
-  await updateDoc(surveyRef, {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  })
-}
-
-// tbd
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function reviewSurvey(_survey: Survey) {
-
-}
+// we decided that updateSurvey and editSurvey are functionally the same, so we will just use edit. 
+// export async function updateSurvey(surveyId: string, updates: Partial<Survey>): Promise<void> {
+//   const surveyRef = doc(db, 'surveys', surveyId)
+//   await updateDoc(surveyRef, {
+//     ...updates,
+//     updatedAt: serverTimestamp(),
+//   })
+// }
 
 export async function saveSurvey(docRef: DocumentReference, survey: Survey) {
   await setDoc(docRef, {
@@ -40,11 +36,53 @@ export async function deleteSurvey(docRef: DocumentReference) {
   await deleteDoc(docRef);
 }
 
-export async function editSurvey(docRef: DocumentReference, survey: Survey) {
+export async function editSurvey(docRef: DocumentReference, survey: Partial<Survey>) {
   await updateDoc(docRef, {
     ...survey,
     updatedAt: serverTimestamp(),
   });
+}
+
+/**
+ * Publish a survey built in the survey builder to Firestore
+ * @param questions - Questions from the survey builder
+ * @param title - Survey title
+ * @param type - Survey type ('Challenge' or 'Pulse')
+ * @param userId - UID of the user publishing the survey
+ */
+export async function publishSurvey(
+  questions: BuilderQuestion[],
+  title: string,
+  type: 'Challenge' | 'Pulse',
+  userId: string | null
+): Promise<DocumentReference> {
+  const questionDocs = questions.map((q, index) => ({
+    question_id: q.id,
+    order: index,
+    text: q.prompt || q.name,
+    questionType: q.questionType,
+    options: q.options ?? [],
+    required: false,
+  }))
+
+  const docRef = await addDoc(collection(db, 'surveys'), {
+    title,
+    type,
+    questions: questionDocs,
+    createdBy: userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    status: 'Published',
+    description: '',
+    questionCount: questions.length,
+    responseCount: 0,
+    visibility: 'School',
+    tags: [],
+    school_id: '',
+    district_id: '',
+  })
+
+  return docRef
 }
 
 /**

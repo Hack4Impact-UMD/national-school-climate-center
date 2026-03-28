@@ -15,6 +15,7 @@ import SurveyDetails from './pages/survey/SurveyDetails'
 import Layout from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
+import SurveyLandingPage from './pages/public/SurveyLandingPage'
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/create-account/nscc" element={<CreateAccountNSCC />} />
       <Route path="/create-account/school" element={<CreateAccountSchool />} />
+      <Route path="/surveys/respond/:surveyId" element={<SurveyLandingPage />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
@@ -39,11 +41,21 @@ export default function App() {
               path="/surveys/create/challenge"
               element={<CreateChallengeSurvey />}
             />
-            <Route 
+            <Route
               path="/surveys/create/challenge/review"
-              element={<ReviewSurveyPage defaultSurveyType="challenge" />}
+              element={<ReviewSurveyPage defaultSurveyType="Challenge" />}
             />
-            {/* <Route path="/surveys" element={<AllSurveys />} /> (moved to NSCC admin only*/}
+
+            <Route
+              path="/surveys/create/pulse"
+              element={<CreateChallengeSurvey />}
+            />
+            <Route
+              path="/surveys/create/pulse/review"
+              element={<ReviewSurveyPage defaultSurveyType="Pulse" />}
+            />
+
+            <Route path="/surveys" element={<AllSurveys />} />
           </Route>
 
           <Route element={<ProtectedRoute requiredAction="read" />}>
