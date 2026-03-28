@@ -40,10 +40,20 @@ export default function App() {
               path="/surveys/create/challenge"
               element={<CreateChallengeSurvey />}
             />
-            <Route 
+            <Route
               path="/surveys/create/challenge/review"
               element={<ReviewSurveyPage defaultSurveyType="Challenge" />}
             />
+
+            <Route
+              path="/surveys/create/pulse"
+              element={<CreateChallengeSurvey />}
+            />
+            <Route
+              path="/surveys/create/pulse/review"
+              element={<ReviewSurveyPage defaultSurveyType="Pulse" />}
+            />
+
             <Route path="/surveys" element={<AllSurveys />} />
           </Route>
 
