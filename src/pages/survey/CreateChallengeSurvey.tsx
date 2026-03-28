@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -91,10 +91,7 @@ export default function CreateChallengeSurvey() {
   const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
 
 
-  const active = useMemo(
-    () => questions.find((q) => q.id === activeId) ?? questions[0],
-    [questions, activeId]
-  )
+  
 
   const navigate = useNavigate()
 

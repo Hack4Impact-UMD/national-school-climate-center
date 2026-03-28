@@ -51,7 +51,7 @@ export default function App() {
             />
             <Route
               path="/surveys/create/pulse/review"
-              element={<ReviewSurveyPage defaultSurveyType="pulse" />}
+              element={<ReviewSurveyPage defaultSurveyType="Pulse" />}
             />
 
             <Route path="/surveys" element={<AllSurveys />} />
