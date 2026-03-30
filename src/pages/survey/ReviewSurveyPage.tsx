@@ -143,7 +143,6 @@ async function handleSaveDraft() {
       title: effectiveTitle,
       description: effectiveDescription,
       type: effectiveSurveyType,
-      description: effectiveDescription,
       questions: questionDocs,
       status: "Draft",
     });
