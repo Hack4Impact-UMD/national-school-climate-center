@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
@@ -174,7 +174,7 @@ export default function CreateChallengeSurvey() {
   //need to add school_name here after the page is created
   function handleReviewSurvey() {
     const surveyType =
-      incomingState.surveyType === 'Pulse' ? 'Pulse' : 'Challenge'
+      incomingState.surveyType === 'pulse' ? 'Pulse' : 'Challenge'
     navigate(`/surveys/create/${surveyType}/review`, {
       state: {
         questions,
