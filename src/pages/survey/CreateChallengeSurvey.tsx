@@ -44,8 +44,13 @@ export default function CreateChallengeSurvey() {
     defaultTab?: 'list' | 'workflow'
     surveyTitle?: string
     surveyDescription?: string
-    surveyType?: 'challenge' | 'pulse'
+    surveyType?: 'Challenge' | 'Pulse' | 'challenge' | 'pulse'
   }
+
+  const normalizedSurveyType =
+    incomingState.surveyType?.toLowerCase() === 'pulse' ? 'pulse' : 'challenge'
+  const surveyTypeLabel =
+    normalizedSurveyType === 'pulse' ? 'Pulse' : 'Challenge'
 
   function normalizeQuestion(q: IncomingQuestion, index: number): Question {
     const ratingMatch = q.type ? /^rating-(\d+)/.exec(q.type) : null
@@ -80,13 +85,22 @@ export default function CreateChallengeSurvey() {
 
   // initial states and values to be used for createSurvey skeleton
 
+  const initialSurveyTitle =
+    incomingState.surveyTitle ??
+    (surveyTypeLabel === 'Pulse' ? 'Pulse Survey' : 'Challenge Survey')
+  const initialSurveyDescription =
+    incomingState.surveyDescription ??
+    (surveyTypeLabel === 'Pulse'
+      ? 'This is a pulse survey.'
+      : 'This is a challenge survey.')
+
   const initialQuestions =
     incomingState.questions && incomingState.questions.length
       ? incomingState.questions.map((q, idx) => normalizeQuestion(q, idx + 1))
       : DEFAULT_QUESTIONS
 
-  const initialSurveyTitle = incomingState.surveyTitle ?? 'Challenge Survey'
-  const initialSurveyDescription = incomingState.surveyDescription ?? 'This is a challenge survey.'
+  // const initialSurveyTitle = incomingState.surveyTitle ?? 'Challenge Survey'
+  // const initialSurveyDescription = incomingState.surveyDescription ?? 'This is a challenge survey.'
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
@@ -107,13 +121,13 @@ export default function CreateChallengeSurvey() {
   const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
 
 
-  
+
 
   const navigate = useNavigate()
 
   useEffect(() => {
     // checks if a draft already exists in this session or mismatched auth
-    if (hasCreatedDraftRef.current || !user) { 
+    if (hasCreatedDraftRef.current || !user) {
       return
     }
 
@@ -173,14 +187,14 @@ export default function CreateChallengeSurvey() {
 
   //need to add school_name here after the page is created
   function handleReviewSurvey() {
-    const surveyType =
-      incomingState.surveyType === 'pulse' ? 'Pulse' : 'Challenge'
-    navigate(`/surveys/create/${surveyType}/review`, {
+    // const surveyType =
+    //   incomingState.surveyType === 'pulse' ? 'Pulse' : 'Challenge'
+    navigate(`/surveys/create/${normalizedSurveyType}/review`, {
       state: {
         questions,
         surveyTitle,
         surveyDescription,
-        surveyType: 'challenge',
+        surveyType: surveyTypeLabel,
         activeId,
         activeTab: tab,
         surveyId: createdSurveyId, // using to keep track of surveys
@@ -244,9 +258,9 @@ export default function CreateChallengeSurvey() {
         </CardContent>
       </Card>
 
-      <Tabs 
-        value={tab} 
-        onValueChange={(v) => setTab(v as typeof tab)} 
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as typeof tab)}
         className="mt-4">
         <TabsList className="w-full justify-start bg-transparent">
           <TabsTrigger value="list">List</TabsTrigger>
