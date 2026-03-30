@@ -30,15 +30,14 @@ export default function ReviewSurveyPage({
 
   const [publishing, setPublishing] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const effectiveDescription = surveyDescription ?? "";
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const effectiveSurveyType = surveyType ?? defaultSurveyType ?? "Challenge";
   const effectiveTitle =
     surveyTitle ?? (effectiveSurveyType === "Pulse" ? "Pulse Survey" : "Challenge Survey");
-  const effectiveDescription = surveyDescription ?? (effectiveSurveyType === "Pulse"
-    ? "This is a pulse survey."
-    : "This is a challenge survey.");
 
     function mapQuestionsToFirebase(questions: BuilderQuestion[]): FirebaseQuestion[] {
     return questions.map((q, index) => ({
@@ -142,6 +141,7 @@ async function handleSaveDraft() {
 
     await editSurvey(surveyRef, {
       title: effectiveTitle,
+      description: effectiveDescription,
       type: effectiveSurveyType,
       description: effectiveDescription,
       questions: questionDocs,
@@ -161,7 +161,10 @@ async function handleSaveDraft() {
   if (!questions.length) {
     return (
       <div className="mx-auto max-w-6xl p-6">
-        <SurveyHeader title={effectiveTitle} subtitle="Name of School/District" />
+        <SurveyHeader
+          title={effectiveTitle}
+          subtitle={effectiveDescription || "Name of School/District"}
+        />
         <p className="mt-6 font-body text-body text-left">
           No survey questions found. Please return to the builder.
         </p>
@@ -175,7 +178,10 @@ async function handleSaveDraft() {
   return (
     <div className="mx-auto max-w-6xl p-6">
       <img src="/logo.png" alt="National School Climate Center" className="w-40" />
-      <SurveyHeader title={effectiveTitle} subtitle="Name of School/District" />
+      <SurveyHeader
+        title={effectiveTitle}
+        subtitle={effectiveDescription || "Name of School/District"}
+      />
 
       <div className="mt-4 border-b border-secondary">
         <button
