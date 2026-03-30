@@ -54,6 +54,9 @@ Desktop.ini
 .vite/
 vite.config.*.timestamp-*
 
+# Some tooling can generate this declaration file locally; don't commit it.
+vite.config.d.ts
+
 # ──────────────── Package manager ────────────────
 .yarn/*
 !.yarn/patches
