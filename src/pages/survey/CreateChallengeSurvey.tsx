@@ -41,6 +41,7 @@ export default function CreateChallengeSurvey() {
     activeTab?: 'question' | 'list' | 'workflow'
     defaultTab?: 'question' | 'list' | 'workflow'
     surveyTitle?: string
+    surveyDescription?: string
     surveyType?: 'challenge' | 'pulse'
   }
 
@@ -83,6 +84,13 @@ export default function CreateChallengeSurvey() {
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
+  const [surveyTitle, setSurveyTitle] = useState<string>(
+    incomingState.surveyTitle ?? 'Challenge Survey'
+  )
+  const [surveyDescription, setSurveyDescription] = useState<string>(
+    incomingState.surveyDescription ?? 'This is a challenge survey.'
+  )
+
   const [activeId, setActiveId] = useState<string>(
     incomingState.activeId ?? initialQuestions[0]?.id ?? 'q1'
   )
@@ -109,8 +117,8 @@ export default function CreateChallengeSurvey() {
     // createSurvey will be called using a skeleton object so that it exists in db
     hasCreatedDraftRef.current = true
     const skeletonSurvey = {
-      title: 'Challenge Survey',
-      description: 'This is a challenge survey.',
+      title: surveyTitle,
+      description: surveyDescription,
       createdBy: user.uid,
       createdAt: null, // unable to access timestamp till after creation in firestore
       updatedAt: null, // which sets it
@@ -165,7 +173,8 @@ export default function CreateChallengeSurvey() {
     navigate('/surveys/create/challenge/review', {
       state: {
         questions,
-        surveyTitle: 'Challenge Survey',
+        surveyTitle,
+        surveyDescription,
         surveyType: 'challenge',
         activeId,
         activeTab: tab,

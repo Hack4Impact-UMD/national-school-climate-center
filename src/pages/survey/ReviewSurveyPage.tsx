@@ -12,6 +12,7 @@ import { editSurvey } from "@/functions/firebaseFunctions";
 type LocationState = {
   questions: BuilderQuestion[];
   surveyTitle?: string;
+  surveyDescription?: string;
   surveyType?: "Challenge" | "Pulse";
   surveyId?: string;
 };
@@ -25,7 +26,7 @@ export default function ReviewSurveyPage({
   const { state } = useLocation();
   const { user } = useAuth();
 
-  const { questions = [], surveyTitle, surveyType, surveyId } = (state || {}) as LocationState;
+  const { questions = [], surveyTitle, surveyDescription, surveyType, surveyId } = (state || {}) as LocationState;
 
   const [publishing, setPublishing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -35,6 +36,9 @@ export default function ReviewSurveyPage({
   const effectiveSurveyType = surveyType ?? defaultSurveyType ?? "Challenge";
   const effectiveTitle =
     surveyTitle ?? (effectiveSurveyType === "Pulse" ? "Pulse Survey" : "Challenge Survey");
+  const effectiveDescription = surveyDescription ?? (effectiveSurveyType === "Pulse"
+    ? "This is a pulse survey."
+    : "This is a challenge survey.");
 
     function mapQuestionsToFirebase(questions: BuilderQuestion[]): FirebaseQuestion[] {
     return questions.map((q, index) => ({
@@ -66,6 +70,7 @@ let docId = surveyId;
 
         await updateDoc(surveyRef, {
           title: effectiveTitle,
+          description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
           updatedAt: serverTimestamp(),
@@ -74,6 +79,7 @@ let docId = surveyId;
       } else {
         const docRef = await addDoc(collection(db, "surveys"), {
           title: effectiveTitle,
+          description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
           createdBy: user?.uid ?? null,
@@ -107,6 +113,7 @@ let docId = surveyId;
       state: {
         questions,
         surveyTitle: effectiveTitle,
+        surveyDescription: effectiveDescription,
         surveyType: effectiveSurveyType,
         surveyId: state?.surveyId,
         activeTab: "question",
@@ -136,6 +143,7 @@ async function handleSaveDraft() {
     await editSurvey(surveyRef, {
       title: effectiveTitle,
       type: effectiveSurveyType,
+      description: effectiveDescription,
       questions: questionDocs,
       status: "Draft",
     });
