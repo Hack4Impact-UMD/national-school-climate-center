@@ -6,6 +6,9 @@ import { Plus } from 'lucide-react'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
 import { QuestionForm } from '@/components/survey/QuestionForm'
 import { QuestionList } from '@/components/survey/QuestionList'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import type { Question } from '@/types/surveybuilder'
 import WorkflowSection from '@/components/survey/WorkFlowSection'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -77,18 +80,23 @@ export default function CreateChallengeSurvey() {
     }
   }
 
+  // initial states and values to be used for createSurvey skeleton
+
   const initialQuestions =
     incomingState.questions && incomingState.questions.length
       ? incomingState.questions.map((q, idx) => normalizeQuestion(q, idx + 1))
       : DEFAULT_QUESTIONS
 
+  const initialSurveyTitle = incomingState.surveyTitle ?? 'Challenge Survey'
+  const initialSurveyDescription = incomingState.surveyDescription ?? 'This is a challenge survey.'
+
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
   const [surveyTitle, setSurveyTitle] = useState<string>(
-    incomingState.surveyTitle ?? 'Challenge Survey'
+    initialSurveyTitle
   )
   const [surveyDescription, setSurveyDescription] = useState<string>(
-    incomingState.surveyDescription ?? 'This is a challenge survey.'
+    initialSurveyDescription
   )
 
   const [activeId, setActiveId] = useState<string>(
@@ -117,8 +125,8 @@ export default function CreateChallengeSurvey() {
     // createSurvey will be called using a skeleton object so that it exists in db
     hasCreatedDraftRef.current = true
     const skeletonSurvey = {
-      title: surveyTitle,
-      description: surveyDescription,
+      title: initialSurveyTitle,
+      description: initialSurveyDescription,
       createdBy: user.uid,
       createdAt: null, // unable to access timestamp till after creation in firestore
       updatedAt: null, // which sets it
@@ -140,7 +148,7 @@ export default function CreateChallengeSurvey() {
         hasCreatedDraftRef.current = false // so that draft retry is allowed
         console.error('Failed to create challenge survey draft', error)
       })
-  }, [user, initialQuestions.length])
+  }, [user, initialQuestions.length, initialSurveyDescription, initialSurveyTitle])
 
   function addBlankQuestion() {
     const id = crypto.randomUUID()
@@ -205,6 +213,36 @@ export default function CreateChallengeSurvey() {
         className="w-40"
       />
       <SurveyHeader title="Survey – Challenge" subtitle="" />
+
+      <div className="mt-4 border-b" />
+
+      <Card className="mt-4 border-none shadow-none">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Survey Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Title</Label>
+            <Input
+              id="survey-title"
+              value={surveyTitle}
+              onChange={(event) => setSurveyTitle(event.target.value)}
+              placeholder="Enter survey title"
+              className="font-body"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Description</Label>
+            <Textarea
+              id="survey-description"
+              value={surveyDescription}
+              onChange={(event) => setSurveyDescription(event.target.value)}
+              placeholder="Enter survey description"
+              className="font-body"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-4">
         <TabsList className="w-full justify-start bg-transparent">
