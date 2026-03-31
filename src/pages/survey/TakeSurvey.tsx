@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import {
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -33,7 +39,11 @@ type Screen = 'welcome' | 'identity' | 'questions' | 'thankyou'
 function Logo() {
   return (
     <header className="px-8 py-5">
-      <img src="/logo.png" alt="National School Climate Center" className="h-8" />
+      <img
+        src="/logo.png"
+        alt="National School Climate Center"
+        className="h-8"
+      />
     </header>
   )
 }
@@ -73,7 +83,8 @@ export default function TakeSurvey() {
   const isPulse = survey?.type === 'Pulse'
 
   // Progress: percentage of questions completed so far
-  const progress = totalQuestions > 0 ? (currentIndex / totalQuestions) * 100 : 0
+  const progress =
+    totalQuestions > 0 ? (currentIndex / totalQuestions) * 100 : 0
 
   const handleStartSurvey = () => {
     if (isPulse) {
@@ -108,7 +119,8 @@ export default function TakeSurvey() {
     setError(null)
     try {
       const rawType = survey.type?.toLowerCase()
-      const surveyType: 'pulse' | 'challenge' = rawType === 'pulse' ? 'pulse' : 'challenge'
+      const surveyType: 'pulse' | 'challenge' =
+        rawType === 'pulse' ? 'pulse' : 'challenge'
 
       const responseData: Record<string, unknown> = {
         survey_id: surveyId,
@@ -132,7 +144,10 @@ export default function TakeSurvey() {
         responseData.respondentEmail = respondentEmail
       }
 
-      await addDoc(collection(db, 'surveys', surveyId, 'responses'), responseData)
+      await addDoc(
+        collection(db, 'surveys', surveyId, 'responses'),
+        responseData
+      )
       setScreen('thankyou')
     } catch (err) {
       console.error('Error submitting response:', err)
@@ -155,7 +170,9 @@ export default function TakeSurvey() {
   if (!survey || totalQuestions === 0) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="font-body text-gray-500">Survey not found or has no questions.</p>
+        <p className="font-body text-gray-500">
+          Survey not found or has no questions.
+        </p>
       </div>
     )
   }
@@ -165,17 +182,36 @@ export default function TakeSurvey() {
   if (screen === 'welcome') {
     const pulseText = (
       <>
-        <p>We want to hear about your experience. Your responses will be kept private and only used to better understand student experiences and improve your school environment.</p>
-        <p>There are no right or wrong answers — just answer honestly based on your own experience.</p>
-        <p>If you have any questions or need support, you can contact us anytime at email@email.com.</p>
+        <p>
+          We want to hear about your experience. Your responses will be kept
+          private and only used to better understand student experiences and
+          improve your school environment.
+        </p>
+        <p>
+          There are no right or wrong answers — just answer honestly based on
+          your own experience.
+        </p>
+        <p>
+          If you have any questions or need support, you can contact us anytime
+          at email@email.com.
+        </p>
       </>
     )
     const challengeText = (
       <>
-        <p>We want to hear about your experience. This survey is completely anonymous, so no one will know which responses are yours.</p>
-        <p>Your feedback helps us understand what's working, what isn't, and how we can improve your school environment.</p>
+        <p>
+          We want to hear about your experience. This survey is completely
+          anonymous, so no one will know which responses are yours.
+        </p>
+        <p>
+          Your feedback helps us understand what's working, what isn't, and how
+          we can improve your school environment.
+        </p>
         <p>There are no right or wrong answers — just answer honestly.</p>
-        <p>If you have any questions or need support, you can contact us anytime at email@email.com.</p>
+        <p>
+          If you have any questions or need support, you can contact us anytime
+          at email@email.com.
+        </p>
       </>
     )
 
@@ -183,10 +219,14 @@ export default function TakeSurvey() {
       <div className="min-h-screen bg-white flex flex-col">
         <Logo />
         <main className="flex-1 flex flex-col items-center justify-center px-6">
-          <div className="max-w-md w-full text-center space-y-4">
-            <h1 className="font-heading text-2xl font-bold text-primary">{survey.title}</h1>
-            <p className="font-body text-sm text-gray-500">Share your experience at [School/District]</p>
-            <div className="font-body text-sm text-gray-600 space-y-3 text-left mt-4">
+          <div className="max-w-[30vw] w-full text-center space-y-4">
+            <h1 className="font-heading text-2xl font-bold text-primary mb-12">
+              {survey.title}
+            </h1>
+            <p className="font-body text-md text-gray-500">
+              Share your experience at [School/District]
+            </p>
+            <div className="font-body text-md text-gray-600 space-y-3 text-center mt-4">
               {isPulse ? pulseText : challengeText}
             </div>
             <div className="pt-4">
@@ -207,19 +247,25 @@ export default function TakeSurvey() {
       <div className="min-h-screen bg-white flex flex-col">
         <Logo />
         <main className="flex-1 flex flex-col items-center justify-center px-6">
-          <div className="max-w-md w-full space-y-6">
-            <div className="text-center space-y-3">
-              <h1 className="font-heading text-2xl font-bold text-primary">Welcome, let's get you set up.</h1>
-              <p className="font-body text-sm text-gray-600">
-                To begin, enter your name and school email so we can make sure each student only submits one response.
+          <div className="max-w-[30vw] w-full text-center space-y-4">
+            <h1 className="font-heading text-2xl font-bold text-primary mb-12">
+              Welcome, let's get you set up.
+            </h1>
+            <div className="font-body text-md text-gray-600 space-y-4 text-center">
+              <p>
+                To begin, enter your name and school email so we can make sure
+                each student only submits one response.
               </p>
-              <p className="font-body text-sm text-gray-600">
-                Your information will not be shared with teachers or staff in a way that identifies your individual responses.
+              <p>
+                Your information will not be shared with teachers or staff in a
+                way that identifies your individual responses.
               </p>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 text-left">
               <div className="space-y-1.5">
-                <Label htmlFor="name" className="font-body text-sm">Name</Label>
+                <Label htmlFor="name" className="font-body text-md">
+                  Name
+                </Label>
                 <Input
                   id="name"
                   placeholder="Please enter your full name..."
@@ -228,7 +274,9 @@ export default function TakeSurvey() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="font-body text-sm">Email</Label>
+                <Label htmlFor="email" className="font-body text-md">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -262,9 +310,16 @@ export default function TakeSurvey() {
         <main className="flex-1 flex flex-col items-center justify-center px-6">
           <div className="max-w-md w-full text-center space-y-4">
             <div className="text-6xl">🙌</div>
-            <h1 className="font-heading text-2xl font-bold text-primary">Thanks for completing the survey!</h1>
-            <p className="font-body text-sm text-gray-600">We appreciate you taking the time to share your thoughts.</p>
-            <p className="font-body text-sm text-gray-600">Your feedback helps us better understand student experiences and improve your school environment.</p>
+            <h1 className="font-heading text-2xl font-bold text-primary">
+              Thanks for completing the survey!
+            </h1>
+            <p className="font-body text-sm text-gray-600">
+              We appreciate you taking the time to share your thoughts.
+            </p>
+            <p className="font-body text-sm text-gray-600">
+              Your feedback helps us better understand student experiences and
+              improve your school environment.
+            </p>
           </div>
         </main>
       </div>
@@ -297,57 +352,62 @@ export default function TakeSurvey() {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="font-body text-xs text-gray-400 w-8 text-right">{Math.round(progress)}%</span>
+          <span className="font-body text-xs text-gray-400 w-8 text-right">
+            {Math.round(progress)}%
+          </span>
         </div>
       </div>
 
       {/* Question area */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
-        <div className="max-w-2xl w-full space-y-6">
-
+        <div className="w-3/4 min-h-[50vh] flex flex-col justify-between space-y-6 px-12 py-10 border border-gray-200 rounded-xl shadow-md">
           {/* Question */}
           <div className="space-y-2">
-            <h2 className="font-heading text-xl font-bold text-primary">
+            <h2 className="font-heading text-2xl font-bold text-primary">
               Question {currentIndex + 1}
             </h2>
-            <p className="font-body text-base text-gray-700">
+            <p className="font-body text-lg text-gray-700">
               {currentQuestion?.text ?? 'Untitled question'}
             </p>
           </div>
 
           {/* Answer input */}
-          {qType === 'open-ended' ? (
-            <Textarea
-              placeholder="Type your answer in max characters..."
-              value={currentAnswer ?? ''}
-              onChange={(e) => handleSelect(e.target.value)}
-              className="font-body text-sm min-h-28 resize-none"
-            />
-          ) : isRating ? (
-            <RatingScale
-              options={options.length > 0 ? options : ['1', '2', '3', '4', '5']}
-              value={currentAnswer ?? ''}
-              onChange={handleSelect}
-            />
-          ) : (
-            <RadioGroup
-              value={currentAnswer ?? ''}
-              onValueChange={handleSelect}
-              className="space-y-3"
-            >
-              {options.map((option, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <RadioGroupItem value={option} id={`option-${idx}`} />
-                  <Label
-                    htmlFor={`option-${idx}`}
-                    className="font-body text-base text-gray-700 cursor-pointer"
-                  >
-                    {option}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          )}
+          <div className="flex-1 flex flex-col py-4">
+            {qType === 'open-ended' ? (
+              <Textarea
+                placeholder="Type your answer in max characters..."
+                value={currentAnswer ?? ''}
+                onChange={(e) => handleSelect(e.target.value)}
+                className="font-body text-base flex-1 resize-none"
+              />
+            ) : isRating ? (
+              <RatingScale
+                options={
+                  options.length > 0 ? options : ['1', '2', '3', '4', '5']
+                }
+                value={currentAnswer ?? ''}
+                onChange={handleSelect}
+              />
+            ) : (
+              <RadioGroup
+                value={currentAnswer ?? ''}
+                onValueChange={handleSelect}
+                className="space-y-3"
+              >
+                {options.map((option, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <RadioGroupItem value={option} id={`option-${idx}`} />
+                    <Label
+                      htmlFor={`option-${idx}`}
+                      className="font-body text-lg text-gray-700 cursor-pointer"
+                    >
+                      {option}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            )}
+          </div>
 
           {/* Navigation */}
           <div className="flex justify-between items-center pt-2">
@@ -362,7 +422,11 @@ export default function TakeSurvey() {
             </Button>
 
             {isLastQuestion ? (
-              <Button onClick={handleSubmit} disabled={submitting} className="px-8">
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="px-8"
+              >
                 {submitting ? 'Submitting…' : 'Submit'}
               </Button>
             ) : (
@@ -378,7 +442,9 @@ export default function TakeSurvey() {
           </div>
 
           {error && (
-            <p className="text-center text-destructive font-body text-sm">{error}</p>
+            <p className="text-center text-destructive font-body text-sm">
+              {error}
+            </p>
           )}
         </div>
       </main>
