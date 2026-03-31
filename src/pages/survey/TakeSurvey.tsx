@@ -236,7 +236,8 @@ export default function TakeSurvey() {
               {survey.title}
             </h1>
             <p className="font-body text-md text-gray-500">
-              Share your experience at [School/District]
+              Share your experience at{' '}
+              {survey.school_id || survey.district_id || '[School/District]'}
             </p>
             <div className="font-body text-md text-gray-600 space-y-3 text-center mt-4">
               {isPulse ? pulseText : challengeText}
