@@ -12,6 +12,7 @@ import { editSurvey } from "@/functions/firebaseFunctions";
 type LocationState = {
   questions: BuilderQuestion[];
   surveyTitle?: string;
+  surveyDescription?: string;
   surveyType?: "Challenge" | "Pulse";
   surveyId?: string;
 };
@@ -25,10 +26,12 @@ export default function ReviewSurveyPage({
   const { state } = useLocation()
   const { user } = useAuth()
 
-  const { questions = [], surveyTitle, surveyType, surveyId } = (state || {}) as LocationState;
+  const { questions = [], surveyTitle, surveyDescription, surveyType, surveyId } = (state || {}) as LocationState;
 
   const [publishing, setPublishing] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const effectiveDescription = surveyDescription ?? "";
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,6 +69,7 @@ let docId = surveyId;
 
         await updateDoc(surveyRef, {
           title: effectiveTitle,
+          description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
           updatedAt: serverTimestamp(),
@@ -74,6 +78,7 @@ let docId = surveyId;
       } else {
         const docRef = await addDoc(collection(db, "surveys"), {
           title: effectiveTitle,
+          description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
           createdBy: user?.uid ?? null,
@@ -107,6 +112,7 @@ let docId = surveyId;
       state: {
         questions,
         surveyTitle: effectiveTitle,
+        surveyDescription: effectiveDescription,
         surveyType: effectiveSurveyType,
         surveyId: state?.surveyId,
         activeTab: "question",
@@ -135,6 +141,7 @@ async function handleSaveDraft() {
 
     await editSurvey(surveyRef, {
       title: effectiveTitle,
+      description: effectiveDescription,
       type: effectiveSurveyType,
       questions: questionDocs,
       status: "Draft",
@@ -155,7 +162,7 @@ async function handleSaveDraft() {
       <div className="mx-auto max-w-6xl p-6">
         <SurveyHeader
           title={effectiveTitle}
-          subtitle="Name of School/District"
+          subtitle={effectiveDescription || "Name of School/District"}
         />
         <p className="mt-6 font-body text-body text-left">
           No survey questions found. Please return to the builder.
@@ -169,12 +176,14 @@ async function handleSaveDraft() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <img
-        src="/logo.png"
-        alt="National School Climate Center"
-        className="w-40"
+      <img 
+        src="/logo.png" 
+        alt="National School Climate Center" 
+        className="w-40" />
+      <SurveyHeader
+        title={effectiveTitle}
+        subtitle={effectiveDescription || "Name of School/District"}
       />
-      <SurveyHeader title={effectiveTitle} subtitle="Name of School/District" />
 
       <div className="mt-4 border-b border-secondary">
         <button
