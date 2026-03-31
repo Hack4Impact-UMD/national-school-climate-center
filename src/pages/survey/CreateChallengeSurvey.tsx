@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
 import { QuestionList } from '@/components/survey/QuestionList'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import type { Question } from '@/types/surveybuilder'
 import WorkflowSection from '@/components/survey/WorkFlowSection'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -40,8 +43,14 @@ export default function CreateChallengeSurvey() {
     activeTab?: 'list' | 'workflow'
     defaultTab?: 'list' | 'workflow'
     surveyTitle?: string
-    surveyType?: 'Challenge' | 'Pulse'
+    surveyDescription?: string
+    surveyType?: 'Challenge' | 'Pulse' | 'challenge' | 'pulse'
   }
+
+  const normalizedSurveyType =
+    incomingState.surveyType?.toLowerCase() === 'pulse' ? 'pulse' : 'challenge'
+  const surveyTypeLabel =
+    normalizedSurveyType === 'pulse' ? 'Pulse' : 'Challenge'
 
   function normalizeQuestion(q: IncomingQuestion, index: number): Question {
     const ratingMatch = q.type ? /^rating-(\d+)/.exec(q.type) : null
@@ -74,12 +83,33 @@ export default function CreateChallengeSurvey() {
     }
   }
 
+  // initial states and values to be used for createSurvey skeleton
+
+  const initialSurveyTitle =
+    incomingState.surveyTitle ??
+    (surveyTypeLabel === 'Pulse' ? 'Pulse Survey' : 'Challenge Survey')
+  const initialSurveyDescription =
+    incomingState.surveyDescription ??
+    (surveyTypeLabel === 'Pulse'
+      ? 'This is a pulse survey.'
+      : 'This is a challenge survey.')
+
   const initialQuestions =
     incomingState.questions && incomingState.questions.length
       ? incomingState.questions.map((q, idx) => normalizeQuestion(q, idx + 1))
       : DEFAULT_QUESTIONS
 
+  // const initialSurveyTitle = incomingState.surveyTitle ?? 'Challenge Survey'
+  // const initialSurveyDescription = incomingState.surveyDescription ?? 'This is a challenge survey.'
+
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
+
+  const [surveyTitle, setSurveyTitle] = useState<string>(
+    initialSurveyTitle
+  )
+  const [surveyDescription, setSurveyDescription] = useState<string>(
+    initialSurveyDescription
+  )
 
   const [activeId, setActiveId] = useState<string>(
     incomingState.activeId ?? initialQuestions[0]?.id ?? 'q1'
@@ -91,21 +121,21 @@ export default function CreateChallengeSurvey() {
   const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
 
 
-  
+
 
   const navigate = useNavigate()
 
   useEffect(() => {
     // checks if a draft already exists in this session or mismatched auth
-    if (hasCreatedDraftRef.current || !user) { 
+    if (hasCreatedDraftRef.current || !user) {
       return
     }
 
     // createSurvey will be called using a skeleton object so that it exists in db
     hasCreatedDraftRef.current = true
     const skeletonSurvey = {
-      title: 'Challenge Survey',
-      description: 'This is a challenge survey.',
+      title: initialSurveyTitle,
+      description: initialSurveyDescription,
       createdBy: user.uid,
       createdAt: null, // unable to access timestamp till after creation in firestore
       updatedAt: null, // which sets it
@@ -127,7 +157,7 @@ export default function CreateChallengeSurvey() {
         hasCreatedDraftRef.current = false // so that draft retry is allowed
         console.error('Failed to create challenge survey draft', error)
       })
-  }, [user, initialQuestions.length])
+  }, [user, initialQuestions.length, initialSurveyDescription, initialSurveyTitle])
 
   function addBlankQuestion() {
     const id = crypto.randomUUID()
@@ -157,13 +187,14 @@ export default function CreateChallengeSurvey() {
 
   //need to add school_name here after the page is created
   function handleReviewSurvey() {
-    const surveyType =
-      incomingState.surveyType === 'Pulse' ? 'Pulse' : 'Challenge'
-    navigate(`/surveys/create/${surveyType}/review`, {
+    // const surveyType =
+    //   incomingState.surveyType === 'pulse' ? 'Pulse' : 'Challenge'
+    navigate(`/surveys/create/${normalizedSurveyType}/review`, {
       state: {
         questions,
-        surveyTitle: `${surveyType} Survey`,
-        surveyType,
+        surveyTitle,
+        surveyDescription,
+        surveyType: surveyTypeLabel,
         activeId,
         activeTab: tab,
         surveyId: createdSurveyId, // using to keep track of surveys
@@ -197,11 +228,40 @@ export default function CreateChallengeSurvey() {
         subtitle=""
       />
 
+      <div className="mt-4 border-b" />
+
+      <Card className="mt-4 border-none shadow-none">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Survey Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Title</Label>
+            <Input
+              id="survey-title"
+              value={surveyTitle}
+              onChange={(event) => setSurveyTitle(event.target.value)}
+              placeholder="Enter survey title"
+              className="font-body"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Description</Label>
+            <Textarea
+              id="survey-description"
+              value={surveyDescription}
+              onChange={(event) => setSurveyDescription(event.target.value)}
+              placeholder="Enter survey description"
+              className="font-body"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs
         value={tab}
         onValueChange={(v) => setTab(v as typeof tab)}
-        className="mt-4"
-      >
+        className="mt-4">
         <TabsList className="w-full justify-start bg-transparent">
           <TabsTrigger value="list">List</TabsTrigger>
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
