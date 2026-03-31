@@ -36,6 +36,11 @@ interface SurveyData {
 
 type Screen = 'welcome' | 'identity' | 'questions' | 'thankyou'
 
+/**
+ * Renders the page header containing the site logo.
+ *
+ * @returns A header element with the National School Climate Center logo image.
+ */
 function Logo() {
   return (
     <header className="px-8 py-5">
@@ -48,6 +53,13 @@ function Logo() {
   )
 }
 
+/**
+ * Render a multi-step survey UI that loads a survey by route parameter, collects responses, and saves them to Firestore.
+ *
+ * This component handles loading the survey document, presenting a welcome/identity/questions/thankyou flow, managing local answer state and navigation, detecting question input types (open-ended, rating/scale, or multiple-choice), and writing a response document to the survey's "responses" subcollection.
+ *
+ * @returns The rendered survey UI element
+ */
 export default function TakeSurvey() {
   const { surveyId } = useParams()
   const { user } = useAuth()
@@ -452,7 +464,14 @@ export default function TakeSurvey() {
   )
 }
 
-// ── Rating scale sub-component ────────────────────────────────────────────────
+/**
+ * Render a horizontal rating scale composed of selectable option buttons.
+ *
+ * @param options - Ordered list of option labels to render as scale steps
+ * @param value - Currently selected option value
+ * @param onChange - Callback invoked with the selected option value when a button is clicked
+ * @returns A JSX element containing the rating buttons and first/last labels
+ */
 
 function RatingScale({
   options,
