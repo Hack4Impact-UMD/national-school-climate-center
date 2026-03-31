@@ -18,6 +18,11 @@ import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
 import SurveyLandingPage from './pages/public/SurveyLandingPage'
 import TakeSurvey from './pages/survey/TakeSurvey'
 
+/**
+ * Defines the application's top-level route map and routing structure.
+ *
+ * @returns The root React element that renders the application's route tree
+ */
 export default function App() {
   return (
     <Routes>
