@@ -16,6 +16,7 @@ import Layout from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
 import SurveyLandingPage from './pages/public/SurveyLandingPage'
+import TakeSurvey from './pages/survey/TakeSurvey'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/create-account/nscc" element={<CreateAccountNSCC />} />
       <Route path="/create-account/school" element={<CreateAccountSchool />} />
       <Route path="/surveys/respond/:surveyId" element={<SurveyLandingPage />} />
+      <Route path="/surveys/take/:surveyId" element={<TakeSurvey />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
