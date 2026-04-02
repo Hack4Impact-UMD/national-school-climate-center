@@ -102,7 +102,7 @@ export function QuestionForm({
         <Label htmlFor={`${baseId}-prompt`}>Question</Label>
         <Textarea
           id={`${baseId}-prompt`}
-          value={value.prompt || value.name} // use name as default if prompt is empty
+          value={value.prompt}
           onChange={(e) => update('prompt', e.target.value)}
           rows={3}
         />
