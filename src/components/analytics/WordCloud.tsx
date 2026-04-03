@@ -17,6 +17,7 @@ export const WordCloud = ({ responses, width, height }: WordCloudProps) => {
 
   if (!wordCloud.length) return <div>No text responses found.</div>
 
+  const maxValue = Math.max(...wordCloud.map((word) => word.value))
   const Cloud = ReactWordCloud as any
 
   return (
@@ -24,7 +25,9 @@ export const WordCloud = ({ responses, width, height }: WordCloudProps) => {
       words={wordCloud}
       width={width}
       height={height}
-      fontSize={(word: { value: number }) => Math.sqrt(word.value) * 10}
+      fontSize={(word: { value: number }) =>
+        (Math.sqrt(word.value) / Math.sqrt(maxValue)) * 15 + 15
+      }
     />
   )
 }
