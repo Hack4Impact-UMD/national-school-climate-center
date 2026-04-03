@@ -46,7 +46,7 @@ export default function AllSurveys() {
 
   // only published surveys; filter by type via tabs.
   const { surveys, loading, error } = usePublishedSurveys({
-    type: tab === 'all' ? null : tab,
+    type: (tab === 'all' ? null : tab.charAt(0).toUpperCase() + tab.slice(1)) as "challenge" | "pulse" ,
   })
 
   const surveyIds = useMemo(() => surveys.map((s) => s.id), [surveys])
@@ -277,7 +277,7 @@ export default function AllSurveys() {
             { key: 'challenge', label: 'Challenge' },
             { key: 'pulse', label: 'Pulse' },
           ] as const).map((t) => {
-            const active = tab === t.key
+            const active = tab?.toLowerCase() === t.key.toLowerCase()
             return (
               <button
                 key={t.key}
@@ -286,7 +286,7 @@ export default function AllSurveys() {
                   'px-4 py-2 text-sm rounded-lg transition-colors ' +
                   (active ? 'bg-primary text-white shadow-sm' : 'text-heading hover:bg-secondary/20')
                 }
-                onClick={() => setTab(t.key)}
+                onClick={() => setTab(t.key.toLowerCase() as typeof t.key)}
               >
                 {t.label}
               </button>
@@ -381,7 +381,7 @@ export default function AllSurveys() {
                       title="Open survey"
                     >
                       <td className="px-4 py-3">{r.title}</td>
-                      <td className="px-4 py-3">{r.type}</td>
+                      <td className="px-4 py-3">{r.type?.charAt(0).toUpperCase() + r.type?.slice(1)}</td>
                       <td className="px-4 py-3">{r.responseCount}</td>
                       <td className="px-4 py-3">{formatDate(r.lastResponseAt)}</td>
                     </tr>
