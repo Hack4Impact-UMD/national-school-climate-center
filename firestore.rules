@@ -1,11 +1,12 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() { return request.auth != null; }
-    function myUid() { return request.auth.uid; }
 
-    // role lookup from users doc
+    function myUid() { return signedIn() ? request.auth.uid : null; }
+
     function myRole() {
       return signedIn()
         ? get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role
@@ -15,11 +16,12 @@ service cloud.firestore {
     function isAdmin() { return myRole() in ['admin', 'super_admin']; }
     function isSuperAdmin() { return myRole() == 'super_admin'; }
     function isSchoolPersonnel() { return myRole() == 'school_personnel'; }
+    function isStaff() { return isSchoolPersonnel(); }
 
     // Members collection - user accounts and roles
     match /members/{uid} {
-      // Users can read their own record, admins can read all
-      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // Allow any signed-in user to read members (temporarily broadened for auth checks)
+      allow read: if signedIn();
 
       // Super admins can create/delete any role
       allow create, delete: if isSuperAdmin() &&
@@ -70,8 +72,8 @@ service cloud.firestore {
       allow delete: if isAdmin() && !isSuperAdmin() &&
         get(/databases/$(database)/documents/invitations/$(id)).data.role in ['school_personnel','student'];
     }
-
-    // Question Bank collection - reusable questions
+    
+     // Question Bank collection - reusable questions
     match /questionBank/{questionID} {
       // Allow any authenticated member to read questions
       allow read: if signedIn();
@@ -79,36 +81,26 @@ service cloud.firestore {
       // Only admins can create, update, or delete questions
       allow create, update, delete: if isAdmin();
     }
-
     // Surveys collection
     match /surveys/{surveyID} {
-      // Allow any authenticated member to read surveys (UI still restricts by role)
       allow read: if signedIn();
-
-      // Only admins can create, update, or delete surveys
       allow create, update, delete: if isAdmin();
+
+      // Responses subcollection for each survey
+      match /responses/{responseID} {
+        allow read: if signedIn() && (isAdmin() || isStaff());
+        allow create: if signedIn();
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
     }
-
-    // Survey responses collection
-    match /responses/{rid} {
-      // - Pulse surveys: must be signed in, include uid equal to caller, and consent true
-      // - Challenge surveys: anonymous allowed (no uid), but must include consent true
-      allow create: if request.resource.data.consent == true && (
-          (request.resource.data.surveyType == 'pulse' && signedIn() && request.resource.data.uid == myUid())
-          ||
-          (request.resource.data.surveyType == 'challenge' && !request.resource.data.keys().hasAny(['uid']))
-        );
-
-      // Immutable once created (prevent edits)
-      allow update: if false;
-
-      // Reads: staff/admin; a student can read their own response
-      allow read: if (signedIn() && resource.data.uid == myUid())
-                  || isAdmin() || isSchoolPersonnel();
-
-      allow delete: if isAdmin();
-    }
-
     
-  }
+    // allows responses to get pulled without a surveyID
+    match /{path=**}/responses/{responseID} {
+      allow read: if signedIn() && (isAdmin() || isStaff());
+    }
+  
+    
+}
+
 }
