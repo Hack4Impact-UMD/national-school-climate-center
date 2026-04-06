@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Check, X } from 'lucide-react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createUserWithEmailAndPassword, type UserCredential } from 'firebase/auth'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp, updateDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/firebase/config'
+
 
 interface CreateAccountFormData {
   firstName: string
@@ -30,6 +31,21 @@ interface PasswordRequirements {
 export default function CreateAccountSchool() {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
+  const [searchParams] = useSearchParams()
+  const token = searchParams.get('token')
+
+  const [inviteEmail, setInviteEmail] = useState<string | null>(null)
+  const [inviteRole, setInviteRole] = useState<string>('school_personnel')
+
+  useEffect(() => {
+    if (!token) return
+    getDoc(doc(db, 'invitations', token)).then((snap) => {
+      if (snap.exists()) {
+        setInviteEmail(snap.data().email)
+        setInviteRole(snap.data().role)
+      }
+    })
+  }, [token])
 
   const {
     register,
@@ -75,7 +91,7 @@ export default function CreateAccountSchool() {
         await setDoc(doc(db, 'members', uid), {
           email: data.email.trim(),
           displayName: `${data.firstName.trim()} ${data.lastName.trim()}`,
-          role: 'school_personnel',
+          role: inviteRole,           // ← was hardcoded 'school_personnel'
           school_id: data.school.trim(),
           district_id: data.district.trim(),
           joinedAt: serverTimestamp(),
@@ -85,6 +101,14 @@ export default function CreateAccountSchool() {
         await cleanupFirebaseError(userCredential)
         throw firestoreError
       }
+
+      if (token) {
+        await updateDoc(doc(db, 'invitations', token), {
+          status: 'accepted',
+          acceptedAt: serverTimestamp(),
+        })
+      }
+
 
       // 3. Navigate to home
       navigate('/home')
@@ -224,6 +248,8 @@ export default function CreateAccountSchool() {
                 <Input
                   type="email"
                   placeholder="Please enter your email"
+                  readOnly={!!inviteEmail}
+                  defaultValue={inviteEmail ?? ''}
                   {...register('email', {
                     required: 'Email is required',
                     pattern: {
@@ -231,7 +257,10 @@ export default function CreateAccountSchool() {
                       message: 'Invalid email address',
                     },
                   })}
-                  className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+                  className={cn(
+                    'w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none',
+                    inviteEmail && 'bg-gray-100 cursor-not-allowed'
+                  )}
                 />
                 {errors.email && (
                   <p className="text-sm text-red-500 font-body">

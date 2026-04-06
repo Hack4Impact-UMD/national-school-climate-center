@@ -36,27 +36,37 @@ export function listenMembers(onChange: (members: Member[]) => void) {
 
 
 export async function inviteMemberByEmail(email: string, role: Role) {
-  // Check for duplicate pending invitations
-  const q = query(
-    invitationsCol,
-    where('email', '==', email),
-    where('status', '==', 'pending')
-  )
+  const q = query(invitationsCol, where('email', '==', email), where('status', '==', 'pending'))
   const existingInvites = await getDocs(q)
 
   if (!existingInvites.empty) {
     throw new Error('An invitation has already been sent to this email address')
   }
 
-  const docRef = doc(invitationsCol)
-  await setDoc(docRef, {
+  const inviteRef = doc(invitationsCol)
+  const inviteLink = `${window.location.origin}/accept-invite?token=${inviteRef.id}`
+
+  await setDoc(inviteRef, {
     email,
     role,
     invitedAt: serverTimestamp(),
     invitedBy: auth.currentUser?.uid ?? null,
     status: 'pending',
   })
-  return docRef.id
+
+  const res = await fetch('http://localhost:3001/api/invite', {  // ← direct URL
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, role, inviteLink }),
+  })
+
+  if (!res.ok) {
+    const { error } = await res.json()
+    await deleteDoc(inviteRef)
+    throw new Error(error ?? 'Failed to send invite email')
+  }
+
+  return inviteRef.id
 }
 
 // TODO: Implement UI for updating member roles in the Admin page
