@@ -491,7 +491,15 @@ export default function Analytics() {
     }
 
     return (
-      <div className="mt-4" id="analyticsInsight">
+      <div className="mt-4 bg-background p-4 rounded-2xl" id="analyticsInsight">
+        <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+          <ChartTypeSelector value={chartType} onChange={setChartType} />
+
+          <div className="flex items-center">
+            <GenerateReport setExport={setExport} chartsData={charts} />
+          </div>
+        </div>
+      
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
           {(exporting ? charts : paginatedCharts).map((chart) => (
             <ResponseChart
@@ -553,11 +561,6 @@ export default function Analytics() {
           activeFilters={activeFilters}
           onRemoveFilter={handleRemoveFilter}
         />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4">
-        <ChartTypeSelector value={chartType} onChange={setChartType} />
-        <GenerateReport setExport={setExport} chartsData={charts} />
       </div>
 
       {renderContent()}

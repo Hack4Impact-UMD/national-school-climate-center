@@ -155,35 +155,38 @@ export default function GenerateReport({ setExport, chartsData }: any) {
 
   return (
     <div className="relative inline-block">
-      <Button
-        variant="secondary"
-        disabled={generating}
+      <button
+        type="button"
         onClick={() => setDrop(!drop)}
+        disabled={generating}
+        className="border border-primary rounded-2xl px-4 py-2 text-sm text-heading hover:bg-secondary/10 inline-flex items-center gap-2"
       >
-        Generate Report <RiArrowDropDownLine />
-      </Button>
+        Export <RiArrowDropDownLine />
+      </button>
       {generating && <span className="ml-2 text-body">Generating...</span>}
 
       {drop && (
-        <div>
-          <div onClick={() => setDrop(false)} />
-
-          <div className=" mt-1 absolute w-full rounded-lg overflow-hidden">
-            <Button
-              onClick={handleExportPDF}
-              disabled={generating}
-              className="w-full text-white rounded-none"
+        <div className="absolute right-0 mt-2 w-24 z-10">
+          <div className="rounded-lg overflow-hidden bg-primary text-white shadow-md">
+            <button
+              onClick={() => {
+                handleExportPDF()
+                setDrop(false)
+              }}
+              className="w-full px-3 py-2 text-center"
             >
               PDF
-            </Button>
+            </button>
 
-            <Button
-              onClick={handleExportCSV}
-              disabled={generating}
-              className="w-full text-white rounded-none"
+            <button
+              onClick={() => {
+                handleExportCSV()
+                setDrop(false)
+              }}
+              className="w-full px-3 py-2 text-center"
             >
               CSV
-            </Button>
+            </button>
           </div>
         </div>
       )}
