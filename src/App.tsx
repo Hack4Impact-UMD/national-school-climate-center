@@ -10,6 +10,7 @@ import ManageUsers from './pages/admin/ManageUsers'
 import General from './pages/admin/General'
 import SurveyBuilder from './pages/survey/SurveyBuilder'
 import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
+import CreatePulseSurvey from './pages/survey/CreatePulseSurvey'
 import AllSurveys from './pages/survey/AllSurveys'
 import SurveyDetails from './pages/survey/SurveyDetails'
 import Layout from './components/layout/Layout'
@@ -55,7 +56,7 @@ export default function App() {
 
             <Route
               path="/surveys/create/pulse"
-              element={<CreateChallengeSurvey />}
+              element={<CreatePulseSurvey />}
             />
             <Route
               path="/surveys/create/pulse/review"
