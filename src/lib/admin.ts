@@ -18,22 +18,28 @@ import type { Role, Member } from '@/types/auth'
 
 const membersCol = collection(db, 'members')
 const invitationsCol = collection(db, 'invitations')
+const mailCol = collection(db, 'mail');
 
 export async function getMembers(): Promise<Member[]> {
   const q = query(membersCol, orderBy('joinedAt', 'desc'))
   const snap = await getDocs(q)
-  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as DocumentData) })) as Member[]
+  return snap.docs.map((d) => ({
+    id: d.id,
+    ...(d.data() as DocumentData),
+  })) as Member[]
 }
 
 export function listenMembers(onChange: (members: Member[]) => void) {
   const q = query(membersCol, orderBy('joinedAt', 'desc'))
   const unsub = onSnapshot(q, (snap) => {
-    const members = snap.docs.map((d) => ({ id: d.id, ...(d.data() as DocumentData) })) as Member[]
+    const members = snap.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as DocumentData),
+    })) as Member[]
     onChange(members)
   })
   return unsub
 }
-
 
 export async function inviteMemberByEmail(email: string, role: Role) {
   // Check for duplicate pending invitations
@@ -56,6 +62,19 @@ export async function inviteMemberByEmail(email: string, role: Role) {
     invitedBy: auth.currentUser?.uid ?? null,
     status: 'pending',
   })
+  const mailRef = doc(mailCol)
+  await setDoc(mailRef, {
+    to: [email],
+    message: {
+      subject: "You've been invited!",
+      text: `You have been invited to join as ${role}. Click here to accept your invitation.`,
+      html: `
+        <p>You have been invited to join as <strong>${role}</strong>.</p>
+        <p><a href="https://yourapp.com/invite/${docRef.id}">Click here to accept your invitation</a></p>
+      `,
+    },
+  })
+
   return docRef.id
 }
 

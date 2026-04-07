@@ -4,5 +4,11 @@
     "national-prod": "national-school-climate-center"
   },
   "targets": {},
-  "etags": {}
+  "etags": {
+    "national-school-climate-center": {
+      "extensionInstances": {
+        "firestore-send-email": "61210ecd7d8472bd2d688d4838d379b0d3f220c47723335a41ae01708e20b891"
+      }
+    }
+  }
 }
