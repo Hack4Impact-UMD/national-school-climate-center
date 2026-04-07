@@ -46,7 +46,7 @@ export default function AllSurveys() {
 
   // only published surveys; filter by type via tabs.
   const { surveys, loading, error } = usePublishedSurveys({
-    type: (tab === 'all' ? null : tab.charAt(0).toUpperCase() + tab.slice(1)) as "challenge" | "pulse",
+    type: tab === 'all' ? null : tab as "challenge" | "pulse",
   })
 
   const surveyIds = useMemo(() => surveys.map((s) => s.id), [surveys])
