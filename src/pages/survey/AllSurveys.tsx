@@ -46,7 +46,7 @@ export default function AllSurveys() {
 
   // only published surveys; filter by type via tabs.
   const { surveys, loading, error } = usePublishedSurveys({
-    type: tab === 'all' ? null : tab,
+    type: (tab === 'all' ? null : tab.charAt(0).toUpperCase() + tab.slice(1)) as "challenge" | "pulse",
   })
 
   const surveyIds = useMemo(() => surveys.map((s) => s.id), [surveys])
@@ -124,14 +124,14 @@ export default function AllSurveys() {
       rows.forEach((row) => {
         csv += `"${row.title}", "${row.type}", "${row.responseCount}", "${formatDate(row.lastResponseAt)}"\n`
       })
- 
+
       const encodedCSV = encodeURI(csv)
       const downloadLink = document.createElement("a")
       downloadLink.href = `data:text/csv;charset=utf-8,${encodedCSV}`
       downloadLink.setAttribute("download", "Surveys_Report.csv")
       downloadLink.click()
       console.log("Downloading as CSV")
-      
+
     } catch (error) {
       console.error("Failed to generate the CSV", error)
     }
@@ -144,7 +144,7 @@ export default function AllSurveys() {
 
       doc.setFontSize(20)
       doc.text("Survey Report", 15, 25)
-      
+
       doc.setFontSize(14)
       let y = 35
 
@@ -163,7 +163,7 @@ export default function AllSurveys() {
         doc.text(row.type, 90, y)
         doc.text(String(row.responseCount), 140, y)
         doc.text(formatDate(row.lastResponseAt), 170, y)
-        y += 12 
+        y += 12
 
         if (y > 270) {
           doc.addPage()
@@ -311,26 +311,28 @@ export default function AllSurveys() {
               </span>
             </button>
 
-          {drop && (
-            <div className="absolute right-0 mt-1 w-23 z-10 items-center">
-              <div onClick={() => setDrop(false)} />
+            {drop && (
+              <div className="absolute right-0 mt-1 w-23 z-10 items-center">
+                <div onClick={() => setDrop(false)} />
                 <div className=" mt-5 absolute w-full rounded-lg overflow-hidden bg-[#2F6CC0] text-white">
-                  <button onClick={() => 
-                    {handleExportPDF()
-                    setDrop(false)}}
+                  <button onClick={() => {
+                    handleExportPDF()
+                    setDrop(false)
+                  }}
                     className="w-full rounded-none">
                     PDF
                   </button>
 
-                  <button onClick={() => 
-                    {handleExportCSV() 
-                    setDrop(false)}} 
+                  <button onClick={() => {
+                    handleExportCSV()
+                    setDrop(false)
+                  }}
                     className="w-full rounded-none mt-1">
                     CSV
                   </button>
-            </div>
-          </div>
-          )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {/* Table */}
@@ -380,7 +382,7 @@ export default function AllSurveys() {
                       title="Open survey"
                     >
                       <td className="px-4 py-3">{r.title}</td>
-                      <td className="px-4 py-3">{r.type}</td>
+                      <td className="px-4 py-3">{r.type?.charAt(0).toUpperCase() + r.type?.slice(1)}</td>
                       <td className="px-4 py-3">{r.responseCount}</td>
                       <td className="px-4 py-3">{formatDate(r.lastResponseAt)}</td>
                     </tr>
