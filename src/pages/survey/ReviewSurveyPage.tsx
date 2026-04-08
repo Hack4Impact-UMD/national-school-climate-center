@@ -134,7 +134,7 @@ export default function ReviewSurveyPage({
     const targetPath =
       effectiveSurveyType === 'Pulse'
         ? '/surveys/create/pulse'
-        : '/surveys/create/Challenge'
+        : '/surveys/create/challenge'
 
     navigate(targetPath, {
       state: {
