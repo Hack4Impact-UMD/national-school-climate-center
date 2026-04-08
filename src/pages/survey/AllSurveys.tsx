@@ -284,6 +284,7 @@ export default function AllSurveys() {
               return (
                 <Button
                   key={t.key}
+                  variant={active ? "default" : "ghost"}
                   type="button"
                   className={
                     'px-4 py-2 text-sm rounded-lg transition-colors ' +
@@ -301,6 +302,7 @@ export default function AllSurveys() {
             {/* Export is present in the design but wiring can be added later */}
             <Button
               type="button"
+              variant={'ghost'}
               className="border border-primary rounded-2xl px-4 py-2 text-sm text-heading hover:bg-secondary/10"
               onClick={() => {
                 setDrop(!drop)
