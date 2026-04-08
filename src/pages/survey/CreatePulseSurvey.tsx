@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// Mock data – replace with real hooks/fetches as needed
+// Mock data
 const MOCK_SCHOOLS = [
   'Lincoln Elementary School',
   'Roosevelt Middle School',
