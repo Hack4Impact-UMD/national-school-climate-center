@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePublishedSurveys } from '@/hooks/useSurveys'
 import { useSurveyResponseAggregates } from '@/hooks/useSurveyResponseAggregates'
 import jsPDF from "jspdf"
+import { Button } from '@/components/ui/button'
 
 const RESPONSE_RANGES = [
   { id: 'any', label: 'Any', test: (_n: number) => true },
@@ -189,14 +190,14 @@ export default function AllSurveys() {
           </p>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={() => navigate('/surveys/builder')}
           className="bg-primary text-white rounded-lg px-4 py-2 text-sm shadow-sm"
           title="Create a new survey"
         >
           Create New Survey
-        </button>
+        </Button>
       </div>
 
       <div>
@@ -269,73 +270,72 @@ export default function AllSurveys() {
         </div>
       </div>
 
-      {/* Tabs + actions */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="inline-flex rounded-xl border border-primary bg-white p-1">
-          {([
-            { key: 'all', label: 'All Surveys' },
-            { key: 'challenge', label: 'Challenge' },
-            { key: 'pulse', label: 'Pulse' },
-          ] as const).map((t) => {
-            const active = tab?.toLowerCase() === t.key.toLowerCase()
-            return (
-              <button
-                key={t.key}
-                type="button"
-                className={
-                  'px-4 py-2 text-sm rounded-lg transition-colors ' +
-                  (active ? 'bg-primary text-white shadow-sm' : 'text-heading hover:bg-secondary/20')
-                }
-                onClick={() => setTab(t.key.toLowerCase() as typeof t.key)}
-              >
-                {t.label}
-              </button>
-            )
-          })}
-        </div>
-
-        <div className=" relative flex items-center gap-2">
-          {/* Export is present in the design but wiring can be added later */}
-          <button
-            type="button"
-            className="border border-primary rounded-lg px-4 py-2 text-sm bg-white text-heading hover:bg-secondary/10"
-            onClick={() => {
-              setDrop(!drop)
-            }}
-            title="Export"
-          >
-            <span className="inline-flex items-center gap-2">
-              Export <span aria-hidden>▾</span>
-            </span>
-          </button>
-
-          {drop && (
-            <div className="absolute right-0 mt-1 w-23 z-10 items-center">
-              <div onClick={() => setDrop(false)} />
-              <div className=" mt-5 absolute w-full rounded-lg overflow-hidden bg-[#2F6CC0] text-white">
-                <button onClick={() => {
-                  handleExportPDF()
-                  setDrop(false)
-                }}
-                  className="w-full rounded-none">
-                  PDF
-                </button>
-
-                <button onClick={() => {
-                  handleExportCSV()
-                  setDrop(false)
-                }}
-                  className="w-full rounded-none mt-1">
-                  CSV
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Light-blue panel wrapper */}
       <div className="rounded-2xl bg-secondary/10 p-5">
+        {/* Tabs + actions */}
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
+          <div className="inline-flex rounded-2xl border border-primary p-1">
+            {([
+              { key: 'all', label: 'All Surveys' },
+              { key: 'challenge', label: 'Challenge' },
+              { key: 'pulse', label: 'Pulse' },
+            ] as const).map((t) => {
+              const active = tab === t.key
+              return (
+                <Button
+                  key={t.key}
+                  type="button"
+                  className={
+                    'px-4 py-2 text-sm rounded-lg transition-colors ' +
+                    (active ? 'bg-primary text-white shadow-sm' : 'text-heading hover:bg-secondary/20')
+                  }
+                  onClick={() => setTab(t.key)}
+                >
+                  {t.label}
+                </Button>
+              )
+            })}
+          </div>
+
+          <div className="relative flex items-center gap-2">
+            {/* Export is present in the design but wiring can be added later */}
+            <Button
+              type="button"
+              className="border border-primary rounded-2xl px-4 py-2 text-sm text-heading hover:bg-secondary/10"
+              onClick={() => {
+                setDrop(!drop)
+              }}
+              title="Export"
+            >
+              <span className="inline-flex items-center gap-2">
+                Export <span aria-hidden>▾</span>
+              </span>
+            </Button>
+
+            {drop && (
+              <div className="absolute right-0 mt-1 w-23 z-10 items-center">
+                <div onClick={() => setDrop(false)} />
+                <div className=" mt-5 absolute w-full rounded-lg overflow-hidden bg-[#2F6CC0] text-white">
+                  <Button onClick={() => {
+                    handleExportPDF()
+                    setDrop(false)
+                  }}
+                    className="w-full rounded-none">
+                    PDF
+                  </Button>
+
+                  <Button onClick={() => {
+                    handleExportCSV()
+                    setDrop(false)
+                  }}
+                    className="w-full rounded-none mt-1">
+                    CSV
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
         {/* Table */}
         <div className="rounded-2xl border bg-white overflow-hidden shadow-sm">
           <div className="overflow-auto max-h-[520px]">
