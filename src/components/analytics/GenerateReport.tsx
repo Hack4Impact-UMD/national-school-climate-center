@@ -155,20 +155,20 @@ export default function GenerateReport({ setExport, chartsData }: any) {
 
   return (
     <div className="relative inline-block">
-      <button
+      <Button
         type="button"
         onClick={() => setDrop(!drop)}
         disabled={generating}
         className="border border-primary rounded-2xl px-4 py-2 text-sm text-heading hover:bg-secondary/10 inline-flex items-center gap-2"
       >
         Export <RiArrowDropDownLine />
-      </button>
+      </Button>
       {generating && <span className="ml-2 text-body">Generating...</span>}
 
       {drop && (
         <div className="absolute right-0 mt-2 w-24 z-10">
           <div className="rounded-lg overflow-hidden bg-primary text-white shadow-md">
-            <button
+            <Button
               onClick={() => {
                 handleExportPDF()
                 setDrop(false)
@@ -176,9 +176,9 @@ export default function GenerateReport({ setExport, chartsData }: any) {
               className="w-full px-3 py-2 text-center"
             >
               PDF
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={() => {
                 handleExportCSV()
                 setDrop(false)
@@ -186,7 +186,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
               className="w-full px-3 py-2 text-center"
             >
               CSV
-            </button>
+            </Button>
           </div>
         </div>
       )}

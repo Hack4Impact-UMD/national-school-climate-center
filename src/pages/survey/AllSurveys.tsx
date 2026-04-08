@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePublishedSurveys } from '@/hooks/useSurveys'
 import { useSurveyResponseAggregates } from '@/hooks/useSurveyResponseAggregates'
 import jsPDF from "jspdf"
+import { Button } from '@/components/ui/button'
 
 const RESPONSE_RANGES = [
   { id: 'any', label: 'Any', test: (_n: number) => true },
@@ -189,14 +190,14 @@ export default function AllSurveys() {
           </p>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={() => navigate('/surveys/builder')}
           className="bg-primary text-white rounded-lg px-4 py-2 text-sm shadow-sm"
           title="Create a new survey"
         >
           Create New Survey
-        </button>
+        </Button>
       </div>
 
       <div>
@@ -281,7 +282,7 @@ export default function AllSurveys() {
             ] as const).map((t) => {
               const active = tab === t.key
               return (
-                <button
+                <Button
                   key={t.key}
                   type="button"
                   className={
@@ -291,14 +292,14 @@ export default function AllSurveys() {
                   onClick={() => setTab(t.key)}
                 >
                   {t.label}
-                </button>
+                </Button>
               )
             })}
           </div>
 
           <div className="relative flex items-center gap-2">
             {/* Export is present in the design but wiring can be added later */}
-            <button
+            <Button
               type="button"
               className="border border-primary rounded-2xl px-4 py-2 text-sm text-heading hover:bg-secondary/10"
               onClick={() => {
@@ -309,27 +310,27 @@ export default function AllSurveys() {
               <span className="inline-flex items-center gap-2">
                 Export <span aria-hidden>▾</span>
               </span>
-            </button>
+            </Button>
 
             {drop && (
               <div className="absolute right-0 mt-1 w-23 z-10 items-center">
                 <div onClick={() => setDrop(false)} />
                 <div className=" mt-5 absolute w-full rounded-lg overflow-hidden bg-[#2F6CC0] text-white">
-                  <button onClick={() => {
+                  <Button onClick={() => {
                     handleExportPDF()
                     setDrop(false)
                   }}
                     className="w-full rounded-none">
                     PDF
-                  </button>
+                  </Button>
 
-                  <button onClick={() => {
+                  <Button onClick={() => {
                     handleExportCSV()
                     setDrop(false)
                   }}
                     className="w-full rounded-none mt-1">
                     CSV
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

@@ -1,4 +1,5 @@
 import type { ChartType } from '../../types/chartTypes'
+import { Button } from '@/components/ui/button'
 
 type Props = {
   value: ChartType
@@ -19,7 +20,7 @@ export default function ChartTypeSelector({ value, onChange }: Props) {
         const active = value === opt.value
 
         return (
-          <button
+          <Button
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
@@ -31,7 +32,7 @@ export default function ChartTypeSelector({ value, onChange }: Props) {
             }
           >
             {opt.label}
-          </button>
+          </Button>
         )
       })}
     </div>
