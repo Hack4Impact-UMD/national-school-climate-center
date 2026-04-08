@@ -11,8 +11,8 @@ export interface Survey {
   visibility: 'School' | 'District' | 'Public'
   questionCount: number
   responseCount: number
-  school_id: string
-  district_id: string
+  school_id: string | null
+  district_id: string | null
   tags: string[]
   type: 'Pulse' | 'Challenge' | 'Custom'
   questions?: Question[] // optional for listing surveys without loading all questions, but should be included when fetching a single survey for editing or responding

@@ -38,6 +38,8 @@ export default function CreateChallengeSurvey() {
   const location = useLocation()
   const { user } = useAuth() // used for survey createdBy
   const incomingState = (location.state ?? {}) as {
+    school?: string
+    district?: string
     questions?: IncomingQuestion[]
     activeId?: string
     activeTab?: 'list' | 'workflow'
@@ -104,9 +106,7 @@ export default function CreateChallengeSurvey() {
 
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
 
-  const [surveyTitle, setSurveyTitle] = useState<string>(
-    initialSurveyTitle
-  )
+  const [surveyTitle, setSurveyTitle] = useState<string>(initialSurveyTitle)
   const [surveyDescription, setSurveyDescription] = useState<string>(
     initialSurveyDescription
   )
@@ -119,9 +119,6 @@ export default function CreateChallengeSurvey() {
   )
   const [createdSurveyId, setCreatedSurveyId] = useState<string | null>(null)
   const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
-
-
-
 
   const navigate = useNavigate()
 
@@ -157,7 +154,12 @@ export default function CreateChallengeSurvey() {
         hasCreatedDraftRef.current = false // so that draft retry is allowed
         console.error('Failed to create challenge survey draft', error)
       })
-  }, [user, initialQuestions.length, initialSurveyDescription, initialSurveyTitle])
+  }, [
+    user,
+    initialQuestions.length,
+    initialSurveyDescription,
+    initialSurveyTitle,
+  ])
 
   function addBlankQuestion() {
     const id = crypto.randomUUID()
@@ -198,6 +200,8 @@ export default function CreateChallengeSurvey() {
         activeId,
         activeTab: tab,
         surveyId: createdSurveyId, // using to keep track of surveys
+        school: incomingState.school,
+        district: incomingState.district,
       },
     })
   }
@@ -261,7 +265,8 @@ export default function CreateChallengeSurvey() {
       <Tabs
         value={tab}
         onValueChange={(v) => setTab(v as typeof tab)}
-        className="mt-4">
+        className="mt-4"
+      >
         <TabsList className="w-full justify-start bg-transparent">
           <TabsTrigger value="list">List</TabsTrigger>
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
