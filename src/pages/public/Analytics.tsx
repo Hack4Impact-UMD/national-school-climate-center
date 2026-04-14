@@ -516,6 +516,7 @@ export default function Analytics() {
               variant="outline"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
+              className="hover:bg-secondary/20 cursor-pointer"
             >
               Previous
             </Button>
@@ -526,6 +527,7 @@ export default function Analytics() {
               variant="outline"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
+              className="hover:bg-secondary/20 cursor-pointer"
             >
               Next
             </Button>

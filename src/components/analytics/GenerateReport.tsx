@@ -173,7 +173,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
                 handleExportPDF()
                 setDrop(false)
               }}
-              className="w-full px-3 py-2 text-center"
+              className="w-full px-3 py-2 text-center hover:bg-secondary/50 cursor-pointer"
             >
               PDF
             </Button>
@@ -183,7 +183,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
                 handleExportCSV()
                 setDrop(false)
               }}
-              className="w-full px-3 py-2 text-center"
+              className="w-full px-3 py-2 text-center hover:bg-secondary/50 cursor-pointer"
             >
               CSV
             </Button>
