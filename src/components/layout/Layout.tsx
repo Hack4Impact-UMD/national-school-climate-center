@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "./NavBar";
+import { InactiveLogout } from "./InactiveLogout"
 
 export default function Layout() {
+  InactiveLogout()
   return (
     <div className="flex h-screen overflow-hidden">
       <NavBar />
