@@ -223,8 +223,12 @@ export default function ReviewSurveyPage({
         </button>
         <button
           type="button"
-          className="pb-2 font-body text-base text-body cursor-pointer"
-          onClick={handleEdit}
+          className={
+            'pb-2 font-body text-body ' +
+            (shareLink ? 'cursor-not-allowed' : 'cursor-pointer')
+          }
+          onClick={shareLink ? undefined : handleEdit}
+          disabled={!!shareLink}
         >
           Edit
         </button>
