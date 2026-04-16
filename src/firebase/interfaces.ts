@@ -57,6 +57,18 @@ export interface ResponseWithId extends Response {
   id: string
 }
 
+export interface School {
+  district_id: string
+  lat: number
+  long: number
+  name: string
+
+}
+
+export interface SchoolWithId extends School {
+  id: string
+}
+
 export interface ConsentGrant {
   grantId: string
   surveyId: string

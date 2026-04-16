@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, getDocs, type Timestamp } from 'firebase/firestore'
-import GeoMapDemo from '@/components/analytics/GeoData'
+import GeoMap from '@/components/analytics/GeoData'
 import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
@@ -570,7 +570,7 @@ export default function Analytics() {
           View survey response distribution and average scores by school
           location.
         </p>
-        <GeoMapDemo />
+        <GeoMap />
       </div>
     </div>
   )
