@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 
-const LOGOUT = 20 * 1000
+const LOGOUT = 5 * 60 * 1000
 const INTERVAL = 1000
 const WRITE_COOLDOWN = 1000
 const LAST_ACTIVE = "lastActive"
