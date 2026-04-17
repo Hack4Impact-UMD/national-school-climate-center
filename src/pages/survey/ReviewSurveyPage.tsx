@@ -90,6 +90,7 @@ export default function ReviewSurveyPage({
           description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
+          questionCount: questionDocs.length,
           updatedAt: serverTimestamp(),
           status: 'Published',
           school_id: state?.school ?? null,
@@ -143,7 +144,7 @@ export default function ReviewSurveyPage({
         surveyDescription: effectiveDescription,
         surveyType: effectiveSurveyType,
         surveyId: state?.surveyId,
-        activeTab: 'question',
+        activeTab: 'list',
         activeId: questions[0]?.id,
       },
     })
@@ -172,6 +173,7 @@ export default function ReviewSurveyPage({
         description: effectiveDescription,
         type: effectiveSurveyType,
         questions: questionDocs,
+        questionCount: questionDocs.length,
         status: 'Draft',
       })
 
