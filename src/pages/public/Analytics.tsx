@@ -7,7 +7,7 @@ import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
 import SimpleBarChart from '@/components/analytics/BarChart'
 import SimplePieChart from '@/components/analytics/PieChart'
 import { FilterBar } from '@/components/analytics/FilterBar'
-import { SearchInput } from '@/components/analytics/SearchInput'
+import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import { FilterChips } from '@/components/analytics/FilterChips'
 import { db } from '@/firebase/config'
 import { Button } from '@/components/ui/button'
@@ -206,6 +206,7 @@ export default function Analytics() {
     const respondentGroupMap = new Map<string, string>()
     const questionTypeMap = new Map<string, string>()
     const surveyTypeMap = new Map<string, string>()
+    const questionMap = new Map<string, string>()
 
     responses.forEach((response) => {
       if (response.school) {
@@ -225,6 +226,9 @@ export default function Analytics() {
       }
       if (response.surveyType) {
         surveyTypeMap.set(response.surveyType, formatLabel(response.surveyType))
+      }
+      if (response.question) {
+        questionMap.set(response.question, response.question)
       }
     })
 
@@ -252,12 +256,17 @@ export default function Analytics() {
         name,
       })
     )
+    const questions = Array.from(questionMap.entries()).map(([id, name]) => ({
+      id,
+      name,
+    }))
 
     return {
       schools,
       respondentGroups,
       questionTypes,
       surveyTypes,
+      questions,
     }
   }, [responses])
 
@@ -268,10 +277,10 @@ export default function Analytics() {
     }))
   }
 
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = (id: string | null) => {
     setFilters((prev) => ({
       ...prev,
-      searchQuery: value,
+      searchQuery: id ?? '',
     }))
   }
 
@@ -553,9 +562,12 @@ export default function Analytics() {
       />
 
       <div className="flex flex-wrap items-start gap-4">
-        <SearchInput
-          value={filters.searchQuery}
+        <SearchCombobox
+          value={filters.searchQuery || null}
           onChange={handleSearchChange}
+          options={filterOptions.questions}
+          placeholder="Search a question"
+          className="w-[240px]"
         />
         <FilterChips
           activeFilters={activeFilters}
