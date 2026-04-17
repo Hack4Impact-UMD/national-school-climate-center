@@ -373,12 +373,40 @@ export default function GeoMapDemo() {
       </div>
 
       {/* map */}
-      <div className="w-full h-full rounded-xl overflow-hidden border">
+      <div className="w-full h-full rounded-xl overflow-hidden border relative">
         <MapContainer
           center={[39.0, -95.0]}
           zoom={5}
           style={{ width: '100%', height: '100%' }}
         >
+          {/* key */}
+          <div className="absolute bottom-6 right-4 z-[400] bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+            <div className="text-xs font-semibold text-gray-700 mb-2">
+              Score
+            </div>
+            {/* gradient */}
+            <svg width="160" height="20" className="block mb-2">
+              <defs>
+                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgb(255, 55, 80)" />
+                  <stop offset="25%" stopColor="rgb(191, 91, 60)" />
+                  <stop offset="50%" stopColor="rgb(128, 128, 40)" />
+                  <stop offset="75%" stopColor="rgb(64, 164, 20)" />
+                  <stop offset="100%" stopColor="rgb(0, 200, 0)" />
+                </linearGradient>
+              </defs>
+              <rect width="160" height="20" fill="url(#scoreGradient)" rx="2" />
+            </svg>
+            {/* labels */}
+            <div className="flex justify-between text-xs text-gray-600">
+              <span>1</span>
+              <span>2</span>
+              <span>3</span>
+              <span>4</span>
+              <span>5</span>
+            </div>
+          </div>
+
           <LayersControl position="topright">
             {/* Base maps */}
             <BaseLayer checked name="OpenStreetMap">
