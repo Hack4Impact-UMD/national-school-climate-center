@@ -156,6 +156,7 @@ export default function GenerateReport({ setExport, chartsData }: any) {
   return (
     <div className="relative inline-block">
       <Button
+        variant={'ghost'}
         type="button"
         onClick={() => setDrop(!drop)}
         disabled={generating}
