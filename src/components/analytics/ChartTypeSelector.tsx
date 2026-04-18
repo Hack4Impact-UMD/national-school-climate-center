@@ -23,6 +23,7 @@ export default function ChartTypeSelector({ value, onChange }: Props) {
           <Button
             key={opt.value}
             type="button"
+            variant={'ghost'}
             onClick={() => onChange(opt.value)}
             className={
               'px-4 py-2 text-sm rounded-lg transition-colors ' +
