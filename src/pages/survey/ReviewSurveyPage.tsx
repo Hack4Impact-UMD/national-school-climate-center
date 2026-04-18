@@ -144,7 +144,7 @@ export default function ReviewSurveyPage({
         surveyDescription: effectiveDescription,
         surveyType: effectiveSurveyType,
         surveyId: state?.surveyId,
-        activeTab: 'question',
+        activeTab: 'list',
         activeId: questions[0]?.id,
       },
     })
