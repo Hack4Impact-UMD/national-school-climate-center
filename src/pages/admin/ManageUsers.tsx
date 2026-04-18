@@ -1,25 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Search, Plus } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { getMembers, listenMembers, inviteMemberByEmail } from '@/lib/admin'
-import { isValidEmail, formatTimestamp } from '@/lib/utils'
-import type { Role, Member } from '@/types/auth'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { useAuth } from '@/contexts/AuthContext'
 import {
@@ -34,7 +15,7 @@ import { useForm } from 'react-hook-form'
 
 export default function ManageUsers() {
   const [loading, setLoading] = useState(true)
-  const [schoolId, setSchoolId] = useState(null)
+  const [schoolId, setSchoolId] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [passError, setPassError] = useState<string | null>(null)
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null)
@@ -43,6 +24,7 @@ export default function ManageUsers() {
 
   useEffect(() => {
     if (!user) return
+    setLoading(false)
 
     async function getSchoolName() {
       if (user) {
@@ -103,14 +85,15 @@ export default function ManageUsers() {
 
   const changePassSubmit = async (data: ChangePassFormData) => {
     if (!user || !user.email) return
+    if (data.newPassword !== data.confirmPassword) {
+      setPassError('Passwords do not match')
+      return
+    }
 
     try {
       const cred = EmailAuthProvider.credential(user.email, data.password)
       await reauthenticateWithCredential(user, cred)
-      if (data.newPassword !== data.confirmPassword) {
-        setPassError('Passwords do not match')
-        return
-      }
+
       await updatePassword(user, data.newPassword)
       setPassSuccess('Password successfully changed')
       setPassError(null)
