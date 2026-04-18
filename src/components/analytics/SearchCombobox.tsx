@@ -44,7 +44,7 @@ export function SearchCombobox({
   }, [])
 
   const handleFocus = () => {
-    setQuery('')
+    setQuery(selectedName)
     setOpen(true)
     setHighlighted(-1)
   }
