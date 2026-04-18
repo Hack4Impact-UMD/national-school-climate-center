@@ -1,8 +1,5 @@
-import {
-  RadioGroup,
-  RadioButton,
-} from '@/components/ui/chart-type-selector-group'
 import type { ChartType } from '../../types/chartTypes'
+import { Button } from '@/components/ui/button'
 
 type Props = {
   value: ChartType
@@ -18,24 +15,27 @@ export default function ChartTypeSelector({ value, onChange }: Props) {
   ]
 
   return (
-    <div className="p-1 border-primary border-2 rounded-md inline-block">
-      <RadioGroup
-        value={value}
-        onValueChange={(v) => onChange(v as ChartType)}
-        className="flex gap-2"
-      >
-        {options.map((opt) => (
-          <RadioButton
+    <div className="inline-flex rounded-2xl border border-primary p-1">
+      {options.map((opt) => {
+        const active = value === opt.value
+
+        return (
+          <Button
             key={opt.value}
-            value={opt.value}
-            variant={value === opt.value ? 'default' : 'ghost'}
-            size="default"
-            className={value === opt.value ? 'text-white' : 'text-primary'}
+            type="button"
+            variant={'ghost'}
+            onClick={() => onChange(opt.value)}
+            className={
+              'px-4 py-2 text-sm rounded-lg transition-colors ' +
+              (active
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-heading hover:bg-secondary/20')
+            }
           >
             {opt.label}
-          </RadioButton>
-        ))}
-      </RadioGroup>
+          </Button>
+        )
+      })}
     </div>
   )
 }

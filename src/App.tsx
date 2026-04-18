@@ -10,12 +10,20 @@ import ManageUsers from './pages/admin/ManageUsers'
 import General from './pages/admin/General'
 import SurveyBuilder from './pages/survey/SurveyBuilder'
 import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
+import CreatePulseSurvey from './pages/survey/CreatePulseSurvey'
 import AllSurveys from './pages/survey/AllSurveys'
 import SurveyDetails from './pages/survey/SurveyDetails'
 import Layout from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
+import SurveyLandingPage from './pages/public/SurveyLandingPage'
+import TakeSurvey from './pages/survey/TakeSurvey'
 
+/**
+ * Defines the application's top-level route map and routing structure.
+ *
+ * @returns The root React element that renders the application's route tree
+ */
 export default function App() {
   return (
     <Routes>
@@ -23,6 +31,8 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/create-account/nscc" element={<CreateAccountNSCC />} />
       <Route path="/create-account/school" element={<CreateAccountSchool />} />
+      <Route path="/surveys/respond/:surveyId" element={<SurveyLandingPage />} />
+      <Route path="/surveys/take/:surveyId" element={<TakeSurvey />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
@@ -39,11 +49,21 @@ export default function App() {
               path="/surveys/create/challenge"
               element={<CreateChallengeSurvey />}
             />
-            <Route 
+            <Route
               path="/surveys/create/challenge/review"
-              element={<ReviewSurveyPage defaultSurveyType="challenge" />}
+              element={<ReviewSurveyPage defaultSurveyType="Challenge" />}
             />
-            {/* <Route path="/surveys" element={<AllSurveys />} /> (moved to NSCC admin only*/}
+
+            <Route
+              path="/surveys/create/pulse"
+              element={<CreatePulseSurvey />}
+            />
+            <Route
+              path="/surveys/create/pulse/review"
+              element={<ReviewSurveyPage defaultSurveyType="Pulse" />}
+            />
+
+            <Route path="/surveys" element={<AllSurveys />} />
           </Route>
 
           <Route element={<ProtectedRoute requiredAction="read" />}>

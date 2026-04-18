@@ -158,7 +158,7 @@ export function usePublishedSurveys(params?: { type?: 'pulse' | 'challenge' | nu
 
         const requestedType = params?.type ?? null
         const filtered = requestedType
-          ? publishedOrLegacy.filter((s) => (s as any).type === requestedType)
+          ? publishedOrLegacy.filter((s) => (s as any).type?.toLowerCase() === requestedType)
           : publishedOrLegacy
 
         // prefer sorting by createdAt if it exists, but don't require it.

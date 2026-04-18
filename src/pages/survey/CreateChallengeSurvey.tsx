@@ -1,14 +1,19 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
-import { QuestionForm } from '@/components/survey/QuestionForm'
 import { QuestionList } from '@/components/survey/QuestionList'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import type { Question } from '@/types/surveybuilder'
 import WorkflowSection from '@/components/survey/WorkFlowSection'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { createSurvey } from '@/functions/firebaseFunctions'
+import { useAuth } from '@/contexts/AuthContext'
+import type { Survey } from '@/types/survey'
 
 const DEFAULT_QUESTIONS: Question[] = [
   {
@@ -31,14 +36,23 @@ type IncomingQuestion = Partial<Question> & {
 
 export default function CreateChallengeSurvey() {
   const location = useLocation()
+  const { user } = useAuth() // used for survey createdBy
   const incomingState = (location.state ?? {}) as {
+    school?: string
+    district?: string
     questions?: IncomingQuestion[]
     activeId?: string
-    activeTab?: 'question' | 'list' | 'workflow'
-    defaultTab?: 'question' | 'list' | 'workflow'
+    activeTab?: 'list' | 'workflow'
+    defaultTab?: 'list' | 'workflow'
     surveyTitle?: string
-    surveyType?: 'challenge' | 'pulse'
+    surveyDescription?: string
+    surveyType?: 'Challenge' | 'Pulse' | 'challenge' | 'pulse'
   }
+
+  const normalizedSurveyType =
+    incomingState.surveyType?.toLowerCase() === 'pulse' ? 'pulse' : 'challenge'
+  const surveyTypeLabel =
+    normalizedSurveyType === 'pulse' ? 'Pulse' : 'Challenge'
 
   function normalizeQuestion(q: IncomingQuestion, index: number): Question {
     const ratingMatch = q.type ? /^rating-(\d+)/.exec(q.type) : null
@@ -52,14 +66,13 @@ export default function CreateChallengeSurvey() {
           : []
 
     const questionType: Question['questionType'] =
-      q.questionType ?? (normalizedOptions.length ? 'multiple-choice' : 'open-ended')
+      q.questionType ??
+      (normalizedOptions.length ? 'multiple-choice' : 'open-ended')
     const inputType: Question['inputType'] =
-      q.inputType ??
-      (questionType === 'multiple-choice'
-        ? 'single'
-        : 'text')
+      q.inputType ?? (questionType === 'multiple-choice' ? 'single' : 'text')
 
-    const fallbackName = q.textOverride || q.text || q.prompt || q.name || `Question ${index}`
+    const fallbackName =
+      q.textOverride || q.text || q.prompt || q.name || `Question ${index}`
     const prompt = q.prompt || q.textOverride || q.text || fallbackName
 
     return {
@@ -72,12 +85,31 @@ export default function CreateChallengeSurvey() {
     }
   }
 
+  // initial states and values to be used for createSurvey skeleton
+
+  const initialSurveyTitle =
+    incomingState.surveyTitle ??
+    (surveyTypeLabel === 'Pulse' ? 'Pulse Survey' : 'Challenge Survey')
+  const initialSurveyDescription =
+    incomingState.surveyDescription ??
+    (surveyTypeLabel === 'Pulse'
+      ? 'This is a pulse survey.'
+      : 'This is a challenge survey.')
+
   const initialQuestions =
     incomingState.questions && incomingState.questions.length
       ? incomingState.questions.map((q, idx) => normalizeQuestion(q, idx + 1))
       : DEFAULT_QUESTIONS
 
+  // const initialSurveyTitle = incomingState.surveyTitle ?? 'Challenge Survey'
+  // const initialSurveyDescription = incomingState.surveyDescription ?? 'This is a challenge survey.'
+
   const [questions, setQuestions] = useState<Question[]>(initialQuestions)
+
+  const [surveyTitle, setSurveyTitle] = useState<string>(initialSurveyTitle)
+  const [surveyDescription, setSurveyDescription] = useState<string>(
+    initialSurveyDescription
+  )
 
   const [activeId, setActiveId] = useState<string>(
     incomingState.activeId ?? initialQuestions[0]?.id ?? 'q1'
@@ -85,13 +117,49 @@ export default function CreateChallengeSurvey() {
   const [tab, setTab] = useState<'question' | 'list' | 'workflow'>(
     incomingState.activeTab ?? incomingState.defaultTab ?? 'question'
   )
-
-  const active = useMemo(
-    () => questions.find((q) => q.id === activeId) ?? questions[0],
-    [questions, activeId]
-  )
+  const [createdSurveyId, setCreatedSurveyId] = useState<string | null>(null)
+  const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
 
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // checks if a draft already exists in this session or mismatched auth
+    if (hasCreatedDraftRef.current || !user) {
+      return
+    }
+
+    // createSurvey will be called using a skeleton object so that it exists in db
+    hasCreatedDraftRef.current = true
+    const skeletonSurvey = {
+      title: initialSurveyTitle,
+      description: initialSurveyDescription,
+      createdBy: user.uid,
+      createdAt: null, // unable to access timestamp till after creation in firestore
+      updatedAt: null, // which sets it
+      status: 'Draft',
+      visibility: 'School',
+      questionCount: initialQuestions.length,
+      responseCount: 0,
+      school_id: '',
+      district_id: '',
+      tags: [],
+      type: 'Challenge',
+    } as unknown as Survey // to bypass type checks on the timestamp
+
+    createSurvey(skeletonSurvey)
+      .then((docRef) => {
+        setCreatedSurveyId(docRef.id)
+      })
+      .catch((error) => {
+        hasCreatedDraftRef.current = false // so that draft retry is allowed
+        console.error('Failed to create challenge survey draft', error)
+      })
+  }, [
+    user,
+    initialQuestions.length,
+    initialSurveyDescription,
+    initialSurveyTitle,
+  ])
 
   function addBlankQuestion() {
     const id = crypto.randomUUID()
@@ -119,14 +187,21 @@ export default function CreateChallengeSurvey() {
     })
   }
 
+  //need to add school_name here after the page is created
   function handleReviewSurvey() {
-    navigate('/surveys/create/challenge/review', {
+    // const surveyType =
+    //   incomingState.surveyType === 'pulse' ? 'Pulse' : 'Challenge'
+    navigate(`/surveys/create/${normalizedSurveyType}/review`, {
       state: {
         questions,
-        surveyTitle: 'Challenge Survey',
-        surveyType: 'challenge',
+        surveyTitle,
+        surveyDescription,
+        surveyType: surveyTypeLabel,
         activeId,
         activeTab: tab,
+        surveyId: createdSurveyId, // using to keep track of surveys
+        school: incomingState.school,
+        district: incomingState.district,
       },
     })
   }
@@ -142,7 +217,7 @@ export default function CreateChallengeSurvey() {
     }
     setQuestions((prev) => [...prev, next])
     setActiveId(nextId)
-    setTab('question')
+    setTab('list')
   }
 
   return (
@@ -152,35 +227,50 @@ export default function CreateChallengeSurvey() {
         alt="National School Climate Center"
         className="w-40"
       />
-      <SurveyHeader title="Survey – Challenge" subtitle="" />
+      <SurveyHeader
+        title={`Survey – ${incomingState.surveyType}`}
+        subtitle=""
+      />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-4">
+      <div className="mt-4 border-b" />
+
+      <Card className="mt-4 border-none shadow-none">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Survey Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Title</Label>
+            <Input
+              id="survey-title"
+              value={surveyTitle}
+              onChange={(event) => setSurveyTitle(event.target.value)}
+              placeholder="Enter survey title"
+              className="font-body"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="font-body text-sm">Description</Label>
+            <Textarea
+              id="survey-description"
+              value={surveyDescription}
+              onChange={(event) => setSurveyDescription(event.target.value)}
+              placeholder="Enter survey description"
+              className="font-body"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as typeof tab)}
+        className="mt-4"
+      >
         <TabsList className="w-full justify-start bg-transparent">
-          <TabsTrigger value="question">Question</TabsTrigger>
           <TabsTrigger value="list">List</TabsTrigger>
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="question">
-          <Card className="mt-2 border-none shadow-none">
-            <CardHeader>
-              <CardTitle className="text-lg">Edit Question</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {active ? (
-                <QuestionForm
-                  key={active.id}
-                  value={active}
-                  onChange={updateActiveQuestion}
-                />
-              ) : (
-                <div className="text-sm text-muted-foreground">
-                  No question selected.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="list">
           <div className="w-full space-y-4">
@@ -188,13 +278,9 @@ export default function CreateChallengeSurvey() {
               items={questions}
               activeId={activeId}
               onSelect={setActiveId}
-              onRename={(id, name) =>
-                setQuestions((prev) =>
-                  prev.map((q) => (q.id === id ? { ...q, name } : q))
-                )
-              }
               onDelete={deleteQuestion}
               onDuplicate={duplicateQuestion}
+              onChange={updateActiveQuestion}
             />
 
             <Card className="border-primary rounded-2xl">
@@ -237,7 +323,7 @@ export default function CreateChallengeSurvey() {
             }))}
             onEdit={(q) => {
               setActiveId(q.id)
-              setTab('question')
+              setTab('list')
             }}
             onReview={handleReviewSurvey}
             selectedId={activeId}
