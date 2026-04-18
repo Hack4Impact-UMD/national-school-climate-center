@@ -51,7 +51,7 @@ export default function SurveyBuilder() {
               state: { defaultTab: 'list', surveyType: 'Challenge' },
             })
           }
-          className="rounded-2xl border bg-transparent p-6 flex-none w-full md:w-80 md:h-60 min-h-[12rem] hover:bg-muted/40 transition-colors cursor-pointer shadow-md"
+          className="rounded-2xl border bg-transparent p-6 flex-none w-full md:w-80 md:h-60 min-h-[12rem] hover:bg-muted transition-colors cursor-pointer shadow-md"
         >
           <div className="flex flex-col items-center text-center gap-2">
             <img
@@ -75,7 +75,7 @@ export default function SurveyBuilder() {
               state: { defaultTab: 'list', surveyType: 'Pulse' },
             })
           }
-          className="rounded-2xl border bg-transparent p-6 flex-none w-full md:w-80 md:h-60 min-h-[12rem] hover:bg-muted/40 transition-colors cursor-pointer shadow-md"
+          className="rounded-2xl border bg-transparent p-6 flex-none w-full md:w-80 md:h-60 min-h-[12rem] hover:bg-muted transition-colors cursor-pointer shadow-md"
         >
           <div className="flex flex-col items-center text-center gap-2">
             <img
@@ -119,12 +119,17 @@ export default function SurveyBuilder() {
       {!loading && !error && pulseSurveys.length > 0 && (
         <div className="flex flex-col md:flex-row items-start gap-4 mb-5 overflow-x-auto max-w-full">
           {pulseSurveys.map((survey) => (
+            <div
+              key={survey.id}
+              className="hover:bg-muted transition-colors cursor-pointer"
+            >
             <ExistingSurvey
               key={survey.id}
               title={survey.title}
               description={survey.description}
               onOpen={() => handleDuplicate(survey.id, survey.type)}
             />
+        </div>
           ))}
         </div>
       )}
@@ -162,12 +167,17 @@ export default function SurveyBuilder() {
       {!loading && !error && challengeSurveys.length > 0 && (
         <div className="flex flex-col md:flex-row items-start gap-4 mb-5 overflow-x-auto max-w-full">
           {challengeSurveys.map((survey) => (
+            <div
+              key={survey.id}
+              className="hover:bg-muted transition-colors cursor-pointer"
+            >
             <ExistingSurvey
               key={survey.id}
               title={survey.title}
               description={survey.description}
               onOpen={() => handleDuplicate(survey.id, survey.type)}
             />
+          </div>
           ))}
         </div>
       )}

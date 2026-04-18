@@ -68,6 +68,36 @@ type ChartEntry = {
   chartData: { name: string; value: number }[]
 }
 
+type CachedData = {
+  responses: ResponseRecord[]
+  cachedAt: number
+}
+
+const CACHE_KEY = 'nscc_analytics_responses' // key used to store and retrieve data from localstorage
+const CACHE_TTL_MS = 15 * 60 * 1000 // resets cached data every 15 minutes
+
+function loadFromCache(): ResponseRecord[] | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) {
+      return null
+    }
+    const parsed = JSON.parse(raw) as CachedData
+    if (Date.now() - parsed.cachedAt > CACHE_TTL_MS) {
+      localStorage.removeItem(CACHE_KEY)
+      return null
+    }
+    return parsed.responses
+  } catch {
+    return null
+  }
+}
+
+function saveToCache(responses: ResponseRecord[]) {
+  const data: CachedData = { responses, cachedAt: Date.now() }
+  localStorage.setItem(CACHE_KEY, JSON.stringify(data))
+}
+
 const PAGE_SIZE = 4
 
 const defaultFilterState: FilterState = {
@@ -103,20 +133,26 @@ const extractDateString = (
   return null
 }
 
+const initialCache = loadFromCache()
+
 export default function Analytics() {
   const [chartType, setChartType] = useState<ChartType>('bar')
-  const [responses, setResponses] = useState<ResponseRecord[]>([])
+  const [responses, setResponses] = useState<ResponseRecord[]>(
+    initialCache ?? []
+  )
   const [filters, setFilters] = useState<FilterState>(defaultFilterState)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(initialCache === null)
   const [error, setError] = useState<string | null>(null)
   const [exporting, setExport] = useState(false)
 
-
   useEffect(() => {
     let isMounted = true
+    const hasCachedData = responses.length > 0
 
     const fetchAnalyticsData = async () => {
-      setLoading(true)
+      if (!hasCachedData) {
+        setLoading(true)
+      }
       setError(null)
 
       try {
@@ -181,11 +217,12 @@ export default function Analytics() {
           })
         }
         if (isMounted) {
+          saveToCache(responseRecords)
           setResponses(responseRecords)
         }
       } catch (err) {
         console.error(err)
-        if (isMounted) {
+        if (isMounted && !hasCachedData) {
           setError('Unable to load survey analytics right now.')
         }
       } finally {
@@ -508,7 +545,7 @@ export default function Analytics() {
             <GenerateReport setExport={setExport} chartsData={charts} />
           </div>
         </div>
-      
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
           {(exporting ? charts : paginatedCharts).map((chart) => (
             <ResponseChart
@@ -519,12 +556,13 @@ export default function Analytics() {
             />
           ))}
         </div>
-        {totalPages > 1 && !exporting &&(
+        {totalPages > 1 && !exporting && (
           <div className="flex items-center justify-between mt-4">
             <Button
               variant="outline"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
+              className="hover:bg-secondary/20 cursor-pointer"
             >
               Previous
             </Button>
@@ -535,6 +573,7 @@ export default function Analytics() {
               variant="outline"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
+              className="hover:bg-secondary/20 cursor-pointer"
             >
               Next
             </Button>

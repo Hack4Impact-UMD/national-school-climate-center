@@ -322,7 +322,7 @@ export default function AllSurveys() {
                     handleExportPDF()
                     setDrop(false)
                   }}
-                    className="w-full rounded-none">
+                    className="w-full rounded-none hover:bg-secondary/50 cursor-pointer">
                     PDF
                   </Button>
 
@@ -330,7 +330,7 @@ export default function AllSurveys() {
                     handleExportCSV()
                     setDrop(false)
                   }}
-                    className="w-full rounded-none mt-1">
+                    className="w-full rounded-none mt-1 hover:bg-secondary/50 cursor-pointer">
                     CSV
                   </Button>
                 </div>
