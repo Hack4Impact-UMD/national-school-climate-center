@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import {
   MapContainer,
   TileLayer,
@@ -354,21 +355,14 @@ export default function GeoMapDemo() {
     <div className="grid grid-rows-[auto_1fr] gap-3 w-full h-[80vh]">
       {/* controls */}
       <div className="flex items-center gap-3">
-        <label className="text-sm font-medium">
-          Question:&nbsp;
-          <select
-            className="border rounded px-2 py-1"
-            value={selectedQuestion}
-            onChange={(e) => setSelectedQuestion(e.target.value)}
-          >
-            {questionIds.length === 0 && <option value="">(none)</option>}
-            {questionIds.map((qid) => (
-              <option key={qid} value={qid}>
-                {qid}
-              </option>
-            ))}
-          </select>
-        </label>
+        <span className="text-sm font-medium">Question:</span>
+        <SearchCombobox
+          value={selectedQuestion || null}
+          onChange={(id) => setSelectedQuestion(id ?? '')}
+          options={questionIds.map((qid) => ({ id: qid, name: qid }))}
+          placeholder="Select a question"
+          className="w-[240px]"
+        />
         <div className="text-sm">Schools with responses: {points.length}</div>
       </div>
 
