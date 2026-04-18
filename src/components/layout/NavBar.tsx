@@ -69,7 +69,7 @@ export default function NavBar() {
             </div>
           </>
         )}
-        <hr className="border-white/50 h-6"/>
+        <hr className="border-white/50 h-6" />
         {can(role, 'read') && (
           <>
             <h3 className="font-heading text-xl text-heading text-white">
@@ -86,7 +86,7 @@ export default function NavBar() {
                 </h3>
               </Link>
             </div>
-            <hr className="border-white/50 h-6"/>
+            <hr className="border-white/50 h-6" />
             <p className="font-heading text-xl text-heading text-white">
               Settings
             </p>
@@ -100,12 +100,12 @@ export default function NavBar() {
               </Link>
               {can(role, 'manage_users') && (
                 <Link
-                  to="/manage-users"
+                  to="/manage-account"
                   className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
                 >
                   <Users className="w-5 h-5" />
                   <h3 className="font-heading text-lg text-inherit">
-                    Manage Users
+                    Manage Account
                   </h3>
                 </Link>
               )}
@@ -118,7 +118,7 @@ export default function NavBar() {
                   Contact Us
                 </h3>
               </Link>
-              <hr className="border-white/50"/>
+              <hr className="border-white/50" />
               <button
                 onClick={handleLogout}
                 className="flex items-center text-white hover:bg-white/20 transition-colors p-2 rounded-md w-full mb-5"

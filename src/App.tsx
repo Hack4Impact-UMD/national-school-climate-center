@@ -15,7 +15,7 @@ import AllSurveys from './pages/survey/AllSurveys'
 import SurveyDetails from './pages/survey/SurveyDetails'
 import Layout from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
-import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
+import ReviewSurveyPage from './pages/survey/ReviewSurveyPage'
 import SurveyLandingPage from './pages/public/SurveyLandingPage'
 import TakeSurvey from './pages/survey/TakeSurvey'
 
@@ -31,7 +31,10 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/create-account/nscc" element={<CreateAccountNSCC />} />
       <Route path="/create-account/school" element={<CreateAccountSchool />} />
-      <Route path="/surveys/respond/:surveyId" element={<SurveyLandingPage />} />
+      <Route
+        path="/surveys/respond/:surveyId"
+        element={<SurveyLandingPage />}
+      />
       <Route path="/surveys/take/:surveyId" element={<TakeSurvey />} />
 
       {/* Authenticated shell */}
@@ -74,7 +77,7 @@ export default function App() {
           <Route element={<ProtectedRoute requiredAction="manage_users" />}>
             <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/surveys/:surveyId" element={<SurveyDetails />} />
-            <Route path="/manage-users" element={<ManageUsers />} />
+            <Route path="/manage-account" element={<ManageUsers />} />
             <Route path="/general" element={<General />} />
           </Route>
           {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
