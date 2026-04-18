@@ -48,6 +48,7 @@ export function InactiveLogout() {
       const timeLeft = LOGOUT - (Date.now() - timeActive)
 
       if (timeLeft <= 0){
+        clearInterval(interval)  
         handleLogout()
         return
       }
