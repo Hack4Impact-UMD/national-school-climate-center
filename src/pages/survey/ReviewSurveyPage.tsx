@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
 import { editSurvey } from '@/functions/firebaseFunctions'
 import type { Survey } from '@/types/survey'
+import { PublishSuccessDialog } from '@/components/survey/PublishSucessDialog'
 
 type LocationState = {
   questions: BuilderQuestion[]
@@ -45,6 +46,7 @@ export default function ReviewSurveyPage({
 
   const [publishing, setPublishing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
 
   const effectiveDescription = surveyDescription ?? ''
   const [error, setError] = useState<string | null>(null)
@@ -122,8 +124,7 @@ export default function ReviewSurveyPage({
         navigator.clipboard.writeText(url).catch(() => {})
       }
 
-      alert(`Survey published! Share this link with respondents:\n\n${url}`)
-      navigate('/surveys')
+      setPublishedUrl(url)
     } catch (err) {
       console.error(err)
       setError('Failed to publish survey. Please try again.')
@@ -207,6 +208,16 @@ export default function ReviewSurveyPage({
 
   return (
     <div className="mx-auto max-w-6xl p-6">
+      {/* Publish Success Dialog */}
+      <PublishSuccessDialog
+        url={publishedUrl ?? ''}
+        open={!!publishedUrl}
+        onClose={() => setPublishedUrl(null)}
+        onNavigate={() => {
+          setPublishedUrl(null)
+          navigate('/surveys')
+        }}
+      />
       <img
         src="/logo.png"
         alt="National School Climate Center"
