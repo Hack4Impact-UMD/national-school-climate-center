@@ -57,10 +57,6 @@ export default function CreateAccountSchool() {
     setIsLoading(true)
 
     try {
-      // TODO: Update firestore.rules to allow self-creation of member records on signup
-      // Current rules require admin to create members. Need to add:
-      // allow create: if request.auth != null && request.auth.uid == uid
-
       // 1. Create Firebase Auth account
       const userCredential = await createUserWithEmailAndPassword(
         auth,
