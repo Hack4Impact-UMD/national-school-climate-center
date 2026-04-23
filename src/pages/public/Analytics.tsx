@@ -74,7 +74,7 @@ type CachedData = {
 }
 
 const CACHE_KEY = 'nscc_analytics_responses' // key used to store and retrieve data from localstorage
-const CACHE_TTL_MS = 15 * 60 * 1000 // resets cached data every 15 minutes
+const CACHE_TTL_MS = 10 * 60 * 1000 // resets cached data every 10 minutes
 
 function loadFromCache(): ResponseRecord[] | null {
   try {
