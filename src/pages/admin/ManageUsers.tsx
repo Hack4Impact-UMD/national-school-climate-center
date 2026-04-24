@@ -8,6 +8,7 @@ import {
   reauthenticateWithCredential,
   verifyBeforeUpdateEmail,
   updatePassword,
+  updateEmail,
 } from 'firebase/auth'
 import { db } from '@/firebase/config'
 import { doc, getDoc } from 'firebase/firestore'
@@ -75,8 +76,8 @@ export default function ManageUsers() {
     try {
       const cred = EmailAuthProvider.credential(user.email, data.password)
       await reauthenticateWithCredential(user, cred)
-      await verifyBeforeUpdateEmail(user, data.email)
-      setEmailSuccess(`Verification email sent to ${data.email}`)
+      await updateEmail(user, data.email)
+      setEmailSuccess(`Email successfully changed to ${data.email}`)
       setEmailError(null)
     } catch (err) {
       setEmailError(err instanceof Error ? err.message : 'An error occurred')
