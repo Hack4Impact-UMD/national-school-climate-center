@@ -190,6 +190,25 @@ export default function CreateChallengeSurvey() {
     })
   }
 
+  function reorderQuestions(fromIndex: number, toIndex: number) {
+    setQuestions((prev) => {
+      if (
+        fromIndex === toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= prev.length ||
+        toIndex >= prev.length
+      ) {
+        return prev
+      }
+
+      const next = [...prev]
+      const [movedQuestion] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, movedQuestion)
+      return next
+    })
+  }
+
   //need to add school_name here after the page is created
   function handleReviewSurvey() {
     // const surveyType =
@@ -283,6 +302,7 @@ export default function CreateChallengeSurvey() {
               onSelect={setActiveId}
               onDelete={deleteQuestion}
               onDuplicate={duplicateQuestion}
+              onMove={reorderQuestions}
               onChange={updateActiveQuestion}
             />
 
