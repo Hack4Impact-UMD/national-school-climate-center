@@ -36,6 +36,77 @@ interface SurveyData {
 
 type Screen = 'welcome' | 'identity' | 'questions' | 'thankyou'
 
+type CachedAnalyticsResponse = {
+  id: string
+  questionId: string
+  question: string
+  surveyTitle: string
+  surveyType: string | null
+  surveyID: string
+  questionType: string | null
+  school: string | null
+  respondentGroup: string | null
+  date: string | null
+  answerValue: string
+}
+
+type CachedAnalyticsData = {
+  responses: CachedAnalyticsResponse[]
+  cachedAt: number
+}
+
+function appendResponseToAnalyticsCache(args: {
+  docId: string
+  surveyId: string
+  survey: SurveyData
+  questions: SurveyQuestion[]
+  answers: Record<string, string>
+}) {
+  const { docId, surveyId, survey, questions, answers } = args
+  try {
+    const raw = localStorage.getItem('nscc_analytics_responses')
+    if (!raw) return
+
+    const parsed = JSON.parse(raw) as CachedAnalyticsData
+    const existing = Array.isArray(parsed.responses) ? parsed.responses : []
+    const today = new Date().toISOString().split('T')[0]
+    const surveyTitle = survey.title ?? 'Untitled Survey'
+    const surveyType = survey.type ?? null
+    const school = survey.school_id ?? null
+
+    const newRecords: CachedAnalyticsResponse[] = questions.map((q, index) => {
+      const rawValue = answers[q.question_id] ?? null
+      return {
+        id: `${docId}-${q.question_id}-${index}`,
+        questionId: q.question_id,
+        question: q.text ?? q.question_id,
+        surveyTitle,
+        surveyType,
+        surveyID: surveyId,
+        questionType: q.questionType ?? 'multiple-choice',
+        school,
+        respondentGroup: 'students',
+        date: today,
+        answerValue:
+          rawValue === null || rawValue === '' ? 'No response' : rawValue,
+      }
+    })
+
+    const updated: CachedAnalyticsData = {
+      responses: [...existing, ...newRecords],
+      cachedAt: parsed.cachedAt ?? Date.now(),
+    }
+    localStorage.setItem('nscc_analytics_responses', JSON.stringify(updated))
+  } catch (err) {
+    console.error('Failed to update analytics cache:', err)
+    try {
+      localStorage.removeItem('nscc_analytics_responses')
+    } catch (err) {
+      console.error('Failed to clear analytics cache:', err)
+    }
+  }
+}
+
 /**
  * Renders the page header containing the site logo.
  *
@@ -156,10 +227,17 @@ export default function TakeSurvey() {
         responseData.respondentEmail = respondentEmail
       }
 
-      await addDoc(
+      const docRef = await addDoc(
         collection(db, 'surveys', surveyId, 'responses'),
         responseData
       )
+      appendResponseToAnalyticsCache({
+        docId: docRef.id,
+        surveyId,
+        survey,
+        questions,
+        answers,
+      })
       setScreen('thankyou')
     } catch (err) {
       console.error('Error submitting response:', err)
