@@ -37,99 +37,100 @@ export default function NavBar() {
         <img
           src="/logo.png"
           alt="Logo"
-          className="w-56 h-auto object-contain my-5"
+          className="w-56 h-20 object-contain my-5"
         />
       </div>
 
       <div className="px-6 text-white mt-8">
         {can(role, 'create') && (
           <>
-            <h3 className="font-heading text-2xl text-heading text-white">
+            <h3 className="font-heading text-xl text-heading text-white">
               Survey Creation
             </h3>
-            <div className="mt-3 text-lg mb-16 space-y-2">
+            <div className="mt-3 text-lg mb-5 space-y-2">
               <Link
                 to="/surveys/builder"
-                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+                className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
               >
                 <ClipboardList className="w-5 h-5" />
-                <h3 className="font-heading text-2xl text-inherit">
+                <h3 className="font-heading text-lg text-inherit">
                   Survey Builder
                 </h3>
               </Link>
               <Link
                 to="/surveys"
-                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+                className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
               >
                 <CheckSquare className="w-5 h-5" />
-                <h3 className="font-heading text-2xl text-inherit">
+                <h3 className="font-heading text-lg text-inherit">
                   All Surveys
                 </h3>
               </Link>
             </div>
           </>
         )}
-
+        <hr className="border-white/50 h-6"/>
         {can(role, 'read') && (
           <>
-            <h3 className="font-heading text-2xl text-heading text-white">
+            <h3 className="font-heading text-xl text-heading text-white">
               Insights
             </h3>
-            <div className="mt-3 text-lg space-y-2 mb-10">
+            <div className="mt-3 text-lg space-y-2 mb-5">
               <Link
                 to="/analytics"
-                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+                className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
               >
                 <BarChart3 className="w-5 h-5" />
-                <h3 className="font-heading text-2xl text-inherit">
+                <h3 className="font-heading text-lg text-inherit">
                   Survey Analytics
                 </h3>
               </Link>
             </div>
-
-            <p className="font-heading text-2xl text-heading text-white">
+            <hr className="border-white/50 h-6"/>
+            <p className="font-heading text-xl text-heading text-white">
               Settings
             </p>
             <div className="mt-3 text-lg space-y-2">
               <Link
                 to="/general"
-                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+                className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
               >
                 <Settings className="w-5 h-5" />
-                <h3 className="font-heading text-2xl text-inherit">General</h3>
+                <h3 className="font-heading text-lg text-inherit">General</h3>
               </Link>
               {can(role, 'manage_users') && (
                 <Link
                   to="/manage-users"
-                  className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+                  className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
                 >
                   <Users className="w-5 h-5" />
-                  <h3 className="font-heading text-2xl text-inherit">
+                  <h3 className="font-heading text-lg text-inherit">
                     Manage Users
                   </h3>
                 </Link>
               )}
               <Link
                 to="/contact"
-                className="flex items-center gap-3 text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md"
+                className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
               >
                 <Phone className="w-5 h-5" />
-                <h3 className="font-heading text-2xl text-inherit">
+                <h3 className="font-heading text-lg text-inherit">
                   Contact Us
                 </h3>
               </Link>
+              <hr className="border-white/50"/>
               <button
                 onClick={handleLogout}
-                className="flex items-center text-white hover:bg-background hover:text-body transition-colors p-2 rounded-md w-full"
+                className="flex items-center text-white hover:bg-white/20 transition-colors p-2 rounded-md w-full mb-5"
               >
-                <h3 className="font-heading text-2xl text-inherit">Logout</h3>
+                <h3 className="font-heading text-xl text-inherit">Logout</h3>
               </button>
             </div>
           </>
         )}
       </div>
       <div className="mt-auto">
-        <div className="flex bg-background items-center gap-4 p-4 w-full rounded-t-2xl">
+        <div className="flex bg-white/60 items-center gap-4 p-4 w-full rounded-t-2xl">
           <div className="w-16 h-16 rounded-full bg-gray-300 overflow-hidden">
             <img
               src={pfpSample}
@@ -138,10 +139,10 @@ export default function NavBar() {
             />
           </div>
           <div>
-            <h3 className="font-heading text-2xl text-body">
+            <h3 className="font-heading font-semibold text-xl text-black">
               {user?.email?.split('@')[0] || 'Username'}
             </h3>
-            <p className="font-body text-base text-body">{getRoleLabel()}</p>
+            <p className="font-body text-base text-black">{getRoleLabel()}</p>
           </div>
         </div>
       </div>

@@ -1,16 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 // import { doc, getDoc } from 'firebase/firestore'
 import { auth } from '@/firebase/config'
 import type { Role } from '@/types/auth'
 
-type AuthState = { user: User | null; role: Role | null; loading: boolean }
+type AuthState = { user: User | null; role: Role | null; loading: boolean; logout: () => Promise<void>}
 const AuthCtx = createContext<AuthState>({
   user: null,
   role: null,
   loading: true,
+  logout: async () => {}
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -45,8 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsub
   }, [])
 
+  const logout = async () => {
+    await signOut(auth)
+  }
+
   return (
-    <AuthCtx.Provider value={{ user, role, loading }}>
+    <AuthCtx.Provider value={{ user, role, loading, logout }}>
       {children}
     </AuthCtx.Provider>
   )

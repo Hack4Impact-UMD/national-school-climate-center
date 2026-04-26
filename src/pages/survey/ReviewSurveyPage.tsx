@@ -1,45 +1,64 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/firebase/config";
-import { useAuth } from "@/contexts/AuthContext";
-import type { Question as BuilderQuestion } from "@/types/surveybuilder";
-import type { Question as FirebaseQuestion } from "@/firebase/interfaces";
-import { Button } from "@/components/ui/button";
-import { SurveyHeader } from "@/components/survey/SurveyHeader";
-import { editSurvey } from "@/functions/firebaseFunctions";
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
+import { db } from '@/firebase/config'
+import { useAuth } from '@/contexts/AuthContext'
+import type { Question as BuilderQuestion } from '@/types/surveybuilder'
+import type { Question as FirebaseQuestion } from '@/firebase/interfaces'
+import { Button } from '@/components/ui/button'
+import { SurveyHeader } from '@/components/survey/SurveyHeader'
+import { editSurvey } from '@/functions/firebaseFunctions'
+import type { Survey } from '@/types/survey'
+import { PublishSuccessDialog } from '@/components/survey/PublishSucessDialog'
 
 type LocationState = {
-  questions: BuilderQuestion[];
-  surveyTitle?: string;
-  surveyDescription?: string;
-  surveyType?: "Challenge" | "Pulse";
-  surveyId?: string;
-};
+  questions: BuilderQuestion[]
+  surveyTitle?: string
+  surveyDescription?: string
+  surveyType?: 'Challenge' | 'Pulse'
+  surveyId?: string
+  school?: string
+  district?: string
+}
 
 export default function ReviewSurveyPage({
   defaultSurveyType,
 }: {
-  defaultSurveyType?: "Challenge" | "Pulse";
+  defaultSurveyType?: 'Challenge' | 'Pulse'
 }) {
   const navigate = useNavigate()
   const { state } = useLocation()
   const { user } = useAuth()
 
-  const { questions = [], surveyTitle, surveyDescription, surveyType, surveyId } = (state || {}) as LocationState;
+  const {
+    questions = [],
+    surveyTitle,
+    surveyDescription,
+    surveyType,
+    surveyId,
+  } = (state || {}) as LocationState
 
-  const [publishing, setPublishing] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
 
-  const effectiveDescription = surveyDescription ?? "";
-  const [shareLink, setShareLink] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const effectiveDescription = surveyDescription ?? ''
+  const [error, setError] = useState<string | null>(null)
 
-  const effectiveSurveyType = surveyType ?? defaultSurveyType ?? "Challenge";
+  const effectiveSurveyType = surveyType ?? defaultSurveyType ?? 'Challenge'
   const effectiveTitle =
-    surveyTitle ?? (effectiveSurveyType === "Pulse" ? "Pulse Survey" : "Challenge Survey");
+    surveyTitle ??
+    (effectiveSurveyType === 'Pulse' ? 'Pulse Survey' : 'Challenge Survey')
 
-    function mapQuestionsToFirebase(questions: BuilderQuestion[]): FirebaseQuestion[] {
+  function mapQuestionsToFirebase(
+    questions: BuilderQuestion[]
+  ): FirebaseQuestion[] {
     return questions.map((q, index) => ({
       question_id: q.id,
       order: index,
@@ -47,7 +66,7 @@ export default function ReviewSurveyPage({
       questionType: q.questionType,
       required: false, // default to false; you can adjust if builder has a required field
       options: q.options ?? [],
-    }));
+    }))
   }
 
   async function handlePublish() {
@@ -60,40 +79,52 @@ export default function ReviewSurveyPage({
     setError(null)
 
     try {
-      const questionDocs = mapQuestionsToFirebase(questions);
+      const questionDocs = mapQuestionsToFirebase(questions)
 
-let docId = surveyId;
+      let docId = surveyId
 
       if (docId) {
-        const surveyRef = doc(db, "surveys", docId);
+        const surveyRef = doc(db, 'surveys', docId)
 
         await updateDoc(surveyRef, {
           title: effectiveTitle,
           description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
+          questionCount: questionDocs.length,
           updatedAt: serverTimestamp(),
-          status: "Published",
-        });
+          status: 'Published',
+          school_id: state?.school ?? null,
+          district_id: state?.district ?? null,
+        })
       } else {
-        const docRef = await addDoc(collection(db, "surveys"), {
+        const newSurvey: Survey = {
           title: effectiveTitle,
           description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
-          createdBy: user?.uid ?? null,
+          createdBy: user?.uid ?? 'na',
           createdAt: serverTimestamp(),
-          status: "Published",
-        });
+          status: 'Published',
+          school_id: state?.school ?? null,
+          district_id: state?.district ?? null,
+          updatedAt: serverTimestamp(),
+          visibility: 'School',
+          questionCount: questionDocs.length,
+          responseCount: 0,
+          tags: [],
+        }
+        const docRef = await addDoc(collection(db, 'surveys'), newSurvey)
 
-        docId = docRef.id;
+        docId = docRef.id
       }
-      const url = `${window.location.origin}/surveys/respond/${docId}`;
-      setShareLink(url);
+      const url = `${window.location.origin}/surveys/respond/${docId}`
 
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(url).catch(() => {})
       }
+
+      setPublishedUrl(url)
     } catch (err) {
       console.error(err)
       setError('Failed to publish survey. Please try again.')
@@ -104,9 +135,9 @@ let docId = surveyId;
 
   function handleEdit() {
     const targetPath =
-      effectiveSurveyType === "Pulse"
-        ? "/surveys/create/pulse"
-        : "/surveys/create/Challenge";
+      effectiveSurveyType === 'Pulse'
+        ? '/surveys/create/pulse'
+        : '/surveys/create/challenge'
 
     navigate(targetPath, {
       state: {
@@ -115,54 +146,55 @@ let docId = surveyId;
         surveyDescription: effectiveDescription,
         surveyType: effectiveSurveyType,
         surveyId: state?.surveyId,
-        activeTab: "question",
+        activeTab: 'list',
         activeId: questions[0]?.id,
       },
-    });
+    })
   }
 
-async function handleSaveDraft() {
-  if (!questions.length) {
-    setError("There are no questions to save.");
-    return;
+  async function handleSaveDraft() {
+    if (!questions.length) {
+      setError('There are no questions to save.')
+      return
+    }
+
+    if (!surveyId) {
+      setError('Cannot save draft: missing survey ID.')
+      return
+    }
+
+    setSaving(true)
+    setError(null)
+
+    try {
+      const questionDocs = mapQuestionsToFirebase(questions)
+      const surveyRef = doc(db, 'surveys', surveyId)
+
+      await editSurvey(surveyRef, {
+        title: effectiveTitle,
+        description: effectiveDescription,
+        type: effectiveSurveyType,
+        questions: questionDocs,
+        questionCount: questionDocs.length,
+        status: 'Draft',
+      })
+
+      // Optional: show a toast or alert
+      alert('Draft saved successfully!')
+    } catch (err) {
+      console.error(err)
+      setError('Failed to save draft. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
-
-  if (!surveyId) {
-    setError("Cannot save draft: missing survey ID.");
-    return;
-  }
-
-  setSaving(true);
-  setError(null);
-
-  try {
-    const questionDocs = mapQuestionsToFirebase(questions);
-    const surveyRef = doc(db, "surveys", surveyId);
-
-    await editSurvey(surveyRef, {
-      title: effectiveTitle,
-      description: effectiveDescription,
-      type: effectiveSurveyType,
-      questions: questionDocs,
-      status: "Draft",
-    });
-
-    // Optional: show a toast or alert
-    alert("Draft saved successfully!");
-  } catch (err) {
-    console.error(err);
-    setError("Failed to save draft. Please try again.");
-  } finally {
-    setSaving(false);
-  }
-}
 
   if (!questions.length) {
     return (
       <div className="mx-auto max-w-6xl p-6">
         <SurveyHeader
           title={effectiveTitle}
-          subtitle={effectiveDescription || "Name of School/District"}
+          subtitle={effectiveDescription || 'Name of School/District'}
         />
         <p className="mt-6 font-body text-body text-left">
           No survey questions found. Please return to the builder.
@@ -176,13 +208,24 @@ async function handleSaveDraft() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <img 
-        src="/logo.png" 
-        alt="National School Climate Center" 
-        className="w-40" />
+      {/* Publish Success Dialog */}
+      <PublishSuccessDialog
+        url={publishedUrl ?? ''}
+        open={!!publishedUrl}
+        onClose={() => setPublishedUrl(null)}
+        onNavigate={() => {
+          setPublishedUrl(null)
+          navigate('/surveys')
+        }}
+      />
+      <img
+        src="/logo.png"
+        alt="National School Climate Center"
+        className="w-40"
+      />
       <SurveyHeader
         title={effectiveTitle}
-        subtitle={effectiveDescription || "Name of School/District"}
+        subtitle={effectiveDescription || 'Name of School/District'}
       />
 
       <div className="mt-4 border-b border-secondary">
@@ -232,38 +275,15 @@ async function handleSaveDraft() {
             onClick={handlePublish}
             disabled={publishing}
           >
-            {publishing ? "Publishing..." : "Publish Survey"}
+            {publishing ? 'Publishing...' : 'Publish Survey'}
           </Button>
           <Button
-          className="px-6 cursor-pointer"
-          onClick={handleSaveDraft}
-          disabled={publishing}
+            className="px-6 cursor-pointer"
+            onClick={handleSaveDraft}
+            disabled={publishing}
           >
-            {saving ? "Saving..." : "Save Draft"}
-            </Button>
-
-          {shareLink && (
-            <div className="w-full max-w-xl space-y-1">
-              <p className="text-sm font-body text-body">
-                Survey published! Share this link with respondents:
-              </p>
-              <div className="flex gap-2">
-                <input
-                  className="flex-1 rounded-md border px-3 py-2 text-sm bg-white"
-                  value={shareLink}
-                  readOnly
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigator.clipboard.writeText(shareLink)}
-                  className="whitespace-nowrap cursor-pointer"
-                >
-                  Copy Link
-                </Button>
-              </div>
-            </div>
-          )}
+            {saving ? 'Saving...' : 'Save Draft'}
+          </Button>
 
           {error && <p className="text-sm text-red-600 font-body">{error}</p>}
         </div>
