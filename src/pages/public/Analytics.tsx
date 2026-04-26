@@ -16,6 +16,7 @@ import type {
   FilterState,
   ActiveFilter,
   School,
+  District,
   RespondentGroup,
   QuestionType,
   SurveyType,
@@ -41,6 +42,7 @@ type FirestoreAnswer = {
 type FirestoreResponse = {
   answers?: FirestoreAnswer[]
   school_id?: string
+  district_id?: string
   respondent_group?: string
   surveyTitle?: string
   survey_id?: string
@@ -56,6 +58,7 @@ type ResponseRecord = {
   surveyID: string
   questionType: string | null
   school: string | null
+  district: string | null
   respondentGroup: string | null
   date: string | null
   answerValue: string
@@ -102,6 +105,7 @@ const PAGE_SIZE = 4
 
 const defaultFilterState: FilterState = {
   school: null,
+  district: null,
   respondentGroup: null,
   compareBy: null,
   questionType: null,
@@ -188,6 +192,7 @@ export default function Analytics() {
             const data = doc.data() as FirestoreResponse
             const date = extractDateString(data.submittedAt)
             const school = data.school_id ?? null
+            const district = data.district_id ?? null
             const respondentGroup = data.respondent_group ?? 'students'
 
             data.answers?.forEach((answer, index) => {
@@ -206,6 +211,7 @@ export default function Analytics() {
                 surveyType: questionMetadata?.surveyType ?? null,
                 questionType: questionMetadata?.questionType ?? null,
                 school,
+                district,
                 respondentGroup,
                 date,
                 answerValue:
@@ -240,6 +246,7 @@ export default function Analytics() {
 
   const filterOptions = useMemo(() => {
     const schoolMap = new Map<string, string>()
+    const districtMap = new Map<string, string>()
     const respondentGroupMap = new Map<string, string>()
     const questionTypeMap = new Map<string, string>()
     const surveyTypeMap = new Map<string, string>()
@@ -248,6 +255,9 @@ export default function Analytics() {
     responses.forEach((response) => {
       if (response.school) {
         schoolMap.set(response.school, formatLabel(response.school))
+      }
+      if (response.district) {
+        districtMap.set(response.district, formatLabel(response.district))
       }
       if (response.respondentGroup) {
         respondentGroupMap.set(
@@ -270,6 +280,12 @@ export default function Analytics() {
     })
 
     const schools: School[] = Array.from(schoolMap.entries()).map(
+      ([id, name]) => ({
+        id,
+        name,
+      })
+    )
+    const districts: District[] = Array.from(districtMap.entries()).map(
       ([id, name]) => ({
         id,
         name,
@@ -300,6 +316,7 @@ export default function Analytics() {
 
     return {
       schools,
+      districts,
       respondentGroups,
       questionTypes,
       surveyTypes,
@@ -338,6 +355,9 @@ export default function Analytics() {
       school: new Map(
         filterOptions.schools.map((opt) => [opt.id, opt.name] as const)
       ),
+      district: new Map(
+        filterOptions.districts.map((opt) => [opt.id, opt.name] as const)
+      ),
       respondentGroup: new Map(
         filterOptions.respondentGroups.map((opt) => [opt.id, opt.name] as const)
       ),
@@ -358,6 +378,13 @@ export default function Analytics() {
         key: 'school',
         label: 'School',
         value: optionLabelMaps.school.get(filters.school) ?? filters.school,
+      })
+    }
+    if (filters.district) {
+      list.push({
+        key: 'district',
+        label: 'District',
+        value: optionLabelMaps.district.get(filters.district) ?? filters.district,
       })
     }
     if (filters.respondentGroup) {
@@ -400,6 +427,9 @@ export default function Analytics() {
   const filteredResponses = useMemo(() => {
     return responses.filter((response) => {
       if (filters.school && response.school !== filters.school) {
+        return false
+      }
+      if (filters.district && response.district !== filters.district) {
         return false
       }
       if (

@@ -10,6 +10,7 @@ import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import type {
   FilterState,
   School,
+  District,
   RespondentGroup,
   QuestionType,
   SurveyType,
@@ -28,6 +29,7 @@ type FilterBarProps = {
   onFilterChange: (key: keyof FilterState, value: string | null) => void
   options?: {
     schools?: School[]
+    districts?: District[]
     respondentGroups?: RespondentGroup[]
     questionTypes?: QuestionType[]
     surveyTypes?: SurveyType[]
@@ -38,6 +40,7 @@ type FilterBarProps = {
 export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) {
   const {
     schools = DEFAULT_SCHOOLS,
+    districts = [],
     respondentGroups = DEFAULT_RESPONDENT_GROUPS,
     questionTypes = DEFAULT_QUESTION_TYPES,
     surveyTypes = DEFAULT_SURVEY_TYPES,
@@ -131,6 +134,26 @@ export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) 
             {surveyTypes.map((type) => (
               <SelectItem key={type.id} value={type.id}>
                 {type.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {/* District */}
+        <Select
+          value={filters.district || ''}
+          onValueChange={(value) => onFilterChange('district', value)}
+        >
+          <SelectTrigger
+            className="w-[181px] font-body bg-background border-0 rounded-lg shadow-sm data-[placeholder]:text-[#444444]"
+            style={{ color: '#444444' }}
+          >
+            <SelectValue placeholder="District" />
+          </SelectTrigger>
+          <SelectContent className="bg-card">
+            {districts.map((option) => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.name}
               </SelectItem>
             ))}
           </SelectContent>
