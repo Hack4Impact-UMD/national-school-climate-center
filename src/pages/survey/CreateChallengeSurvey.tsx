@@ -17,7 +17,7 @@ import type { Survey } from '@/types/survey'
 
 const DEFAULT_QUESTIONS: Question[] = [
   {
-    id: 'q1',
+    id: crypto.randomUUID(),
     name: 'Sample Question 1',
     prompt: 'How satisfied are you with your current experience?',
     questionType: 'multiple-choice',

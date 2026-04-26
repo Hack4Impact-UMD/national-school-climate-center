@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import {
   MapContainer,
@@ -320,12 +320,7 @@ export default function GeoMap() {
       try {
         const [responseSnapshot, schoolSnapshot, questionSnapshot] =
           await Promise.all([
-            getDocs(
-              query(
-                collectionGroup(db, 'responses'),
-                where('school_id', '!=', null)
-              )
-            ),
+            getDocs(collectionGroup(db, 'responses')),
             getDocs(collection(db, 'schools')),
             getDocs(collection(db, 'questionBank')),
           ])
@@ -345,6 +340,7 @@ export default function GeoMap() {
         const questionData: QuestionBankItem[] = questionSnapshot.docs.map(
           (doc) => ({
             ...(doc.data() as QuestionBankItem),
+            id: doc.id,
           })
         )
 
@@ -377,6 +373,8 @@ export default function GeoMap() {
     }
   }, [questionIds])
 
+  console.log('questionIds:', questionIds)
+
   // aggregate responses by school_id for the selected question
   const points = useMemo(() => {
     type Agg = { count: number; values: number[] }
@@ -394,6 +392,8 @@ export default function GeoMap() {
         bySchool[sid].values.push(ans.value)
       }
     }
+
+    
 
     //debug
     console.log('bySchool:', bySchool)
@@ -430,6 +430,8 @@ export default function GeoMap() {
     return out
   }, [selectedQuestion, responses, schools])
 
+  console.log('points:', points)
+
   return (
     <div className="grid grid-rows-[auto_1fr] gap-3 w-full h-[80vh]">
       {/* controls */}
@@ -438,7 +440,7 @@ export default function GeoMap() {
         <SearchCombobox
           value={selectedQuestion || null}
           onChange={(id) => setSelectedQuestion(id ?? '')}
-          options={questionIds.map((qid) => ({ id: qid, name: qid }))}
+          options={questions.map((q) => ({ id: q.id, name: q.text ?? q.id }))}
           placeholder="Select a question"
           className="w-[240px]"
         />
@@ -460,7 +462,13 @@ export default function GeoMap() {
             {/* gradient */}
             <svg width="160" height="20" className="block mb-2">
               <defs>
-                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <linearGradient
+                  id="scoreGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
                   <stop offset="0%" stopColor="rgb(255, 55, 80)" />
                   <stop offset="25%" stopColor="rgb(191, 91, 60)" />
                   <stop offset="50%" stopColor="rgb(128, 128, 40)" />
