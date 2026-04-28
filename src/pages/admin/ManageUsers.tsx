@@ -1,213 +1,281 @@
 import { useEffect, useState } from 'react'
-import { Search, Plus } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { useAuth } from '@/contexts/AuthContext'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { getMembers, listenMembers, inviteMemberByEmail } from '@/lib/admin'
-import { isValidEmail, formatTimestamp } from '@/lib/utils'
-import type { Role, Member } from '@/types/auth'
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+  updateEmail,
+  deleteUser,
+} from 'firebase/auth'
+import { db } from '@/firebase/config'
+import { doc, getDoc } from 'firebase/firestore'
+import { useForm } from 'react-hook-form'
 
 export default function ManageUsers() {
-  const [open, setOpen] = useState(false);
-  const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<Role>('admin')
-  const [inviteLoading, setInviteLoading] = useState(false)
-  const [inviteError, setInviteError] = useState<string | null>(null)
-  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null)
-  
-  const roleLabel = (r?: Role | null) => {
-    if (!r) return '-'
-    const map: Record<string, string> = {
-      super_admin: 'Super Admin',
-      admin: 'Admin',
-      student: 'Student',
-      school_personnel: 'School Personnel',
-    }
-    return map[r] ?? r
-  }
-  
+  const [schoolId, setSchoolId] = useState<string | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [passError, setPassError] = useState<string | null>(null)
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null)
+  const [passSuccess, setPassSuccess] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null)
+  const { user, role } = useAuth()
 
   useEffect(() => {
-    getMembers()
-      .then(setMembers)
-      .catch(console.error)
-      .finally(() => setLoading(false))
-    const unsub = listenMembers((m) => setMembers(m))
-    return () => unsub && unsub()
-  }, [])
+    if (!user) return
+    setLoading(false)
 
-  
+    async function getSchoolName() {
+      if (user) {
+        const d = doc(db, 'members', user.uid)
+        const snap = await getDoc(d)
+
+        if (!snap.exists()) return null
+
+        const data = snap.data()
+
+        if (!data.school_id) return null
+
+        return data.school_id
+      }
+    }
+
+    async function loadSchool() {
+      try {
+        const id = await getSchoolName()
+        setSchoolId(id)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSchool()
+  }, [user])
+
+  interface ChangeEmailFormData {
+    email: string
+    password: string
+  }
+
+  interface ChangePassFormData {
+    password: string
+    newPassword: string
+    confirmPassword: string
+  }
+
+  interface DeleteFormData {
+    password: string
+  }
+
+  const emailForm = useForm<ChangeEmailFormData>()
+  const passForm = useForm<ChangePassFormData>()
+  const deleteForm = useForm<DeleteFormData>()
+
+  const changeEmailSubmit = async (data: ChangeEmailFormData) => {
+    if (!user || !user.email) return
+
+    try {
+      const cred = EmailAuthProvider.credential(user.email, data.password)
+      await reauthenticateWithCredential(user, cred)
+      await updateEmail(user, data.email)
+      setEmailSuccess(`Email successfully changed to ${data.email}`)
+      setEmailError(null)
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+
+  const changePassSubmit = async (data: ChangePassFormData) => {
+    if (!user || !user.email) return
+    if (data.newPassword !== data.confirmPassword) {
+      setPassError('Passwords do not match')
+      return
+    }
+
+    try {
+      const cred = EmailAuthProvider.credential(user.email, data.password)
+      await reauthenticateWithCredential(user, cred)
+
+      await updatePassword(user, data.newPassword)
+      setPassSuccess('Password successfully changed')
+      setPassError(null)
+    } catch (err) {
+      setPassError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+
+  const handleDelete = async (data: DeleteFormData) => {
+    if (!user || !user.email) return
+    try {
+      const cred = EmailAuthProvider.credential(user.email, data.password)
+      await reauthenticateWithCredential(user, cred)
+
+      if (window.confirm('Are you sure you want to delete your account?')) {
+        await deleteUser(user)
+        setDeleteSuccess('Account successfully deleted')
+        setDeleteError(null)
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
 
   return (
     <div className="p-6">
       <h1 className="font-heading text-4xl font-bold text-heading mb-4">
-        Manage Access
+        Manage Account
       </h1>
-      <div className="flex justify-between items-center mb-6">
-        <p className="font-body text-lg text-body">
-          Users
-        </p>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Input 
-              type="text"
-              placeholder="Search by name"
-              className="p1-8 bg-gray-100 w-64 cursor-text"
-            />
-            <Search className="absolute right-2 top-2.5 w-4 h-4 text-gray-500" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" /> Invite users
-            </Button>
-          </div>
+      <div className="flex flex-col mb-5 space-y-4">
+        <div>
+          <p className="font-body text-lg text-body">
+            Welcome, {user?.email?.split('@')[0] || 'Username'}.
+          </p>
+          {!loading && role && (
+            <p className="font-body text-lg text-body">
+              {schoolId ?? 'No school found'}
+            </p>
+          )}
         </div>
-      </div>
-
-      <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <table className="w-full text-left">
-          <thead className="bg-blue-50">
-            <tr>
-              <th className="px-6 py-3 text-sm font-semibold text-gray-600">Name</th>
-              <th className="px-6 py-3 text-sm font-semibold text-gray-600">Email</th>
-              <th className="px-6 py-3 text-sm font-semibold text-gray-600">Joined</th>
-              <th className="px-6 py-3 text-sm font-semibold text-gray-600">Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={4} className="px-6 py-8 text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-primary border-r-transparent"></div>
-                    <span className="text-body font-body">Loading users...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : members.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-body font-body">
-                  No users found
-                </td>
-              </tr>
-            ) : (
-              members.map((m) => (
-                <tr key={m.id} className="border-t border-gray-100 h-12">
-                  <td className="px-6">{m.displayName ?? '-'}</td>
-                  <td className="px-6">{m.email ?? '-'}</td>
-                  <td className="px-6">{formatTimestamp(m.joinedAt)}</td>
-                  <td className="px-6">{roleLabel(m.role)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-primary text-2xl font-semibold">
-              Invite Users
-            </DialogTitle>
-            <DialogDescription>
-              Invite users and manage access in workspace.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="mt-4 border-t border-gray-200 pt-4">
-            <p className="font-medium mb-2">Invite new users</p>
-            <p className="text-sm text-gray-600 mb-3">Add new users by email.</p>
-
-            <div className="flex gap-2 mb-4">
-              <div className="relative flex-grow">
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="pr-8 bg-gray-100 cursor-text"
-                />
-                <Search className="absolute right-2 top-2.5 w-4 h-4 text-gray-500" />
-              </div>
-              {/* TODO: Filter role options based on current user's role (useAuth).
-                  Regular admins should only see school_personnel and student options.
-                  Super admins should see all roles. */}
-              <Select defaultValue={inviteRole} onValueChange={(v: string) => setInviteRole(v as Role)}>
-                <SelectTrigger className="w-36 bg-gray-50 cursor-pointer">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="school_personnel">School Personnel</SelectItem>
-                </SelectContent>
-              </Select>
+        <p className="font-body text-lg text-body">Change Email</p>
+        <form onSubmit={emailForm.handleSubmit(changeEmailSubmit)}>
+          <Card className="shadow-none border-0 bg-secondary/10 p-5">
+            <CardContent className="space-y-4 pt-6 text-body font-body">
+              <label className="text-sm font-body text-primary">Email</label>
+              <Input
+                type="email"
+                placeholder="Enter your new email"
+                {...emailForm.register('email', {
+                  required: 'New email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address',
+                  },
+                })}
+                className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+              />
+              <label className="text-sm font-body text-primary">Password</label>
+              <Input
+                type="password"
+                placeholder="Please enter your password"
+                {...emailForm.register('password', {
+                  required: 'Password is required',
+                })}
+                className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+              />
+              {emailError && (
+                <p className="text-sm font-body text-primary">{emailError}</p>
+              )}
+              {emailSuccess && (
+                <p className="text-sm font-body text-primary">{emailSuccess}</p>
+              )}
+            </CardContent>
+            <CardFooter>
               <Button
-                disabled={inviteLoading}
-                onClick={async () => {
-                  if (!inviteEmail) return
-                  if (!isValidEmail(inviteEmail)) {
-                    setInviteError('Please enter a valid email address')
-                    return
-                  }
-                  const email = inviteEmail
-                  setInviteError(null)
-                  setInviteSuccess(null)
-                  setInviteLoading(true)
-                  try {
-                    await inviteMemberByEmail(email, inviteRole)
-                    setInviteEmail('')
-                    setInviteSuccess(`Invite sent to ${email}`)
-                    setTimeout(() => setInviteSuccess(null), 5000)
-                  } catch (err: unknown) {
-                    console.error('Invite failed', err)
-                    const msg = err instanceof Error ? err.message : String(err)
-                    setInviteError('Invite failed: ' + msg)
-                  } finally {
-                    setInviteLoading(false)
-                  }
-                }}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
+                type="submit"
+                disabled={emailForm.formState.isSubmitting}
+                className="w-[165px] bg-secondary text-secondary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {inviteLoading ? 'Sending…' : 'Send Invite'}
+                Change Email
               </Button>
-            </div>
-
-            {inviteSuccess && <div className="mt-2 text-sm text-green-600">{inviteSuccess}</div>}
-            {inviteError && <div className="mt-2 text-sm text-red-600">{inviteError}</div>}
-          </div>
-
-          <DialogFooter>
-            <Button
-              onClick={() => setOpen(false)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground mt-4 w-full cursor-pointer"
-            >
-              Done
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </CardFooter>
+          </Card>
+        </form>
+        <p className="font-body text-lg text-body">Change Password</p>
+        <form onSubmit={passForm.handleSubmit(changePassSubmit)}>
+          <Card className="shadow-none border-0 bg-secondary/10 p-5">
+            <CardContent className="space-y-4 pt-6 text-body font-body">
+              <label className="text-sm font-body text-primary">
+                Current Password
+              </label>
+              <Input
+                type="password"
+                placeholder="Please enter your password"
+                {...passForm.register('password', {
+                  required: 'Password is required',
+                })}
+                className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+              />
+              <label className="text-sm font-body text-primary">
+                New Password
+              </label>
+              <Input
+                type="password"
+                placeholder="Please enter your new password"
+                {...passForm.register('newPassword', {
+                  required: 'New password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Password must be at least 6 characters',
+                  },
+                })}
+                className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+              />
+              <Input
+                type="password"
+                placeholder="Confirm new password"
+                {...passForm.register('confirmPassword', {
+                  required: 'Please confirm password',
+                })}
+                className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+              />
+              {passError && (
+                <p className="text-sm font-body text-primary">{passError}</p>
+              )}
+              {passSuccess && (
+                <p className="text-sm font-body text-primary">{passSuccess}</p>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button
+                type="submit"
+                disabled={passForm.formState.isSubmitting}
+                className="w-[165px] bg-secondary text-secondary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Change Password
+              </Button>
+            </CardFooter>
+          </Card>
+        </form>
+        <p className="font-body text-lg text-body">Delete Account</p>
+        <form onSubmit={deleteForm.handleSubmit(handleDelete)}>
+          <Card className="shadow-none border-0 bg-secondary/10 p-5">
+            <CardContent className="space-y-4 pt-6 text-body font-body">
+              <label className="text-sm font-body text-primary">Password</label>
+              <Input
+                type="password"
+                placeholder="Please enter your password"
+                {...deleteForm.register('password', {
+                  required: 'Password is required',
+                })}
+                className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+              />
+              {deleteError && (
+                <p className="text-sm font-body text-primary">{deleteError}</p>
+              )}
+              {deleteSuccess && (
+                <p className="text-sm font-body text-primary">
+                  {deleteSuccess}
+                </p>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button
+                type="submit"
+                disabled={deleteForm.formState.isSubmitting}
+                className="w-[165px] bg-secondary text-secondary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Delete Account
+              </Button>
+            </CardFooter>
+          </Card>
+        </form>
+      </div>
     </div>
   )
 }
