@@ -9,6 +9,7 @@ import {
   verifyBeforeUpdateEmail,
   updatePassword,
   updateEmail,
+  deleteUser,
 } from 'firebase/auth'
 import { db } from '@/firebase/config'
 import { doc, getDoc } from 'firebase/firestore'
@@ -21,6 +22,8 @@ export default function ManageUsers() {
   const [passError, setPassError] = useState<string | null>(null)
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null)
   const [passSuccess, setPassSuccess] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null)
   const { user, role } = useAuth()
 
   useEffect(() => {
@@ -67,8 +70,13 @@ export default function ManageUsers() {
     confirmPassword: string
   }
 
+  interface DeleteFormData {
+    password: string
+  }
+
   const emailForm = useForm<ChangeEmailFormData>()
   const passForm = useForm<ChangePassFormData>()
+  const deleteForm = useForm<DeleteFormData>()
 
   const changeEmailSubmit = async (data: ChangeEmailFormData) => {
     if (!user || !user.email) return
@@ -100,6 +108,23 @@ export default function ManageUsers() {
       setPassError(null)
     } catch (err) {
       setPassError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+
+  const handleDelete = async (data: DeleteFormData) => {
+    if (!user || !user.email) return
+    try {
+      const cred = EmailAuthProvider.credential(user.email, data.password)
+      await reauthenticateWithCredential(user, cred)
+
+      if (window.confirm('Are you sure you want to delete your account?')) {
+        console.log('delete')
+        await deleteUser(user)
+        setDeleteSuccess('Account successfully deleted')
+        setDeleteError(null)
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'An error occurred')
     }
   }
 
@@ -215,6 +240,39 @@ export default function ManageUsers() {
                 className="w-[165px] bg-secondary text-secondary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Change Password
+              </Button>
+            </CardFooter>
+          </Card>
+        </form>
+        <p className="font-body text-lg text-body">Delete Account</p>
+        <form onSubmit={deleteForm.handleSubmit(handleDelete)}>
+          <Card className="shadow-none border-0 bg-secondary/10 p-5">
+            <CardContent className="space-y-4 pt-6 text-body font-body">
+              <label className="text-sm font-body text-primary">Password</label>
+              <Input
+                type="password"
+                placeholder="Please enter your password"
+                {...deleteForm.register('password', {
+                  required: 'Password is required',
+                })}
+                className="w-full h-12 rounded-xl border-body focus:border-primary font-body shadow-none"
+              />
+              {deleteError && (
+                <p className="text-sm font-body text-primary">{deleteError}</p>
+              )}
+              {deleteSuccess && (
+                <p className="text-sm font-body text-primary">
+                  {deleteSuccess}
+                </p>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button
+                type="submit"
+                disabled={deleteForm.formState.isSubmitting}
+                className="w-[165px] bg-secondary text-secondary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Delete Account
               </Button>
             </CardFooter>
           </Card>
