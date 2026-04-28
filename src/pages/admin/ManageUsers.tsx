@@ -117,7 +117,6 @@ export default function ManageUsers() {
       await reauthenticateWithCredential(user, cred)
 
       if (window.confirm('Are you sure you want to delete your account?')) {
-        console.log('delete')
         await deleteUser(user)
         setDeleteSuccess('Account successfully deleted')
         setDeleteError(null)
