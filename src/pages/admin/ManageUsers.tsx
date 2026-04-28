@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext'
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
-  verifyBeforeUpdateEmail,
   updatePassword,
   updateEmail,
   deleteUser,
