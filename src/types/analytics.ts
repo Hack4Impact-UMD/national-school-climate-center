@@ -3,6 +3,11 @@ export type School = {
   name: string
 }
 
+export type District = {
+  id: string
+  name: string
+}
+
 export type RespondentGroup = {
   id: string
   name: string
@@ -39,6 +44,7 @@ export type ChartData = {
 
 export type FilterState = {
   school: string | null
+  district: string | null
   respondentGroup: string | null
   compareBy: string | null
   questionType: string | null
