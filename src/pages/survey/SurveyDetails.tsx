@@ -1,7 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSurvey } from '@/hooks/useSurveys'
 import { useResponses } from '@/hooks/useResponses'
+import { Button } from '@/components/ui/button'
+import { BsDownload } from "react-icons/bs"
 
 function formatSubmittedAt(v: unknown): string {
   if (!v) return '—'
@@ -54,6 +56,70 @@ export default function SurveyDetails() {
       }))
   }, [survey])
 
+    const [drop, setDrop] = useState(false)
+    const handleExportCSV = () => {
+      try {
+        setDrop(false)
+        let csv: any
+        if (isPulse){
+          csv = "Submitted, School, District, Responses, Respondent, Email, "
+          questionRows.forEach((q: any) => {
+            csv += `"${q.text}",`
+          })
+          csv += "\n"
+    
+          responses.forEach((row : any) => {
+            const submitted = formatSubmittedAt(row.submittedAt) ?? "—"
+            const school = row.school_id ?? "—"
+            const district = row.district_id ?? "—"
+            const responseCount = Array.isArray(row.answers) ? row.answers.length : 0
+            const respondent = row.respondentName ?? "—"
+            const email = row.respondentEmail ?? "—"
+            csv += `"${submitted}", "${school}", "${district}","${responseCount}", "${respondent}", "${email}",`
+
+            row.answers?.forEach((a : any) => {
+              const value = a.value ?? "—"
+              csv += `"${String(value)}",`
+            })
+            csv += "\n"
+          })
+          
+      }
+        else {
+          csv = "Submitted, School, District, Responses,"
+          questionRows.forEach((q: any) => {
+            csv += `"${q.text}",`
+          })
+          csv += "\n"
+
+          responses.forEach((row) => {
+            const submitted = formatSubmittedAt(row.submittedAt) ?? "—"
+            const school = row.school_id ?? "—"
+            const district = row.district_id ?? "—"
+            const responseCount = Array.isArray(row.answers) ? row.answers.length : 0
+            csv += `"${submitted}", "${school}", "${district}","${responseCount}",`
+            row.answers?.forEach((a : any) => {
+              const value = a.value ?? "—"
+              csv += `"${String(value)}",`
+            })
+            csv += "\n"
+
+        })
+      }
+
+  
+        const encodedCSV = encodeURI(csv)
+        const downloadLink = document.createElement("a")
+        downloadLink.href = `data:text/csv;charset=utf-8,${encodedCSV}`
+        downloadLink.setAttribute("download", `${surveyTitle} responses.csv`)
+        downloadLink.click()
+        console.log("Downloading as CSV")
+  
+      } catch (error) {
+        console.error("Failed to generate the CSV", error)
+      }
+    }
+
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto pb-12">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -95,7 +161,7 @@ export default function SurveyDetails() {
               <div className="text-sm text-body">
                 <span className="font-semibold text-heading">Survey ID:</span> {survey?.id}
               </div>
-              <div className="text-sm text-body">
+              <div className="text-sm text-body"> 
                 <span className="font-semibold text-heading">Type:</span> {String(surveyType ?? '—')}
               </div>
               {'status' in (survey as any) && (
@@ -141,6 +207,12 @@ export default function SurveyDetails() {
           <div className="space-y-3">
             <h2 className="font-heading text-2xl font-semibold text-primary">Responses</h2>
             <div className="rounded-2xl border bg-white overflow-hidden">
+              <div className="relative flex items-center gap-2">
+
+            <Button onClick={handleExportCSV} className="ml-auto mr-5 mt-5" >
+              <BsDownload />
+            </Button>
+        </div>
               {responses.length === 0 ? (
                 <div className="p-5 text-body">No responses found.</div>
               ) : (
@@ -151,9 +223,7 @@ export default function SurveyDetails() {
                       <th className="px-4 py-3 font-semibold">School</th>
                       <th className="px-4 py-3 font-semibold">District</th>
                       <th className="px-4 py-3 font-semibold">State</th>
-                      <th className="px-4 py-3 font-semibold">Answers</th>
-                      {isPulse && <th className="px-4 py-3 font-semibold">Student</th>}
-                      <th className="px-4 py-3 font-semibold">Raw</th>
+                      <th className="px-4 py-3 font-semibold">Responses</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -168,21 +238,6 @@ export default function SurveyDetails() {
                           <td className="px-4 py-3">{rr.district_id ?? '—'}</td>
                           <td className="px-4 py-3">{rr.state ?? '—'}</td>
                           <td className="px-4 py-3">{Array.isArray(rr.answers) ? rr.answers.length : '—'}</td>
-                          {isPulse && (
-                            <td className="px-4 py-3">
-                              <div className="font-mono text-xs break-all">{rr.uid ?? '—'}</div>
-                              {rr.respondent && (
-                                <pre className="mt-2 text-[11px] p-2 bg-secondary/10 rounded-lg overflow-auto max-h-40">
-                                  {prettyJson(rr.respondent)}
-                                </pre>
-                              )}
-                            </td>
-                          )}
-                          <td className="px-4 py-3">
-                            <pre className="text-[11px] p-2 bg-secondary/10 rounded-lg overflow-auto max-h-40">
-                              {prettyJson(rr)}
-                            </pre>
-                          </td>
                         </tr>
                       )
                     })}
