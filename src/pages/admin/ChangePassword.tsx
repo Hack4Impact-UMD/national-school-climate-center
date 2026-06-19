@@ -10,9 +10,6 @@ import { auth } from "@/firebase/config"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { setStoredPassword } from "@/lib/accountPassword"
-
-const MIN_PASSWORD_LENGTH = 6
 
 export default function ChangePassword() {
   const navigate = useNavigate()
@@ -28,10 +25,6 @@ export default function ChangePassword() {
 
     if (!currentPassword) {
       setError("Please enter your current password.")
-      return
-    }
-    if (newPassword.length < MIN_PASSWORD_LENGTH) {
-      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`)
       return
     }
     if (newPassword !== confirmPassword) {
@@ -54,7 +47,6 @@ export default function ChangePassword() {
       await reauthenticateWithCredential(currentUser, credential)
 
       await updatePassword(currentUser, newPassword)
-      setStoredPassword(newPassword)
       navigate("/account")
     } catch (err) {
       console.error("Failed to update password:", err)

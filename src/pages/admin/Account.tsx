@@ -17,17 +17,6 @@ function accountTypeLabel(role: Role | null): string {
   }
 }
 
-function DetailRow({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <tr className="border-t border-gray-100">
-      <th className="bg-blue-50 px-6 py-3 text-sm font-semibold text-gray-600 w-48 align-top">
-        {label}
-      </th>
-      <td className="px-6 py-3 font-body text-body">{children}</td>
-    </tr>
-  )
-}
-
 export default function Account() {
   const { user, role } = useAuth()
   const navigate = useNavigate()
@@ -45,14 +34,36 @@ export default function Account() {
       <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm max-w-2xl">
         <table className="w-full text-left">
           <tbody>
-            <DetailRow label="Account Type">{accountTypeLabel(role)}</DetailRow>
-            <DetailRow label="Name">{displayName}</DetailRow>
-            <DetailRow label="Email">{user?.email}</DetailRow>
-            <DetailRow label="Password">
-              <div className="flex items-center gap-2">
-                <span className="tracking-widest">••••••••</span>
-              </div>
-            </DetailRow>
+            <tr className="border-t border-gray-100">
+              <th className="bg-blue-50 px-6 py-3 text-sm font-semibold text-gray-600 w-48 align-top">
+                Account Type
+              </th>
+              <td className="px-6 py-3 font-body text-body">
+                {accountTypeLabel(role)}
+              </td>
+            </tr>
+            <tr className="border-t border-gray-100">
+              <th className="bg-blue-50 px-6 py-3 text-sm font-semibold text-gray-600 w-48 align-top">
+                Name
+              </th>
+              <td className="px-6 py-3 font-body text-body">{displayName}</td>
+            </tr>
+            <tr className="border-t border-gray-100">
+              <th className="bg-blue-50 px-6 py-3 text-sm font-semibold text-gray-600 w-48 align-top">
+                Email
+              </th>
+              <td className="px-6 py-3 font-body text-body">{user?.email}</td>
+            </tr>
+            <tr className="border-t border-gray-100">
+              <th className="bg-blue-50 px-6 py-3 text-sm font-semibold text-gray-600 w-48 align-top">
+                Password
+              </th>
+              <td className="px-6 py-3 font-body text-body">
+                <div className="flex items-center gap-2">
+                  <span className="tracking-widest">••••••••</span>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
