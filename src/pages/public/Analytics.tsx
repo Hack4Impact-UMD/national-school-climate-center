@@ -42,6 +42,7 @@ type FirestoreAnswer = {
 type FirestoreResponse = {
   answers?: FirestoreAnswer[]
   school_id?: string
+  district_id?: string
   respondent_group?: string
   surveyTitle?: string
   survey_id?: string

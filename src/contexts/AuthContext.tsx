@@ -2,8 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
-import { auth, db } from '@/firebase/config'
+import { auth } from '@/firebase/config'
 import type { Role } from '@/types/auth'
 
 type AuthState = { 
