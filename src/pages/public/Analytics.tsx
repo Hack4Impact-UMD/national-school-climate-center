@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, getDocs, type Timestamp } from 'firebase/firestore'
+import { useAuth } from '@/contexts/AuthContext'
 import GeoMapDemo from '@/components/analytics/GeoData'
 import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
@@ -56,6 +57,7 @@ type ResponseRecord = {
   surveyID: string
   questionType: string | null
   school: string | null
+  district: string | null
   respondentGroup: string | null
   date: string | null
   answerValue: string
@@ -136,6 +138,7 @@ const extractDateString = (
 const initialCache = loadFromCache()
 
 export default function Analytics() {
+  const { role, schoolId, districtId } = useAuth()
   const [chartType, setChartType] = useState<ChartType>('bar')
   const [responses, setResponses] = useState<ResponseRecord[]>(
     initialCache ?? []
@@ -206,6 +209,7 @@ export default function Analytics() {
                 surveyType: questionMetadata?.surveyType ?? null,
                 questionType: questionMetadata?.questionType ?? null,
                 school,
+                district: data.district_id ?? null,
                 respondentGroup,
                 date,
                 answerValue:
@@ -245,7 +249,27 @@ export default function Analytics() {
     const surveyTypeMap = new Map<string, string>()
     const questionMap = new Map<string, string>()
 
-    responses.forEach((response) => {
+    const isSchoolAdmin = Boolean(
+      (role === 'school_personnel' || role === 'admin') &&
+        schoolId &&
+        schoolId !== 'all-schools'
+    )
+    const isDistrictAdmin =
+      role === 'admin' && Boolean(districtId && districtId !== 'all-districts')
+
+    const visibleResponses = responses.filter((response) => {
+      if (isSchoolAdmin) {
+        return response.school === schoolId
+      }
+
+      if (isDistrictAdmin) {
+        return response.district === districtId
+      }
+
+      return true
+    })
+
+    visibleResponses.forEach((response) => {
       if (response.school) {
         schoolMap.set(response.school, formatLabel(response.school))
       }
@@ -398,7 +422,27 @@ export default function Analytics() {
   }, [filters, optionLabelMaps])
 
   const filteredResponses = useMemo(() => {
-    return responses.filter((response) => {
+    const isSchoolAdmin = Boolean(
+      (role === 'school_personnel' || role === 'admin') &&
+        schoolId &&
+        schoolId !== 'all-schools'
+    )
+    const isDistrictAdmin =
+      role === 'admin' && Boolean(districtId && districtId !== 'all-districts')
+
+    const visibleResponses = responses.filter((response) => {
+      if (isSchoolAdmin) {
+        return response.school === schoolId
+      }
+
+      if (isDistrictAdmin) {
+        return response.district === districtId
+      }
+
+      return true
+    })
+
+    return visibleResponses.filter((response) => {
       if (filters.school && response.school !== filters.school) {
         return false
       }

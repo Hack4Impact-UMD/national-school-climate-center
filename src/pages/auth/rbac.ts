@@ -5,7 +5,7 @@ export type { Role, Action }
 const policy: Record<Role, Action[]> = {
   super_admin: ['read', 'create', 'update', 'delete', 'manage_users'],
   admin: ['read', 'create', 'update', 'delete', 'manage_users'],
-  student: ['read'],
+  student: [],
   school_personnel: ['read'],
 }
 

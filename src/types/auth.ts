@@ -10,4 +10,6 @@ export type Member = {
   role: Role
   joinedAt?: Timestamp | null
   displayName?: string
+  school_id?: string
+  district_id?: string
 }
