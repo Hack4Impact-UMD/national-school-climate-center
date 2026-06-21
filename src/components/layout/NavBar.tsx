@@ -18,7 +18,9 @@ export default function NavBar() {
 
   const getRoleLabel = () => {
     if (!role) return 'Guest'
-    return role === 'super_admin' ? 'NSCC Admin' : 'School Personnel'
+    if (role === 'super_admin') return 'NSCC Admin'
+    if (role === 'admin') return 'District Admin'
+    return 'School Personnel'
   }
 
   const handleLogout = async () => {

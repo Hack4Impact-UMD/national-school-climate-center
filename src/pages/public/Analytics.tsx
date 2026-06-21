@@ -243,32 +243,23 @@ export default function Analytics() {
     }
   }, [])
 
+  const visibleResponses = useMemo(() => {
+    const isSchoolAdmin = role === 'school_personnel' && Boolean(schoolId && schoolId !== 'all-schools')
+    const isDistrictAdmin = role === 'admin' && Boolean(districtId && districtId !== 'all-districts')
+
+    return responses.filter((response) => {
+      if (isSchoolAdmin) return response.school === schoolId
+      if (isDistrictAdmin) return response.district === districtId
+      return true
+    })
+  }, [responses, role, schoolId, districtId])
+
   const filterOptions = useMemo(() => {
     const schoolMap = new Map<string, string>()
     const respondentGroupMap = new Map<string, string>()
     const questionTypeMap = new Map<string, string>()
     const surveyTypeMap = new Map<string, string>()
     const questionMap = new Map<string, string>()
-
-    const isSchoolAdmin = Boolean(
-      (role === 'school_personnel' || role === 'admin') &&
-        schoolId &&
-        schoolId !== 'all-schools'
-    )
-    const isDistrictAdmin =
-      role === 'admin' && Boolean(districtId && districtId !== 'all-districts')
-
-    const visibleResponses = responses.filter((response) => {
-      if (isSchoolAdmin) {
-        return response.school === schoolId
-      }
-
-      if (isDistrictAdmin) {
-        return response.district === districtId
-      }
-
-      return true
-    })
 
     visibleResponses.forEach((response) => {
       if (response.school) {
@@ -330,7 +321,7 @@ export default function Analytics() {
       surveyTypes,
       questions,
     }
-  }, [responses])
+  }, [visibleResponses])
 
   const handleFilterChange = (key: keyof FilterState, value: string | null) => {
     setFilters((prev) => ({
@@ -423,26 +414,6 @@ export default function Analytics() {
   }, [filters, optionLabelMaps])
 
   const filteredResponses = useMemo(() => {
-    const isSchoolAdmin = Boolean(
-      (role === 'school_personnel' || role === 'admin') &&
-        schoolId &&
-        schoolId !== 'all-schools'
-    )
-    const isDistrictAdmin =
-      role === 'admin' && Boolean(districtId && districtId !== 'all-districts')
-
-    const visibleResponses = responses.filter((response) => {
-      if (isSchoolAdmin) {
-        return response.school === schoolId
-      }
-
-      if (isDistrictAdmin) {
-        return response.district === districtId
-      }
-
-      return true
-    })
-
     return visibleResponses.filter((response) => {
       if (filters.school && response.school !== filters.school) {
         return false
@@ -483,7 +454,7 @@ export default function Analytics() {
 
       return true
     })
-  }, [responses, filters])
+  }, [visibleResponses, filters])
 
   const charts = useMemo(() => {
     const grouped = new Map<string, ChartEntry>()

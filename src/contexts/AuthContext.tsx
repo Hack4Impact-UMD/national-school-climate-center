@@ -2,15 +2,18 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import { auth } from '@/firebase/config'
+import { doc, getDoc } from 'firebase/firestore'
+import { auth, db } from '@/firebase/config'
 import type { Role } from '@/types/auth'
 
-type AuthState = { 
-  user: User | null 
-  role: Role | null  
+type AuthState = {
+  user: User | null
+  role: Role | null
   schoolId: string | null
-  districtId: string | null 
-  loading: boolean; logout: () => Promise<void>}
+  districtId: string | null
+  loading: boolean
+  logout: () => Promise<void>
+}
 
 const AuthCtx = createContext<AuthState>({
   user: null,
@@ -38,21 +41,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false)
         return
       }
-      // TODO: Remove this testing override - defaults all users to admin
-      // setRole('super_admin')
-      // setLoading(false)
-      // return
 
-      // Original role fetching logic (disabled for testing)
-      // const snap = await getDoc(doc(db, 'members', u.uid))
-      // if (snap.exists()) {
-      //   const roleData = snap.data()?.role
-      //   const validRoles: Role[] = ['admin', 'school_personnel']
-      //   setRole(validRoles.includes(roleData) ? roleData : null)
-      // } else {
-      //   setRole(null)
-      // }
-      // setLoading(false)
+      const snap = await getDoc(doc(db, 'members', u.uid))
+      if (snap.exists()) {
+        const data = snap.data()
+        const validRoles: Role[] = ['super_admin', 'admin', 'school_personnel', 'student']
+        const fetchedRole = data?.role
+        setRole(validRoles.includes(fetchedRole) ? fetchedRole : null)
+        setSchoolId(data?.school_id ?? null)
+        setDistrictId(data?.district_id ?? null)
+      } else {
+        setRole(null)
+        setSchoolId(null)
+        setDistrictId(null)
+      }
+      setLoading(false)
     })
     return unsub
   }, [])
