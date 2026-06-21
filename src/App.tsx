@@ -2,12 +2,12 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/public/Home'
 import About from './pages/public/About'
 import Analytics from './pages/public/Analytics'
-import Contact from './pages/public/Contact'
 import Login from './pages/auth/Login'
 import CreateAccountNSCC from './pages/auth/CreateAccountNSCC'
 import CreateAccountSchool from './pages/auth/CreateAccountSchool'
 import ManageUsers from './pages/admin/ManageUsers'
-import General from './pages/admin/General'
+import Account from './pages/admin/Account'
+import ChangePassword from './pages/admin/ChangePassword'
 import SurveyBuilder from './pages/survey/SurveyBuilder'
 import CreateChallengeSurvey from './pages/survey/CreateChallengeSurvey'
 import CreatePulseSurvey from './pages/survey/CreatePulseSurvey'
@@ -40,7 +40,6 @@ export default function App() {
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
 
           {/* Action-gated */}
           <Route element={<ProtectedRoute requiredAction="create" />}>
@@ -75,7 +74,11 @@ export default function App() {
             <Route path="/surveys" element={<AllSurveys />} />
             <Route path="/surveys/:surveyId" element={<SurveyDetails />} />
             <Route path="/manage-users" element={<ManageUsers />} />
-            <Route path="/general" element={<General />} />
+            <Route path="/account" element={<Account />} />
+            <Route
+              path="/account/change-password"
+              element={<ChangePassword />}
+            />
           </Route>
           {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
         </Route>
