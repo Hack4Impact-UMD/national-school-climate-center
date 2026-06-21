@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSurvey } from '@/hooks/useSurveys'
 import { useResponses } from '@/hooks/useResponses'
@@ -19,13 +19,6 @@ function formatSubmittedAt(v: unknown): string {
   return '—'
 }
 
-function prettyJson(value: unknown): string {
-  try {
-    return JSON.stringify(value, null, 2)
-  } catch {
-    return String(value)
-  }
-}
 
 export default function SurveyDetails() {
   const { surveyId } = useParams()
@@ -56,11 +49,9 @@ export default function SurveyDetails() {
       }))
   }, [survey])
 
-    const [drop, setDrop] = useState(false)
     const handleExportCSV = () => {
       try {
-        setDrop(false)
-        let csv: any
+        let csv: string
         if (isPulse){
           csv = "Submitted, School, District, Responses, Respondent, Email, "
           questionRows.forEach((q: any) => {
@@ -113,7 +104,6 @@ export default function SurveyDetails() {
         downloadLink.href = `data:text/csv;charset=utf-8,${encodedCSV}`
         downloadLink.setAttribute("download", `${surveyTitle} responses.csv`)
         downloadLink.click()
-        console.log("Downloading as CSV")
   
       } catch (error) {
         console.error("Failed to generate the CSV", error)
