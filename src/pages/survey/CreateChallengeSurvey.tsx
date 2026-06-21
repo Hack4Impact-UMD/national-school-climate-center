@@ -47,6 +47,7 @@ export default function CreateChallengeSurvey() {
     surveyTitle?: string
     surveyDescription?: string
     surveyType?: 'Challenge' | 'Pulse' | 'challenge' | 'pulse'
+    surveyId?: string
   }
 
   const normalizedSurveyType =
@@ -117,14 +118,16 @@ export default function CreateChallengeSurvey() {
   const [tab, setTab] = useState<'question' | 'list' | 'workflow'>(
     incomingState.activeTab ?? incomingState.defaultTab ?? 'question'
   )
-  const [createdSurveyId, setCreatedSurveyId] = useState<string | null>(null)
+  const [createdSurveyId, setCreatedSurveyId] = useState<string | null>(
+    incomingState.surveyId ?? null
+  )
   const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    // checks if a draft already exists in this session or mismatched auth
-    if (hasCreatedDraftRef.current || !user) {
+    // checks if a draft already exists in this session, incoming surveyId exists, or mismatched auth
+    if (hasCreatedDraftRef.current || incomingState.surveyId || !user) {
       return
     }
 
@@ -184,6 +187,25 @@ export default function CreateChallengeSurvey() {
       const filtered = prev.filter((q) => q.id !== id)
       if (activeId === id) setActiveId(filtered[0]?.id ?? '')
       return filtered
+    })
+  }
+
+  function reorderQuestions(fromIndex: number, toIndex: number) {
+    setQuestions((prev) => {
+      if (
+        fromIndex === toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= prev.length ||
+        toIndex >= prev.length
+      ) {
+        return prev
+      }
+
+      const next = [...prev]
+      const [movedQuestion] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, movedQuestion)
+      return next
     })
   }
 
@@ -280,6 +302,7 @@ export default function CreateChallengeSurvey() {
               onSelect={setActiveId}
               onDelete={deleteQuestion}
               onDuplicate={duplicateQuestion}
+              onMove={reorderQuestions}
               onChange={updateActiveQuestion}
             />
 

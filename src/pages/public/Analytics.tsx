@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, getDocs, type Timestamp } from 'firebase/firestore'
+import { useAuth } from '@/contexts/AuthContext'
 import GeoMapDemo from '@/components/analytics/GeoData'
 import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
@@ -7,7 +8,7 @@ import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
 import SimpleBarChart from '@/components/analytics/BarChart'
 import SimplePieChart from '@/components/analytics/PieChart'
 import { FilterBar } from '@/components/analytics/FilterBar'
-import { SearchInput } from '@/components/analytics/SearchInput'
+import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import { FilterChips } from '@/components/analytics/FilterChips'
 import { db } from '@/firebase/config'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ type FirestoreAnswer = {
 type FirestoreResponse = {
   answers?: FirestoreAnswer[]
   school_id?: string
+  district_id?: string
   respondent_group?: string
   surveyTitle?: string
   survey_id?: string
@@ -56,6 +58,7 @@ type ResponseRecord = {
   surveyID: string
   questionType: string | null
   school: string | null
+  district: string | null
   respondentGroup: string | null
   date: string | null
   answerValue: string
@@ -66,6 +69,36 @@ type ChartEntry = {
   question: string
   surveyTitle: string
   chartData: { name: string; value: number }[]
+}
+
+type CachedData = {
+  responses: ResponseRecord[]
+  cachedAt: number
+}
+
+const CACHE_KEY = 'nscc_analytics_responses' // key used to store and retrieve data from localstorage
+const CACHE_TTL_MS = 15 * 60 * 1000 // resets cached data every 15 minutes
+
+function loadFromCache(): ResponseRecord[] | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) {
+      return null
+    }
+    const parsed = JSON.parse(raw) as CachedData
+    if (Date.now() - parsed.cachedAt > CACHE_TTL_MS) {
+      localStorage.removeItem(CACHE_KEY)
+      return null
+    }
+    return parsed.responses
+  } catch {
+    return null
+  }
+}
+
+function saveToCache(responses: ResponseRecord[]) {
+  const data: CachedData = { responses, cachedAt: Date.now() }
+  localStorage.setItem(CACHE_KEY, JSON.stringify(data))
 }
 
 const PAGE_SIZE = 4
@@ -103,20 +136,27 @@ const extractDateString = (
   return null
 }
 
+const initialCache = loadFromCache()
+
 export default function Analytics() {
+  const { role, schoolId, districtId } = useAuth()
   const [chartType, setChartType] = useState<ChartType>('bar')
-  const [responses, setResponses] = useState<ResponseRecord[]>([])
+  const [responses, setResponses] = useState<ResponseRecord[]>(
+    initialCache ?? []
+  )
   const [filters, setFilters] = useState<FilterState>(defaultFilterState)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(initialCache === null)
   const [error, setError] = useState<string | null>(null)
   const [exporting, setExport] = useState(false)
 
-
   useEffect(() => {
     let isMounted = true
+    const hasCachedData = responses.length > 0
 
     const fetchAnalyticsData = async () => {
-      setLoading(true)
+      if (!hasCachedData) {
+        setLoading(true)
+      }
       setError(null)
 
       try {
@@ -170,6 +210,7 @@ export default function Analytics() {
                 surveyType: questionMetadata?.surveyType ?? null,
                 questionType: questionMetadata?.questionType ?? null,
                 school,
+                district: data.district_id ?? null,
                 respondentGroup,
                 date,
                 answerValue:
@@ -181,11 +222,12 @@ export default function Analytics() {
           })
         }
         if (isMounted) {
+          saveToCache(responseRecords)
           setResponses(responseRecords)
         }
       } catch (err) {
         console.error(err)
-        if (isMounted) {
+        if (isMounted && !hasCachedData) {
           setError('Unable to load survey analytics right now.')
         }
       } finally {
@@ -201,13 +243,25 @@ export default function Analytics() {
     }
   }, [])
 
+  const visibleResponses = useMemo(() => {
+    const isSchoolAdmin = role === 'school_personnel' && Boolean(schoolId && schoolId !== 'all-schools')
+    const isDistrictAdmin = role === 'admin' && Boolean(districtId && districtId !== 'all-districts')
+
+    return responses.filter((response) => {
+      if (isSchoolAdmin) return response.school === schoolId
+      if (isDistrictAdmin) return response.district === districtId
+      return true
+    })
+  }, [responses, role, schoolId, districtId])
+
   const filterOptions = useMemo(() => {
     const schoolMap = new Map<string, string>()
     const respondentGroupMap = new Map<string, string>()
     const questionTypeMap = new Map<string, string>()
     const surveyTypeMap = new Map<string, string>()
+    const questionMap = new Map<string, string>()
 
-    responses.forEach((response) => {
+    visibleResponses.forEach((response) => {
       if (response.school) {
         schoolMap.set(response.school, formatLabel(response.school))
       }
@@ -225,6 +279,9 @@ export default function Analytics() {
       }
       if (response.surveyType) {
         surveyTypeMap.set(response.surveyType, formatLabel(response.surveyType))
+      }
+      if (response.question) {
+        questionMap.set(response.question, response.question)
       }
     })
 
@@ -252,14 +309,19 @@ export default function Analytics() {
         name,
       })
     )
+    const questions = Array.from(questionMap.entries()).map(([id, name]) => ({
+      id,
+      name,
+    }))
 
     return {
       schools,
       respondentGroups,
       questionTypes,
       surveyTypes,
+      questions,
     }
-  }, [responses])
+  }, [visibleResponses])
 
   const handleFilterChange = (key: keyof FilterState, value: string | null) => {
     setFilters((prev) => ({
@@ -268,10 +330,10 @@ export default function Analytics() {
     }))
   }
 
-  const handleSearchChange = (value: string) => {
+  const handleSearchChange = (id: string | null) => {
     setFilters((prev) => ({
       ...prev,
-      searchQuery: value,
+      searchQuery: id ?? '',
     }))
   }
 
@@ -352,7 +414,7 @@ export default function Analytics() {
   }, [filters, optionLabelMaps])
 
   const filteredResponses = useMemo(() => {
-    return responses.filter((response) => {
+    return visibleResponses.filter((response) => {
       if (filters.school && response.school !== filters.school) {
         return false
       }
@@ -392,7 +454,7 @@ export default function Analytics() {
 
       return true
     })
-  }, [responses, filters])
+  }, [visibleResponses, filters])
 
   const charts = useMemo(() => {
     const grouped = new Map<string, ChartEntry>()
@@ -499,7 +561,7 @@ export default function Analytics() {
             <GenerateReport setExport={setExport} chartsData={charts} />
           </div>
         </div>
-      
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
           {(exporting ? charts : paginatedCharts).map((chart) => (
             <ResponseChart
@@ -510,12 +572,13 @@ export default function Analytics() {
             />
           ))}
         </div>
-        {totalPages > 1 && !exporting &&(
+        {totalPages > 1 && !exporting && (
           <div className="flex items-center justify-between mt-4">
             <Button
               variant="outline"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
+              className="hover:bg-secondary/20 cursor-pointer"
             >
               Previous
             </Button>
@@ -526,6 +589,7 @@ export default function Analytics() {
               variant="outline"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
+              className="hover:bg-secondary/20 cursor-pointer"
             >
               Next
             </Button>
@@ -553,9 +617,12 @@ export default function Analytics() {
       />
 
       <div className="flex flex-wrap items-start gap-4">
-        <SearchInput
-          value={filters.searchQuery}
+        <SearchCombobox
+          value={filters.searchQuery || null}
           onChange={handleSearchChange}
+          options={filterOptions.questions}
+          placeholder="Search a question"
+          className="w-[240px]"
         />
         <FilterChips
           activeFilters={activeFilters}
