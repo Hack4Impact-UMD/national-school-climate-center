@@ -193,13 +193,21 @@ export default function CreateChallengeSurvey() {
 
   function addQuestionFromBank(question: Question) {
     const copiedQuestion: Question = {
-      ...question,
-      id: crypto.randomUUID(),
-    };
+    id: crypto.randomUUID(),
+    name: question.name ?? "Untitled",
+    prompt: question.prompt ?? "",
+    questionType: question.questionType ?? "open-ended",
+    inputType:
+      question.inputType ??
+      (question.questionType === "multiple-choice"
+        ? "single"
+        : "text"),
+    options: question.options ?? [],
+  }
 
-    setQuestions((prev) => [...prev, copiedQuestion]);
-    setActiveId(copiedQuestion.id);
-    setShowQuestionBank(false);
+  setQuestions(prev => [...prev, copiedQuestion])
+  setActiveId(copiedQuestion.id)
+  setShowQuestionBank(false)
   }
 
   //need to add school_name here after the page is created
@@ -368,7 +376,7 @@ const term = search.toLowerCase()
 
               <div className='space-y-3 max-h-96 overflow-y-auto'>
                 {searchQuestionBank.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
+                  <p className='text-sm text-muted-foreground'>
                     No questions found.
                   </p>
                 ) : (
