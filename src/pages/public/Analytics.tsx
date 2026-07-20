@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, getDocs, type Timestamp } from 'firebase/firestore'
 import { useAuth } from '@/contexts/AuthContext'
-import GeoMapDemo from '@/components/analytics/GeoData'
 import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
@@ -12,6 +11,7 @@ import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import { FilterChips } from '@/components/analytics/FilterChips'
 import { db } from '@/firebase/config'
 import { Button } from '@/components/ui/button'
+import GeoMap from '@/components/analytics/GeoData.tsx'
 import type { ChartType } from '@/types/chartTypes'
 import type {
   FilterState,
@@ -640,7 +640,7 @@ export default function Analytics() {
           View survey response distribution and average scores by school
           location.
         </p>
-        <GeoMapDemo />
+        <GeoMap />
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import {
   MapContainer,
@@ -9,259 +9,274 @@ import {
   Tooltip,
 } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import {
+  collection,
+  collectionGroup,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore'
+import { db } from '@/firebase/config'
+import type {
+  ResponseWithId,
+  Response,
+  School,
+  SchoolWithId,
+  QuestionBankItem,
+} from '@/firebase/interfaces'
 
 // ===== Dummy data =====
 
-// /schools docs (id = school_id)
-const SCHOOLS = [
-  {
-    id: 'school-a',
-    name: 'Roosevelt HS',
-    lat: 38.9369,
-    lng: -77.032,
-    district_id: 'dc-01',
-  },
-  {
-    id: 'school-b',
-    name: 'Jefferson MS',
-    lat: 39.2904,
-    lng: -76.6122,
-    district_id: 'md-01',
-  },
-  {
-    id: 'school-c',
-    name: 'Lincoln HS',
-    lat: 40.7128,
-    lng: -74.006,
-    district_id: 'ny-01',
-  },
-  {
-    id: 'school-d',
-    name: 'Franklin ES',
-    lat: 38.9072,
-    lng: -77.0369,
-    district_id: 'dc-02',
-  },
-  {
-    id: 'school-e',
-    name: 'Madison HS',
-    lat: 39.9526,
-    lng: -75.1652,
-    district_id: 'pa-01',
-  },
-]
+// // /schools docs (id = school_id)
+// const SCHOOLS = [
+//   {
+//     id: 'school-a',
+//     name: 'Roosevelt HS',
+//     lat: 38.9369,
+//     lng: -77.032,
+//     district_id: 'dc-01',
+//   },
+//   {
+//     id: 'school-b',
+//     name: 'Jefferson MS',
+//     lat: 39.2904,
+//     lng: -76.6122,
+//     district_id: 'md-01',
+//   },
+//   {
+//     id: 'school-c',
+//     name: 'Lincoln HS',
+//     lat: 40.7128,
+//     lng: -74.006,
+//     district_id: 'ny-01',
+//   },
+//   {
+//     id: 'school-d',
+//     name: 'Franklin ES',
+//     lat: 38.9072,
+//     lng: -77.0369,
+//     district_id: 'dc-02',
+//   },
+//   {
+//     id: 'school-e',
+//     name: 'Madison HS',
+//     lat: 39.9526,
+//     lng: -75.1652,
+//     district_id: 'pa-01',
+//   },
+// ]
 
-// /responses docs (simplified)
-type Answer = { question_id: string; value: number | string }
-type Resp = {
-  survey_id: string
-  uid: string
-  school_id: string
-  consent: boolean
-  answers: Answer[]
-  submittedAt: Date
-}
+// // /responses docs (simplified)
+// type Answer = { question_id: string; value: number | string }
+// type Resp = {
+//   survey_id: string
+//   uid: string
+//   school_id: string
+//   consent: boolean
+//   answers: Answer[]
+//   submittedAt: Date
+// }
 
-// Questions we’ll see in answers:
-// - q1_satisfaction (1–5 numeric)
-// - q2_safety (Yes/No) — categorical
-// - q3_teacher_support (1–5 numeric)
-// - q4_facilities (1–5 numeric)
-// - q5_belonging (1–5 numeric)
+// // Questions we’ll see in answers:
+// // - q1_satisfaction (1–5 numeric)
+// // - q2_safety (Yes/No) — categorical
+// // - q3_teacher_support (1–5 numeric)
+// // - q4_facilities (1–5 numeric)
+// // - q5_belonging (1–5 numeric)
 
-const RESPONSES: Resp[] = [
-  // Roosevelt HS (A) — 4 responses
-  {
-    survey_id: 'svy-1',
-    uid: 'a1',
-    school_id: 'school-a',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 4 },
-      { question_id: 'q2_safety', value: 'Yes' },
-      { question_id: 'q3_teacher_support', value: 5 },
-      { question_id: 'q4_facilities', value: 4 },
-      { question_id: 'q5_belonging', value: 4 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'a2',
-    school_id: 'school-a',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 5 },
-      { question_id: 'q2_safety', value: 'Yes' },
-      { question_id: 'q3_teacher_support', value: 4 },
-      { question_id: 'q4_facilities', value: 5 },
-      { question_id: 'q5_belonging', value: 5 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'a3',
-    school_id: 'school-a',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 3 },
-      { question_id: 'q2_safety', value: 'Sometimes' },
-      { question_id: 'q3_teacher_support', value: 4 },
-      { question_id: 'q4_facilities', value: 3 },
-      { question_id: 'q5_belonging', value: 3 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'a4',
-    school_id: 'school-a',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 4 },
-      { question_id: 'q2_safety', value: 'Yes' },
-      { question_id: 'q3_teacher_support', value: 4 },
-      { question_id: 'q4_facilities', value: 4 },
-      { question_id: 'q5_belonging', value: 4 },
-    ],
-    submittedAt: new Date(),
-  },
+// const RESPONSES: Resp[] = [
+//   // Roosevelt HS (A) — 4 responses
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'a1',
+//     school_id: 'school-a',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 4 },
+//       { question_id: 'q2_safety', value: 'Yes' },
+//       { question_id: 'q3_teacher_support', value: 5 },
+//       { question_id: 'q4_facilities', value: 4 },
+//       { question_id: 'q5_belonging', value: 4 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'a2',
+//     school_id: 'school-a',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 5 },
+//       { question_id: 'q2_safety', value: 'Yes' },
+//       { question_id: 'q3_teacher_support', value: 4 },
+//       { question_id: 'q4_facilities', value: 5 },
+//       { question_id: 'q5_belonging', value: 5 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'a3',
+//     school_id: 'school-a',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 3 },
+//       { question_id: 'q2_safety', value: 'Sometimes' },
+//       { question_id: 'q3_teacher_support', value: 4 },
+//       { question_id: 'q4_facilities', value: 3 },
+//       { question_id: 'q5_belonging', value: 3 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'a4',
+//     school_id: 'school-a',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 4 },
+//       { question_id: 'q2_safety', value: 'Yes' },
+//       { question_id: 'q3_teacher_support', value: 4 },
+//       { question_id: 'q4_facilities', value: 4 },
+//       { question_id: 'q5_belonging', value: 4 },
+//     ],
+//     submittedAt: new Date(),
+//   },
 
-  // Jefferson MS (B) — 3 responses
-  {
-    survey_id: 'svy-1',
-    uid: 'b1',
-    school_id: 'school-b',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 2 },
-      { question_id: 'q2_safety', value: 'No' },
-      { question_id: 'q3_teacher_support', value: 3 },
-      { question_id: 'q4_facilities', value: 2 },
-      { question_id: 'q5_belonging', value: 2 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'b2',
-    school_id: 'school-b',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 3 },
-      { question_id: 'q2_safety', value: 'Sometimes' },
-      { question_id: 'q3_teacher_support', value: 3 },
-      { question_id: 'q4_facilities', value: 3 },
-      { question_id: 'q5_belonging', value: 3 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'b3',
-    school_id: 'school-b',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 2 },
-      { question_id: 'q2_safety', value: 'No' },
-      { question_id: 'q3_teacher_support', value: 2 },
-      { question_id: 'q4_facilities', value: 2 },
-      { question_id: 'q5_belonging', value: 2 },
-    ],
-    submittedAt: new Date(),
-  },
+//   // Jefferson MS (B) — 3 responses
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'b1',
+//     school_id: 'school-b',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 2 },
+//       { question_id: 'q2_safety', value: 'No' },
+//       { question_id: 'q3_teacher_support', value: 3 },
+//       { question_id: 'q4_facilities', value: 2 },
+//       { question_id: 'q5_belonging', value: 2 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'b2',
+//     school_id: 'school-b',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 3 },
+//       { question_id: 'q2_safety', value: 'Sometimes' },
+//       { question_id: 'q3_teacher_support', value: 3 },
+//       { question_id: 'q4_facilities', value: 3 },
+//       { question_id: 'q5_belonging', value: 3 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'b3',
+//     school_id: 'school-b',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 2 },
+//       { question_id: 'q2_safety', value: 'No' },
+//       { question_id: 'q3_teacher_support', value: 2 },
+//       { question_id: 'q4_facilities', value: 2 },
+//       { question_id: 'q5_belonging', value: 2 },
+//     ],
+//     submittedAt: new Date(),
+//   },
 
-  // Lincoln HS (C) — 2 responses
-  {
-    survey_id: 'svy-1',
-    uid: 'c1',
-    school_id: 'school-c',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 3 },
-      { question_id: 'q2_safety', value: 'Yes' },
-      { question_id: 'q3_teacher_support', value: 3 },
-      { question_id: 'q4_facilities', value: 3 },
-      { question_id: 'q5_belonging', value: 3 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'c2',
-    school_id: 'school-c',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 4 },
-      { question_id: 'q2_safety', value: 'Yes' },
-      { question_id: 'q3_teacher_support', value: 4 },
-      { question_id: 'q4_facilities', value: 4 },
-      { question_id: 'q5_belonging', value: 4 },
-    ],
-    submittedAt: new Date(),
-  },
+//   // Lincoln HS (C) — 2 responses
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'c1',
+//     school_id: 'school-c',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 3 },
+//       { question_id: 'q2_safety', value: 'Yes' },
+//       { question_id: 'q3_teacher_support', value: 3 },
+//       { question_id: 'q4_facilities', value: 3 },
+//       { question_id: 'q5_belonging', value: 3 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'c2',
+//     school_id: 'school-c',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 4 },
+//       { question_id: 'q2_safety', value: 'Yes' },
+//       { question_id: 'q3_teacher_support', value: 4 },
+//       { question_id: 'q4_facilities', value: 4 },
+//       { question_id: 'q5_belonging', value: 4 },
+//     ],
+//     submittedAt: new Date(),
+//   },
 
-  // Franklin ES (D) — 1 response
-  {
-    survey_id: 'svy-1',
-    uid: 'd1',
-    school_id: 'school-d',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 5 },
-      { question_id: 'q2_safety', value: 'Yes' },
-      { question_id: 'q3_teacher_support', value: 5 },
-      { question_id: 'q4_facilities', value: 5 },
-      { question_id: 'q5_belonging', value: 5 },
-    ],
-    submittedAt: new Date(),
-  },
+//   // Franklin ES (D) — 1 response
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'd1',
+//     school_id: 'school-d',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 5 },
+//       { question_id: 'q2_safety', value: 'Yes' },
+//       { question_id: 'q3_teacher_support', value: 5 },
+//       { question_id: 'q4_facilities', value: 5 },
+//       { question_id: 'q5_belonging', value: 5 },
+//     ],
+//     submittedAt: new Date(),
+//   },
 
-  // Madison HS (E) — 3 responses
-  {
-    survey_id: 'svy-1',
-    uid: 'e1',
-    school_id: 'school-e',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 4 },
-      { question_id: 'q2_safety', value: 'Yes' },
-      { question_id: 'q3_teacher_support', value: 4 },
-      { question_id: 'q4_facilities', value: 4 },
-      { question_id: 'q5_belonging', value: 4 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'e2',
-    school_id: 'school-e',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 3 },
-      { question_id: 'q2_safety', value: 'Sometimes' },
-      { question_id: 'q3_teacher_support', value: 3 },
-      { question_id: 'q4_facilities', value: 3 },
-      { question_id: 'q5_belonging', value: 3 },
-    ],
-    submittedAt: new Date(),
-  },
-  {
-    survey_id: 'svy-1',
-    uid: 'e3',
-    school_id: 'school-e',
-    consent: true,
-    answers: [
-      { question_id: 'q1_satisfaction', value: 2 },
-      { question_id: 'q2_safety', value: 'No' },
-      { question_id: 'q3_teacher_support', value: 2 },
-      { question_id: 'q4_facilities', value: 2 },
-      { question_id: 'q5_belonging', value: 2 },
-    ],
-    submittedAt: new Date(),
-  },
-]
+//   // Madison HS (E) — 3 responses
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'e1',
+//     school_id: 'school-e',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 4 },
+//       { question_id: 'q2_safety', value: 'Yes' },
+//       { question_id: 'q3_teacher_support', value: 4 },
+//       { question_id: 'q4_facilities', value: 4 },
+//       { question_id: 'q5_belonging', value: 4 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'e2',
+//     school_id: 'school-e',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 3 },
+//       { question_id: 'q2_safety', value: 'Sometimes' },
+//       { question_id: 'q3_teacher_support', value: 3 },
+//       { question_id: 'q4_facilities', value: 3 },
+//       { question_id: 'q5_belonging', value: 3 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+//   {
+//     survey_id: 'svy-1',
+//     uid: 'e3',
+//     school_id: 'school-e',
+//     consent: true,
+//     answers: [
+//       { question_id: 'q1_satisfaction', value: 2 },
+//       { question_id: 'q2_safety', value: 'No' },
+//       { question_id: 'q3_teacher_support', value: 2 },
+//       { question_id: 'q4_facilities', value: 2 },
+//       { question_id: 'q5_belonging', value: 2 },
+//     ],
+//     submittedAt: new Date(),
+//   },
+// ]
 
 // ===== helpers =====
 
@@ -270,6 +285,7 @@ const RESPONSES: Resp[] = [
 // }
 
 // 1..5 => red->yellow->green; null => gray
+
 function scoreToColor(avg: number | null): string {
   if (avg == null) return '#888'
   const t = Math.max(0, Math.min(1, (avg - 1) / 4))
@@ -289,29 +305,82 @@ function sizeByCount(n: number): number {
 
 const { BaseLayer, Overlay } = LayersControl
 
-export default function GeoMapDemo() {
+export default function GeoMap() {
+  const [responses, setResponses] = useState<ResponseWithId[]>([])
+  const [schools, setSchools] = useState<SchoolWithId[]>([])
+  const [questions, setQuestions] = useState<QuestionBankItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  //fetch data for schools, responses
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+
+    const fetchData = async () => {
+      try {
+        const [responseSnapshot, schoolSnapshot, questionSnapshot] =
+          await Promise.all([
+            getDocs(collectionGroup(db, 'responses')),
+            getDocs(collection(db, 'schools')),
+            getDocs(collection(db, 'questionBank')),
+          ])
+
+        const responseData: ResponseWithId[] = responseSnapshot.docs.map(
+          (doc) => ({
+            id: doc.id,
+            ...(doc.data() as Response),
+          })
+        )
+
+        const schoolData: SchoolWithId[] = schoolSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as School),
+        }))
+
+        const questionData: QuestionBankItem[] = questionSnapshot.docs.map(
+          (doc) => ({
+            ...(doc.data() as QuestionBankItem),
+            id: doc.id,
+          })
+        )
+
+        setResponses(responseData)
+        setSchools(schoolData)
+        setQuestions(questionData)
+      } catch (err) {
+        setError('Failed to fetch data')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
   // derive question ids from data
   const questionIds = useMemo(() => {
     const s = new Set<string>()
-    for (const r of RESPONSES) {
-      if (!r.consent) continue
-      for (const a of r.answers) if (a?.question_id) s.add(a.question_id)
+    for (const q of questions) {
+      s.add(q.id)
     }
     return Array.from(s).sort()
-  }, [])
+  }, [questions])
 
-  const [selectedQuestion, setSelectedQuestion] = useState<string>(
-    questionIds.includes('q1_satisfaction')
-      ? 'q1_satisfaction'
-      : questionIds[0] || ''
-  )
+  const [selectedQuestion, setSelectedQuestion] = useState<string>('')
+  useEffect(() => {
+    if (!selectedQuestion && questionIds.length > 0) {
+      setSelectedQuestion(questionIds[0])
+    }
+  }, [questionIds])
+
+  console.log('questionIds:', questionIds)
 
   // aggregate responses by school_id for the selected question
   const points = useMemo(() => {
     type Agg = { count: number; values: number[] }
     const bySchool: Record<string, Agg> = {}
 
-    for (const r of RESPONSES) {
+    for (const r of responses) {
       if (!r.consent) continue
       const sid = r.school_id
       if (!sid) continue
@@ -324,6 +393,16 @@ export default function GeoMapDemo() {
       }
     }
 
+    
+
+    //debug
+    console.log('bySchool:', bySchool)
+    console.log('selectedQuestion:', selectedQuestion)
+    const allMatchingAnswers = responses.flatMap((r) =>
+      r.answers.filter((a) => a.question_id === selectedQuestion)
+    )
+    console.log('answers matching selectedQuestion:', allMatchingAnswers)
+
     const out: Array<{
       id: string
       name?: string
@@ -333,7 +412,7 @@ export default function GeoMapDemo() {
       avg: number | null
     }> = []
 
-    for (const school of SCHOOLS) {
+    for (const school of schools) {
       const agg = bySchool[school.id]
       if (!agg) continue
       const avg = agg.values.length
@@ -343,13 +422,15 @@ export default function GeoMapDemo() {
         id: school.id,
         name: school.name,
         lat: school.lat,
-        lng: school.lng,
+        lng: school.long,
         count: agg.count,
         avg,
       })
     }
     return out
-  }, [selectedQuestion])
+  }, [selectedQuestion, responses, schools])
+
+  console.log('points:', points)
 
   return (
     <div className="grid grid-rows-[auto_1fr] gap-3 w-full h-[80vh]">
@@ -359,7 +440,7 @@ export default function GeoMapDemo() {
         <SearchCombobox
           value={selectedQuestion || null}
           onChange={(id) => setSelectedQuestion(id ?? '')}
-          options={questionIds.map((qid) => ({ id: qid, name: qid }))}
+          options={questions.map((q) => ({ id: q.id, name: q.text ?? q.id }))}
           placeholder="Select a question"
           className="w-[240px]"
         />
@@ -381,7 +462,13 @@ export default function GeoMapDemo() {
             {/* gradient */}
             <svg width="160" height="20" className="block mb-2">
               <defs>
-                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <linearGradient
+                  id="scoreGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
                   <stop offset="0%" stopColor="rgb(255, 55, 80)" />
                   <stop offset="25%" stopColor="rgb(191, 91, 60)" />
                   <stop offset="50%" stopColor="rgb(128, 128, 40)" />
@@ -470,10 +557,10 @@ export default function GeoMapDemo() {
 
             <Overlay name="School Locations">
               <>
-                {SCHOOLS.map((s) => (
+                {schools.map((s) => (
                   <CircleMarker
                     key={`loc-${s.id}`}
-                    center={[s.lat, s.lng]}
+                    center={[s.lat, s.long]}
                     radius={6}
                     pathOptions={{
                       color: '#333',
@@ -498,7 +585,7 @@ export default function GeoMapDemo() {
                         </div>
                         <div>
                           <b>Location:</b> {s.lat.toFixed(4)},{' '}
-                          {s.lng.toFixed(4)}
+                          {s.long.toFixed(4)}
                         </div>
                       </div>
                     </Popup>
