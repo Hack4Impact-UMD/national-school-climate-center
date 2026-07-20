@@ -63,26 +63,26 @@ function UnauthorizedMessage({ requiredAction }: UnauthorizedMessageProps) {
             Redirecting to login...
           </p>
         </div>
-        <RedirectToLogin />
+        {/* <RedirectToLogin /> */}
       </div>
     </main>
   )
 }
 
-function RedirectToLogin() {
-  const [shouldRedirect, setShouldRedirect] = useState(false)
+// function RedirectToLogin() {
+//   const [shouldRedirect, setShouldRedirect] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShouldRedirect(true)
-    }, UNAUTHORIZED_REDIRECT_DELAY_MS)
+//   useEffect(() => {
+//     const timer = setTimeout(() => {
+//       setShouldRedirect(true)
+//     }, UNAUTHORIZED_REDIRECT_DELAY_MS)
 
-    return () => clearTimeout(timer)
-  }, [])
+//     return () => clearTimeout(timer)
+//   }, [])
 
-  if (shouldRedirect) {
-    return <Navigate to="/login" replace />
-  }
+//   if (shouldRedirect) {
+//     return <Navigate to="/login" replace />
+//   }
 
-  return null
-}
+//   return null
+// }
