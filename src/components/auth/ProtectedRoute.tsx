@@ -59,9 +59,6 @@ function UnauthorizedMessage({ requiredAction }: UnauthorizedMessageProps) {
           <p className="font-body text-lg text-body mb-2">
             {actionMessages[requiredAction]}
           </p>
-          <p className="font-body text-sm text-body/70">
-            Redirecting to login...
-          </p>
         </div>
         {/* <RedirectToLogin /> */}
       </div>
