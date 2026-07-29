@@ -18,6 +18,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import ReviewSurveyPage from "./pages/survey/ReviewSurveyPage";
 import SurveyLandingPage from './pages/public/SurveyLandingPage'
 import TakeSurvey from './pages/survey/TakeSurvey'
+import AcceptInvite from './pages/auth/AcceptInvite'
 
 /**
  * Defines the application's top-level route map and routing structure.
@@ -33,6 +34,7 @@ export default function App() {
       <Route path="/create-account/school" element={<CreateAccountSchool />} />
       <Route path="/surveys/respond/:surveyId" element={<SurveyLandingPage />} />
       <Route path="/surveys/take/:surveyId" element={<TakeSurvey />} />
+      <Route path="/accept-invite" element={<AcceptInvite />} />
 
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>

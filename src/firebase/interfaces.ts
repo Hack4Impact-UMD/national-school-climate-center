@@ -1,4 +1,5 @@
-import type { Timestamp } from 'firebase-admin/firestore'
+import type { Role } from '@/types/auth'
+import type { DocumentData, Timestamp } from 'firebase-admin/firestore'
 import type { FieldValue } from 'firebase-admin/firestore'
 
 export interface User {
@@ -17,6 +18,16 @@ export interface Question {
   required: boolean
   overrides?: Record<string, unknown>
   text?: string
+}
+
+
+export interface Invitation {
+  id: string
+  email: string
+  role: Role
+  status: 'pending' | 'accepted' | 'cancelled'
+  invitedAt: DocumentData['invitedAt']
+  invitedBy: string | null
 }
 
 export interface Survey {
