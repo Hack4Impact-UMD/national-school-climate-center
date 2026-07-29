@@ -389,24 +389,25 @@ export default function Analytics() {
     }
   }, [])
   const getPermSurveys = (surveys: SurveyInfo[], auth: PermissionContext) => {
-    const published = surveys.filter((survey) => survey.status == 'Published')
-    console.log(published)
+    const published = surveys.filter((survey) => survey.status === 'Published')
+
     if (auth.role === 'super_admin') {
       return published
     }
-    if (auth.districtId == null && auth.schoolId == null) {
-      return []
+
+    if (auth.role === 'admin') {
+      if (auth.districtId == null) return []
+      return published.filter((survey) => survey.districtId === auth.districtId)
     }
-    return published.filter((survey) => {
-      const schoolMatches =
-        auth.schoolId == null || survey.schoolId === auth.schoolId
-      const districtMatches =
-        auth.districtId == null || survey.districtId === auth.districtId
 
-      return schoolMatches && districtMatches
-    })
+    if (auth.role === 'school_personnel') {
+      if (auth.schoolId == null) return []
+      return published.filter((survey) => survey.schoolId === auth.schoolId)
+    }
+
+    // unrecognized/missing role — no access by default
+    return []
   }
-
   const { role, schoolId, districtId } = useAuth()
 
   const permittedSurveys = useMemo(
