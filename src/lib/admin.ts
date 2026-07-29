@@ -140,6 +140,7 @@ export async function acceptInvitation(inviteId: string, uid: string) {
     throw new Error('This invitation has already been used or is no longer valid')
   }
 
+
   await setDoc(doc(db, 'members', uid), {
     email: invite.email,
     role: invite.role,
@@ -206,5 +207,5 @@ export async function cancelInvitation(id: string) {
   if (snap.data().status !== 'pending') {
     throw new Error('Only pending invitations can be cancelled')
   }
-  await updateDoc(d, { status: 'cancelled' })
+  await updateDoc(d, { status: 'expired' })
 }

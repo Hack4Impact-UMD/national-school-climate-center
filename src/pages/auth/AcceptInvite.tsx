@@ -66,7 +66,7 @@ export default function AcceptInvite() {
       await acceptInvitation(inviteId, cred.user.uid)
       navigate('/home')
     } catch (error) {
-      console.error('Error accepting invitation:', error)
+      console.error('Firestore write failed after auth creation:', error)
       if (error instanceof Error && 'code' in error) {
         const firebaseError = error as { code: string }
         if (firebaseError.code === 'auth/email-already-in-use') {

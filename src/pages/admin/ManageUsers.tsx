@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Search, Plus, Pencil, X } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 import {
   Dialog,
   DialogContent,
@@ -52,6 +53,7 @@ type Row =
 
 export default function ManageUsers() {
   const [open, setOpen] = useState(false)
+  const { role: currentRole } = useAuth()
   const [members, setMembers] = useState<Member[]>([])
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,6 +68,27 @@ export default function ManageUsers() {
   const [editRole, setEditRole] = useState<Role>('admin')
   const [editLoading, setEditLoading] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
+
+  const availableRoles = useMemo(() => {
+    const all: { value: Role; label: string }[] = [
+      { value: 'super_admin', label: 'Super Admin' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'school_personnel', label: 'School Personnel' },
+      { value: 'student', label: 'Student' },
+    ]
+    if (currentRole === 'super_admin') return all
+    // regular admins (and anyone else) only get school_personnel/student,
+    // matching the invitations create rule in firestore.rules
+    return all.filter((r) => r.value === 'school_personnel' || r.value === 'student')
+  }, [currentRole])
+
+  // default the invite/edit role pickers to the first option this admin can actually pick,
+  // rather than always defaulting to 'admin' (which a regular admin can't invite)
+  useEffect(() => {
+    if (availableRoles.length && !availableRoles.some((r) => r.value === inviteRole)) {
+      setInviteRole(availableRoles[0].value)
+    }
+  }, [availableRoles])
 
   const roleLabel = (r?: Role | null) => {
     if (!r) return '-'
@@ -125,7 +148,7 @@ export default function ManageUsers() {
     // Don't show invitations that have already been accepted — that person
     // now shows up as a member row instead, so this avoids duplicate rows.
     const invitationRows: Row[] = invitations
-      .filter((i) => i.status !== 'accepted')
+      .filter((i) => i.status === 'pending') // only show active, unresolved invites
       .map((i) => ({
         kind: 'invitation',
         id: i.id,
@@ -150,6 +173,7 @@ export default function ManageUsers() {
     setEditLoading(true)
     setEditError(null)
     try {
+      console.log('Updating invitation role', editingInvite.id, editRole, 'current role', currentRole)
       await updateInvitationRole(editingInvite.id, editRole)
       setEditingInvite(null)
     } catch (err: unknown) {
@@ -305,10 +329,11 @@ export default function ManageUsers() {
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="school_personnel">School Personnel</SelectItem>
+                  {availableRoles.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Button
@@ -371,15 +396,16 @@ export default function ManageUsers() {
 
           <div className="mt-2">
             <label className="text-sm font-medium text-gray-600 mb-2 block">Role</label>
-            <Select value={editRole} onValueChange={(v: string) => setEditRole(v as Role)}>
-              <SelectTrigger className="w-full bg-gray-50 cursor-pointer">
+            <Select defaultValue={inviteRole} onValueChange={(v: string) => setInviteRole(v as Role)}>
+              <SelectTrigger className="w-36 bg-gray-50 cursor-pointer">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="super_admin">Super Admin</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="student">Student</SelectItem>
-                <SelectItem value="school_personnel">School Personnel</SelectItem>
+                {availableRoles.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {editError && <div className="mt-2 text-sm text-red-600">{editError}</div>}
