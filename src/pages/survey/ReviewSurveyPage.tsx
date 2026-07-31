@@ -6,6 +6,7 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
+  setDoc,
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { useAuth } from '@/contexts/AuthContext'
@@ -15,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { SurveyHeader } from '@/components/survey/SurveyHeader'
 import { editSurvey } from '@/functions/firebaseFunctions'
 import type { Survey } from '@/types/survey'
+import { PublishSuccessDialog } from '@/components/survey/PublishSucessDialog'
 
 type LocationState = {
   questions: BuilderQuestion[]
@@ -45,9 +47,9 @@ export default function ReviewSurveyPage({
 
   const [publishing, setPublishing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null)
 
   const effectiveDescription = surveyDescription ?? ''
-  const [shareLink, setShareLink] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const effectiveSurveyType = surveyType ?? defaultSurveyType ?? 'Challenge'
@@ -80,6 +82,23 @@ export default function ReviewSurveyPage({
     try {
       const questionDocs = mapQuestionsToFirebase(questions)
 
+      //add questions to questionBank
+      await Promise.all(
+        questions.map((q) =>
+          setDoc(
+            doc(db, 'questionBank', q.id),
+            {
+              id: q.id,
+              text: q.prompt || q.name,
+              type: q.questionType,
+              options: q.options ?? [],
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true } 
+          )
+        )
+      )
+
       let docId = surveyId
 
       if (docId) {
@@ -90,6 +109,7 @@ export default function ReviewSurveyPage({
           description: effectiveDescription,
           type: effectiveSurveyType,
           questions: questionDocs,
+          questionCount: questionDocs.length,
           updatedAt: serverTimestamp(),
           status: 'Published',
           school_id: state?.school ?? null,
@@ -117,11 +137,12 @@ export default function ReviewSurveyPage({
         docId = docRef.id
       }
       const url = `${window.location.origin}/surveys/respond/${docId}`
-      setShareLink(url)
 
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(url).catch(() => {})
       }
+
+      setPublishedUrl(url)
     } catch (err) {
       console.error(err)
       setError('Failed to publish survey. Please try again.')
@@ -143,7 +164,7 @@ export default function ReviewSurveyPage({
         surveyDescription: effectiveDescription,
         surveyType: effectiveSurveyType,
         surveyId: state?.surveyId,
-        activeTab: 'question',
+        activeTab: 'list',
         activeId: questions[0]?.id,
       },
     })
@@ -172,6 +193,7 @@ export default function ReviewSurveyPage({
         description: effectiveDescription,
         type: effectiveSurveyType,
         questions: questionDocs,
+        questionCount: questionDocs.length,
         status: 'Draft',
       })
 
@@ -204,6 +226,16 @@ export default function ReviewSurveyPage({
 
   return (
     <div className="mx-auto max-w-6xl p-6">
+      {/* Publish Success Dialog */}
+      <PublishSuccessDialog
+        url={publishedUrl ?? ''}
+        open={!!publishedUrl}
+        onClose={() => setPublishedUrl(null)}
+        onNavigate={() => {
+          setPublishedUrl(null)
+          navigate('/surveys')
+        }}
+      />
       <img
         src="/logo.png"
         alt="National School Climate Center"
@@ -270,29 +302,6 @@ export default function ReviewSurveyPage({
           >
             {saving ? 'Saving...' : 'Save Draft'}
           </Button>
-
-          {shareLink && (
-            <div className="w-full max-w-xl space-y-1">
-              <p className="text-sm font-body text-body">
-                Survey published! Share this link with respondents:
-              </p>
-              <div className="flex gap-2">
-                <input
-                  className="flex-1 rounded-md border px-3 py-2 text-sm bg-white"
-                  value={shareLink}
-                  readOnly
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigator.clipboard.writeText(shareLink)}
-                  className="whitespace-nowrap cursor-pointer"
-                >
-                  Copy Link
-                </Button>
-              </div>
-            </div>
-          )}
 
           {error && <p className="text-sm text-red-600 font-body">{error}</p>}
         </div>

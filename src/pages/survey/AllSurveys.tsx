@@ -2,13 +2,17 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePublishedSurveys } from '@/hooks/useSurveys'
 import { useSurveyResponseAggregates } from '@/hooks/useSurveyResponseAggregates'
-import jsPDF from "jspdf"
+import jsPDF from 'jspdf'
 import { Button } from '@/components/ui/button'
 
 const RESPONSE_RANGES = [
   { id: 'any', label: 'Any', test: (_n: number) => true },
   { id: 'lt100', label: '<100', test: (n: number) => n < 100 },
-  { id: '100_500', label: '100–500', test: (n: number) => n >= 100 && n <= 500 },
+  {
+    id: '100_500',
+    label: '100–500',
+    test: (n: number) => n >= 100 && n <= 500,
+  },
   { id: 'gt500', label: '500+', test: (n: number) => n > 500 },
 ] as const
 
@@ -47,7 +51,7 @@ export default function AllSurveys() {
 
   // only published surveys; filter by type via tabs.
   const { surveys, loading, error } = usePublishedSurveys({
-    type: tab === 'all' ? null : tab as "challenge" | "pulse",
+    type: tab === 'all' ? null : (tab as 'challenge' | 'pulse'),
   })
 
   const surveyIds = useMemo(() => surveys.map((s) => s.id), [surveys])
@@ -77,13 +81,16 @@ export default function AllSurveys() {
   }, [aggregates])
 
   const rows = useMemo(() => {
-    const range = RESPONSE_RANGES.find((r) => r.id === filters.responses) ?? RESPONSE_RANGES[0]
+    const range =
+      RESPONSE_RANGES.find((r) => r.id === filters.responses) ??
+      RESPONSE_RANGES[0]
 
     return surveys
       .map((s) => {
         const agg = aggregates[s.id]
         return {
           id: s.id,
+          link: `${window.location.origin}/surveys/take/${s.id}`,
           title: (s as any).title ?? 'Untitled Survey',
           type: (s as any).type ?? '—',
           responseCount: agg?.responseCount ?? 0,
@@ -95,9 +102,12 @@ export default function AllSurveys() {
       })
       .filter((r) => {
         // responded-from filtering
-        if (filters.school !== 'any' && !r.schools.has(filters.school)) return false
-        if (filters.district !== 'any' && !r.districts.has(filters.district)) return false
-        if (filters.state !== 'any' && !r.states.has(filters.state)) return false
+        if (filters.school !== 'any' && !r.schools.has(filters.school))
+          return false
+        if (filters.district !== 'any' && !r.districts.has(filters.district))
+          return false
+        if (filters.state !== 'any' && !r.states.has(filters.state))
+          return false
 
         // response count range filter
         if (!range.test(r.responseCount)) return false
@@ -120,39 +130,37 @@ export default function AllSurveys() {
   const handleExportCSV = () => {
     try {
       setDrop(false)
-      let csv = "Survey Title, Type, Responses, Last Response\n"
+      let csv = 'Survey Title, Type, Responses, Last Response\n'
 
       rows.forEach((row) => {
         csv += `"${row.title}", "${row.type}", "${row.responseCount}", "${formatDate(row.lastResponseAt)}"\n`
       })
 
       const encodedCSV = encodeURI(csv)
-      const downloadLink = document.createElement("a")
+      const downloadLink = document.createElement('a')
       downloadLink.href = `data:text/csv;charset=utf-8,${encodedCSV}`
-      downloadLink.setAttribute("download", "Surveys_Report.csv")
+      downloadLink.setAttribute('download', 'Surveys_Report.csv')
       downloadLink.click()
-      console.log("Downloading as CSV")
-
+      console.log('Downloading as CSV')
     } catch (error) {
-      console.error("Failed to generate the CSV", error)
+      console.error('Failed to generate the CSV', error)
     }
   }
-
 
   const handleExportPDF = () => {
     try {
       const doc = new jsPDF()
 
       doc.setFontSize(20)
-      doc.text("Survey Report", 15, 25)
+      doc.text('Survey Report', 15, 25)
 
       doc.setFontSize(14)
       let y = 35
 
-      doc.text("Name", 15, y)
-      doc.text("Type", 90, y)
-      doc.text("Responses", 140, y)
-      doc.text("Last Response", 170, y)
+      doc.text('Name', 15, y)
+      doc.text('Type', 90, y)
+      doc.text('Responses', 140, y)
+      doc.text('Last Response', 170, y)
       y += 10
 
       doc.setLineWidth(0.7)
@@ -172,11 +180,10 @@ export default function AllSurveys() {
         }
       })
 
-      doc.save("Surveys_Report.pdf")
-      console.log("Downloading PDF")
-
+      doc.save('Surveys_Report.pdf')
+      console.log('Downloading PDF')
     } catch (error) {
-      console.error("Failed to generate the PDF", error)
+      console.error('Failed to generate the PDF', error)
     }
   }
 
@@ -184,9 +191,12 @@ export default function AllSurveys() {
     <div className="p-6 space-y-5 max-w-6xl mx-auto pb-12">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-heading text-4xl font-bold text-heading mb-1">All Surveys</h1>
+          <h1 className="font-heading text-4xl font-bold text-heading mb-1">
+            All Surveys
+          </h1>
           <p className="font-body text-lg text-body">
-            Published surveys (NSCC admin only). Filter by where respondents came from.
+            Published surveys (NSCC admin only). Filter by where respondents
+            came from.
           </p>
         </div>
 
@@ -201,14 +211,18 @@ export default function AllSurveys() {
       </div>
 
       <div>
-        <h2 className="font-heading text-2xl font-semibold text-primary mb-3">Filter</h2>
+        <h2 className="font-heading text-2xl font-semibold text-primary mb-3">
+          Filter
+        </h2>
 
         {/* Filter bar */}
         <div className="flex flex-wrap gap-3 items-center">
           <select
             className={selectPillClass}
             value={filters.school}
-            onChange={(e) => setFilters((p) => ({ ...p, school: e.target.value }))}
+            onChange={(e) =>
+              setFilters((p) => ({ ...p, school: e.target.value }))
+            }
           >
             <option value="any">School</option>
             {filterOptions.schools.map((s) => (
@@ -221,7 +235,9 @@ export default function AllSurveys() {
           <select
             className={selectPillClass}
             value={filters.district}
-            onChange={(e) => setFilters((p) => ({ ...p, district: e.target.value }))}
+            onChange={(e) =>
+              setFilters((p) => ({ ...p, district: e.target.value }))
+            }
           >
             <option value="any">District</option>
             {filterOptions.districts.map((d) => (
@@ -234,7 +250,9 @@ export default function AllSurveys() {
           <select
             className={selectPillClass}
             value={filters.state}
-            onChange={(e) => setFilters((p) => ({ ...p, state: e.target.value }))}
+            onChange={(e) =>
+              setFilters((p) => ({ ...p, state: e.target.value }))
+            }
           >
             <option value="any">State</option>
             {filterOptions.states.map((st) => (
@@ -248,7 +266,10 @@ export default function AllSurveys() {
             className={selectPillClass}
             value={filters.responses}
             onChange={(e) =>
-              setFilters((p) => ({ ...p, responses: e.target.value as Filters['responses'] }))
+              setFilters((p) => ({
+                ...p,
+                responses: e.target.value as Filters['responses'],
+              }))
             }
           >
             <option value="any">Number of Responses</option>
@@ -264,7 +285,9 @@ export default function AllSurveys() {
               className={inputPillClass}
               placeholder="Search"
               value={filters.search}
-              onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
+              onChange={(e) =>
+                setFilters((p) => ({ ...p, search: e.target.value }))
+              }
             />
           </div>
         </div>
@@ -275,20 +298,24 @@ export default function AllSurveys() {
         {/* Tabs + actions */}
         <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
           <div className="inline-flex rounded-2xl border border-primary p-1">
-            {([
-              { key: 'all', label: 'All Surveys' },
-              { key: 'challenge', label: 'Challenge' },
-              { key: 'pulse', label: 'Pulse' },
-            ] as const).map((t) => {
+            {(
+              [
+                { key: 'all', label: 'All Surveys' },
+                { key: 'challenge', label: 'Challenge' },
+                { key: 'pulse', label: 'Pulse' },
+              ] as const
+            ).map((t) => {
               const active = tab === t.key
               return (
                 <Button
                   key={t.key}
-                  variant={active ? "default" : "ghost"}
+                  variant={active ? 'default' : 'ghost'}
                   type="button"
                   className={
                     'px-4 py-2 text-sm rounded-lg transition-colors ' +
-                    (active ? 'bg-primary text-white shadow-sm' : 'text-heading hover:bg-secondary/20')
+                    (active
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-heading hover:bg-secondary/20')
                   }
                   onClick={() => setTab(t.key)}
                 >
@@ -318,19 +345,23 @@ export default function AllSurveys() {
               <div className="absolute right-0 mt-1 w-23 z-10 items-center">
                 <div onClick={() => setDrop(false)} />
                 <div className=" mt-5 absolute w-full rounded-lg overflow-hidden bg-[#2F6CC0] text-white">
-                  <Button onClick={() => {
-                    handleExportPDF()
-                    setDrop(false)
-                  }}
-                    className="w-full rounded-none">
+                  <Button
+                    onClick={() => {
+                      handleExportPDF()
+                      setDrop(false)
+                    }}
+                    className="w-full rounded-none hover:bg-secondary/50 cursor-pointer"
+                  >
                     PDF
                   </Button>
 
-                  <Button onClick={() => {
-                    handleExportCSV()
-                    setDrop(false)
-                  }}
-                    className="w-full rounded-none mt-1">
+                  <Button
+                    onClick={() => {
+                      handleExportCSV()
+                      setDrop(false)
+                    }}
+                    className="w-full rounded-none mt-1 hover:bg-secondary/50 cursor-pointer"
+                  >
                     CSV
                   </Button>
                 </div>
@@ -348,6 +379,7 @@ export default function AllSurveys() {
                   <th className="px-4 py-3 font-semibold">Type</th>
                   <th className="px-4 py-3 font-semibold">Responses</th>
                   <th className="px-4 py-3 font-semibold">Last Response</th>
+                  <th className="px-4 py-3 font-semibold">Survey Link</th>
                 </tr>
               </thead>
               <tbody>
@@ -361,7 +393,10 @@ export default function AllSurveys() {
 
                 {!isLoading && displayError && (
                   <tr>
-                    <td colSpan={4} className="px-4 py-6 text-red-600 whitespace-pre-wrap break-words">
+                    <td
+                      colSpan={4}
+                      className="px-4 py-6 text-red-600 whitespace-pre-wrap break-words"
+                    >
                       {displayError}
                     </td>
                   </tr>
@@ -385,9 +420,26 @@ export default function AllSurveys() {
                       title="Open survey"
                     >
                       <td className="px-4 py-3">{r.title}</td>
-                      <td className="px-4 py-3">{r.type?.charAt(0).toUpperCase() + r.type?.slice(1)}</td>
+                      <td className="px-4 py-3">
+                        {r.type?.charAt(0).toUpperCase() + r.type?.slice(1)}
+                      </td>
                       <td className="px-4 py-3">{r.responseCount}</td>
-                      <td className="px-4 py-3">{formatDate(r.lastResponseAt)}</td>
+                      <td className="px-4 py-3">
+                        {formatDate(r.lastResponseAt)}
+                      </td>
+                      <td
+                        className="px-4 py-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <a
+                          href={r.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline hover:opacity-75"
+                        >
+                          Survey Link
+                        </a>
+                      </td>
                     </tr>
                   ))}
               </tbody>
@@ -398,4 +450,3 @@ export default function AllSurveys() {
     </div>
   )
 }
-

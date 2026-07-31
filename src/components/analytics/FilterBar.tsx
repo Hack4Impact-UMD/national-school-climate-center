@@ -6,6 +6,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import type {
   FilterState,
   School,
@@ -48,24 +49,12 @@ export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) 
       {/* Main filter row */}
       <div className="flex flex-wrap items-center gap-2.5">
         {/* School */}
-        <Select
-          value={filters.school || ''}
-          onValueChange={(value) => onFilterChange('school', value)}
-        >
-          <SelectTrigger
-            className="w-[181px] font-body bg-background border-0 rounded-lg shadow-sm data-[placeholder]:text-[#444444]"
-            style={{ color: '#444444' }}
-          >
-            <SelectValue placeholder="School" />
-          </SelectTrigger>
-          <SelectContent className="bg-card">
-            {schools.map((school) => (
-              <SelectItem key={school.id} value={school.id}>
-                {school.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchCombobox
+          value={filters.school}
+          onChange={(id) => onFilterChange('school', id)}
+          options={schools}
+          placeholder="School"
+        />
 
         {/* Respondent Group */}
         <Select
