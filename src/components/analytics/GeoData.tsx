@@ -13,8 +13,6 @@ import {
   collection,
   collectionGroup,
   getDocs,
-  query,
-  where,
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import type {
@@ -393,7 +391,7 @@ export default function GeoMap() {
       }
     }
 
-    
+
 
     //debug
     console.log('bySchool:', bySchool)
@@ -432,6 +430,21 @@ export default function GeoMap() {
 
   console.log('points:', points)
 
+  if (loading) {
+    return (
+      <div className="grid place-items-center h-[80vh] text-sm text-gray-500">
+        Loading map data...
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="grid place-items-center h-[80vh] text-sm text-red-500">
+        {error}
+      </div>
+    )
+  }
   return (
     <div className="grid grid-rows-[auto_1fr] gap-3 w-full h-[80vh]">
       {/* controls */}
