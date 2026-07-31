@@ -22,7 +22,6 @@ import type {
   QuestionType,
   SurveyType,
 } from '@/types/analytics'
-import { useAuth } from '@/contexts/AuthContext'
 
 type SurveyQuestion = {
   question_id: string
