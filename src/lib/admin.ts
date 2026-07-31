@@ -24,11 +24,6 @@ function buildInviteEmailHtml(role: Role, acceptUrl: string) {
     <div style="background-color:#ffffff; padding:24px; font-family:Arial, Helvetica, sans-serif;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:576px; margin:0 auto;">
         <tr>
-          <td style="text-align:center; padding-bottom:16px;">
-            <img src="https://yourapp.com/logo.png" alt="National School Climate Center" width="140" style="display:block; margin:0 auto; height:auto;" />
-          </td>
-        </tr>
-        <tr>
           <td style="text-align:center; padding-bottom:8px;">
             <h1 style="font-size:24px; font-weight:700; color:#1E3A5F; margin:0; padding:0 24px;">
               You've been invited
