@@ -63,10 +63,16 @@ export default function AcceptInvite() {
         invite.email,
         password
       )
-      await acceptInvitation(inviteId, cred.user.uid)
+      try {
+        await acceptInvitation(inviteId, cred.user.uid)
+      } catch (acceptError) {
+        // Roll back the newly created auth account so the user can retry.
+        await cred.user.delete().catch(() => {})
+        throw acceptError
+      }
       navigate('/home')
     } catch (error) {
-      console.error('Firestore write failed after auth creation:', error)
+      console.error('Error accepting invitation:', error)
       if (error instanceof Error && 'code' in error) {
         const firebaseError = error as { code: string }
         if (firebaseError.code === 'auth/email-already-in-use') {
