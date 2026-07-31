@@ -140,6 +140,7 @@ export async function acceptInvitation(inviteId: string, uid: string) {
     email: invite.email,
     role: invite.role,
     joinedAt: serverTimestamp(),
+    inviteId,
   })
 
   await updateDoc(inviteRef, {
