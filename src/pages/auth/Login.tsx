@@ -220,27 +220,6 @@ export default function Login() {
         >
           Forgot Password
         </button>
-        <div className="text-center mt-4">
-          <p className="font-body text-md text-secondary">
-            Don't have an account?
-          </p>
-          <span className="flex justify-center gap-4 mt-1">
-            <button
-              className="font-body text-md text-secondary underline font-bold cursor-pointer bg-transparent border-0 p-0"
-              type="button"
-              onClick={() => navigate('/create-account/nscc')}
-            >
-              Create NSCC Account
-            </button>
-            <button
-              className="font-body text-md text-secondary underline font-bold cursor-pointer bg-transparent border-0 p-0"
-              type="button"
-              onClick={() => navigate('/create-account/school')}
-            >
-              Create School Account
-            </button>
-          </span>
-        </div>
       </div>
     </main>
   )
