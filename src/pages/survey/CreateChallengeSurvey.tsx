@@ -21,7 +21,7 @@ import { db } from '@/firebase/config'
 
 const DEFAULT_QUESTIONS: Question[] = [
   {
-    id: 'q1',
+    id: crypto.randomUUID(),
     name: 'Sample Question 1',
     prompt: 'How satisfied are you with your current experience?',
     questionType: 'multiple-choice',
@@ -51,6 +51,7 @@ export default function CreateChallengeSurvey() {
     surveyTitle?: string
     surveyDescription?: string
     surveyType?: 'Challenge' | 'Pulse' | 'challenge' | 'pulse'
+    surveyId?: string
   }
 
   const normalizedSurveyType =
@@ -121,14 +122,16 @@ export default function CreateChallengeSurvey() {
   const [tab, setTab] = useState<'question' | 'list' | 'workflow'>(
     incomingState.activeTab ?? incomingState.defaultTab ?? 'question'
   )
-  const [createdSurveyId, setCreatedSurveyId] = useState<string | null>(null)
+  const [createdSurveyId, setCreatedSurveyId] = useState<string | null>(
+    incomingState.surveyId ?? null
+  )
   const hasCreatedDraftRef = useRef(false) // prevents duplicate creations from effect reruns
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    // checks if a draft already exists in this session or mismatched auth
-    if (hasCreatedDraftRef.current || !user) {
+    // checks if a draft already exists in this session, incoming surveyId exists, or mismatched auth
+    if (hasCreatedDraftRef.current || incomingState.surveyId || !user) {
       return
     }
 
@@ -208,6 +211,25 @@ export default function CreateChallengeSurvey() {
   setQuestions(prev => [...prev, copiedQuestion])
   setActiveId(copiedQuestion.id)
   setShowQuestionBank(false)
+  }
+
+  function reorderQuestions(fromIndex: number, toIndex: number) {
+    setQuestions((prev) => {
+      if (
+        fromIndex === toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= prev.length ||
+        toIndex >= prev.length
+      ) {
+        return prev
+      }
+
+      const next = [...prev]
+      const [movedQuestion] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, movedQuestion)
+      return next
+    })
   }
 
   //need to add school_name here after the page is created
@@ -332,6 +354,7 @@ const term = search.toLowerCase()
               onSelect={setActiveId}
               onDelete={deleteQuestion}
               onDuplicate={duplicateQuestion}
+              onMove={reorderQuestions}
               onChange={updateActiveQuestion}
             />
 

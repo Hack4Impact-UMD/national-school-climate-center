@@ -83,21 +83,27 @@ service cloud.firestore {
     }
     // Surveys collection
     match /surveys/{surveyID} {
-      allow read: if signedIn();
+      allow read: if true;
       allow create, update, delete: if isAdmin();
 
       // Responses subcollection for each survey
       match /responses/{responseID} {
         allow read: if signedIn() && (isAdmin() || isStaff());
-        allow create: if signedIn();
+        allow create: if true;
         allow update: if false;
         allow delete: if isAdmin();
       }
     }
+
+    // Schools collection
+    match /schools/{schoolID} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
     
     // allows responses to get pulled without a surveyID
     match /{path=**}/responses/{responseID} {
-      allow read: if signedIn() && (isAdmin() || isStaff());
+      allow read: if signedIn()
     }
   
     
