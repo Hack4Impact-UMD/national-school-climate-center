@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, getDocs, type Timestamp } from 'firebase/firestore'
-import GeoMapDemo from '@/components/analytics/GeoData'
+import { useAuth } from '@/contexts/AuthContext'
 import GenerateReport from '@/components/analytics/GenerateReport'
 import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
@@ -12,6 +12,7 @@ import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import { FilterChips } from '@/components/analytics/FilterChips'
 import { db } from '@/firebase/config'
 import { Button } from '@/components/ui/button'
+import GeoMap from '@/components/analytics/GeoData.tsx'
 import type { ChartType } from '@/types/chartTypes'
 import type {
   FilterState,
@@ -46,6 +47,7 @@ type FirestoreAnswer = {
 type FirestoreResponse = {
   answers?: FirestoreAnswer[]
   school_id?: string
+  district_id?: string
   respondent_group?: string
   surveyTitle?: string
   survey_id?: string
@@ -61,6 +63,7 @@ type ResponseRecord = {
   surveyID: string
   questionType: string | null
   school: string | null
+  district: string | null
   respondentGroup: string | null
   date: string | null
   answerValue: string
@@ -270,6 +273,7 @@ function buildComparisonCharts(
 const initialCache = loadFromCache()
 
 export default function Analytics() {
+  const { role, schoolId, districtId } = useAuth()
   const [chartType, setChartType] = useState<ChartType>('bar')
   const [responses, setResponses] = useState<ResponseRecord[]>(
     initialCache ?? []
@@ -356,6 +360,7 @@ export default function Analytics() {
                 surveyType: questionMetadata?.surveyType ?? null,
                 questionType: questionMetadata?.questionType ?? null,
                 school,
+                district: data.district_id ?? null,
                 respondentGroup,
                 date,
                 answerValue:
@@ -388,6 +393,17 @@ export default function Analytics() {
       isMounted = false
     }
   }, [])
+
+  const visibleResponses = useMemo(() => {
+    const isSchoolAdmin = role === 'school_personnel' && Boolean(schoolId && schoolId !== 'all-schools')
+    const isDistrictAdmin = role === 'admin' && Boolean(districtId && districtId !== 'all-districts')
+
+    return responses.filter((response) => {
+      if (isSchoolAdmin) return response.school === schoolId
+      if (isDistrictAdmin) return response.district === districtId
+      return true
+    })
+  }, [responses, role, schoolId, districtId])
   const getPermSurveys = (surveys: SurveyInfo[], auth: PermissionContext) => {
     const published = surveys.filter((survey) => survey.status === 'Published')
 
@@ -408,7 +424,6 @@ export default function Analytics() {
     // unrecognized/missing role — no access by default
     return []
   }
-  const { role, schoolId, districtId } = useAuth()
 
   const permittedSurveys = useMemo(
     () => getPermSurveys(surveys, { role, schoolId, districtId }),
@@ -422,7 +437,7 @@ export default function Analytics() {
     const surveyTypeMap = new Map<string, string>()
     const questionMap = new Map<string, string>()
 
-    responses.forEach((response) => {
+    visibleResponses.forEach((response) => {
       if (response.school) {
         schoolMap.set(response.school, formatLabel(response.school))
       }
@@ -488,7 +503,7 @@ export default function Analytics() {
       questions,
       compareBy,
     }
-  }, [responses, permittedSurveys])
+  }, [visibleResponses, permittedSurveys])
 
   const handleFilterChange = (key: keyof FilterState, value: string | null) => {
     setFilters((prev) => ({
@@ -581,7 +596,7 @@ export default function Analytics() {
   }, [filters, optionLabelMaps])
 
   const filteredResponses = useMemo(() => {
-    return responses.filter((response) => {
+    return visibleResponses.filter((response) => {
       if (filters.school && response.school !== filters.school) {
         return false
       }
@@ -621,7 +636,7 @@ export default function Analytics() {
 
       return true
     })
-  }, [responses, filters])
+  }, [visibleResponses, filters])
 
   const charts = useMemo(() => {
     const grouped = new Map<string, ChartEntry>()
@@ -874,7 +889,7 @@ export default function Analytics() {
           View survey response distribution and average scores by school
           location.
         </p>
-        <GeoMapDemo />
+        <GeoMap />
       </div>
     </div>
   )

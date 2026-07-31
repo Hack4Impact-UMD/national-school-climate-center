@@ -14,10 +14,14 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { createSurvey } from '@/functions/firebaseFunctions'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Survey } from '@/types/survey'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '@/firebase/config'
+
+
 
 const DEFAULT_QUESTIONS: Question[] = [
   {
-    id: 'q1',
+    id: crypto.randomUUID(),
     name: 'Sample Question 1',
     prompt: 'How satisfied are you with your current experience?',
     questionType: 'multiple-choice',
@@ -190,6 +194,25 @@ export default function CreateChallengeSurvey() {
     })
   }
 
+  function addQuestionFromBank(question: Question) {
+    const copiedQuestion: Question = {
+    id: crypto.randomUUID(),
+    name: question.name ?? "Untitled",
+    prompt: question.prompt ?? "",
+    questionType: question.questionType ?? "open-ended",
+    inputType:
+      question.inputType ??
+      (question.questionType === "multiple-choice"
+        ? "single"
+        : "text"),
+    options: question.options ?? [],
+  }
+
+  setQuestions(prev => [...prev, copiedQuestion])
+  setActiveId(copiedQuestion.id)
+  setShowQuestionBank(false)
+  }
+
   function reorderQuestions(fromIndex: number, toIndex: number) {
     setQuestions((prev) => {
       if (
@@ -241,6 +264,35 @@ export default function CreateChallengeSurvey() {
     setActiveId(nextId)
     setTab('list')
   }
+ 
+
+  const [questionBank, setQuestionBank] = useState<Question[]>([])
+  const [showQuestionBank, setShowQuestionBank] = useState(false)
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+  async function loadQuestionBank() {
+    const snapshot = await getDocs(collection(db, 'questionBank'));
+    const questions = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Question[]
+
+    setQuestionBank(questions)
+  }
+
+  loadQuestionBank()
+}, [])
+
+
+const searchQuestionBank = questionBank.filter((question) => {
+const term = search.toLowerCase()
+  return (
+    (question.name ?? '').toLowerCase().includes(term) ||
+    (question.prompt ?? '').toLowerCase().includes(term)
+  )
+
+})
 
   return (
     <div className="mx-auto max-w-6xl p-6">
@@ -320,8 +372,68 @@ export default function CreateChallengeSurvey() {
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
-              </CardContent>
-            </Card>
+              
+
+            <Button
+              variant = 'outline'
+              onClick = {() => setShowQuestionBank(!showQuestionBank)}
+            > 
+              {showQuestionBank ? 'Hide Question Bank' : 'Question Bank'}
+            </Button>
+            </CardContent>
+          </Card>
+          
+        {showQuestionBank ? (
+          <Card className='mt-4'>
+            <CardHeader>
+              <CardTitle>Question Bank</CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              <Input
+                placeholder='Search questions...'
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className='mb-4'
+              />
+
+              <div className='space-y-3 max-h-96 overflow-y-auto'>
+                {searchQuestionBank.length === 0 ? (
+                  <p className='text-sm text-muted-foreground'>
+                    No questions found.
+                  </p>
+                ) : (
+                searchQuestionBank.map((question) => (
+                  <Card key={question.id}>
+                    <CardContent className='flex items-center justify-between py-4'>
+                      <div>
+                        <p className='font-semibold'>
+                          {question.name || 'Untitled Question'}
+                        </p>
+                        <p className='text-sm text-muted-foreground'>
+                           {question.prompt || 'No prompt'}
+                         </p>
+
+                       <p className='text-xs text-muted-foreground'>
+                          {question.questionType || 'Unknown'}
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={() => addQuestionFromBank(question)}
+                      >
+                        Add
+                      </Button>
+             </CardContent>
+          </Card>
+          ))
+        )}
+      </div>
+    </CardContent>
+  </Card>
+) : null}
+          
+
             <Button
               className="text-sm cursor-pointer"
               onClick={handleReviewSurvey}

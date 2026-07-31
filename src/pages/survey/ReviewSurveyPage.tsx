@@ -6,6 +6,7 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
+  setDoc,
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { useAuth } from '@/contexts/AuthContext'
@@ -80,6 +81,23 @@ export default function ReviewSurveyPage({
 
     try {
       const questionDocs = mapQuestionsToFirebase(questions)
+
+      //add questions to questionBank
+      await Promise.all(
+        questions.map((q) =>
+          setDoc(
+            doc(db, 'questionBank', q.id),
+            {
+              id: q.id,
+              text: q.prompt || q.name,
+              type: q.questionType,
+              options: q.options ?? [],
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true } 
+          )
+        )
+      )
 
       let docId = surveyId
 

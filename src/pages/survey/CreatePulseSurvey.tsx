@@ -1,25 +1,49 @@
-import { useState } from 'react'
+import { db } from '@/firebase/config'
+import type { School, SchoolWithId } from '@/firebase/interfaces'
+import { collection, getDocs } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // Mock data
-const MOCK_SCHOOLS = [
-  'Lincoln Elementary School',
-  'Roosevelt Middle School',
-  'Jefferson High School',
-  'Washington Academy',
-]
+// const MOCK_SCHOOLS = [
+//   'Lincoln Elementary School',
+//   'Roosevelt Middle School',
+//   'Jefferson High School',
+//   'Washington Academy',
+// ]
 
-const MOCK_DISTRICTS = [
-  'North Shore Unified School District',
-  'Eastside Community School District',
-  'Westfield Public Schools',
-  'Central Valley School District',
-]
+// const MOCK_DISTRICTS = [
+//   'North Shore Unified School District',
+//   'Eastside Community School District',
+//   'Westfield Public Schools',
+//   'Central Valley School District',
+// ]
 
 export default function CreatePulseSurvey() {
   const navigate = useNavigate()
   const [selectedSchool, setSelectedSchool] = useState('')
+  const [distrcts, setDistrcts] = useState<string[]>([])
   const [selectedDistrict, setSelectedDistrict] = useState('')
+
+  const [schools, setSchools] = useState<SchoolWithId[]>([])
+
+  useEffect(() => {
+    getDocs(collection(db, 'schools')).then((snap) => {
+      setSchools(
+        snap.docs.map((doc) => ({ id: doc.id, ...(doc.data() as School) }))
+      )
+
+      const districts = new Set<string>()
+      snap.docs.forEach((doc) => {
+        const school = doc.data() as School
+        if (school.district_id) {
+          districts.add(school.district_id)
+        }
+      })
+
+      setDistrcts(Array.from(districts))
+    })
+  }, [])
 
   const handleCreateSurvey = () => {
     if (!selectedSchool && !selectedDistrict) {
@@ -75,9 +99,9 @@ export default function CreatePulseSurvey() {
             <option value="" disabled>
               Name of School XXXXXX
             </option>
-            {MOCK_SCHOOLS.map((school) => (
-              <option key={school} value={school}>
-                {school}
+            {schools.map((school) => (
+              <option key={school.id} value={school.id}>
+                {school.name}
               </option>
             ))}
           </select>
@@ -125,7 +149,7 @@ export default function CreatePulseSurvey() {
             <option value="" disabled>
               Name of District XXXXXX
             </option>
-            {MOCK_DISTRICTS.map((district) => (
+            {distrcts.map((district) => (
               <option key={district} value={district}>
                 {district}
               </option>

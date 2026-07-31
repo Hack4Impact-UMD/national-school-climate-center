@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { can, type Action } from '@/pages/auth/rbac'
 import { LoadingSpinner } from '@/components/layout/LoadingSpinner'
 
-const UNAUTHORIZED_REDIRECT_DELAY_MS = 2000
 
 interface ProtectedRouteProps {
   requiredAction?: Action
@@ -59,30 +57,27 @@ function UnauthorizedMessage({ requiredAction }: UnauthorizedMessageProps) {
           <p className="font-body text-lg text-body mb-2">
             {actionMessages[requiredAction]}
           </p>
-          <p className="font-body text-sm text-body/70">
-            Redirecting to login...
-          </p>
         </div>
-        <RedirectToLogin />
+        {/* <RedirectToLogin /> */}
       </div>
     </main>
   )
 }
 
-function RedirectToLogin() {
-  const [shouldRedirect, setShouldRedirect] = useState(false)
+// function RedirectToLogin() {
+//   const [shouldRedirect, setShouldRedirect] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShouldRedirect(true)
-    }, UNAUTHORIZED_REDIRECT_DELAY_MS)
+//   useEffect(() => {
+//     const timer = setTimeout(() => {
+//       setShouldRedirect(true)
+//     }, UNAUTHORIZED_REDIRECT_DELAY_MS)
 
-    return () => clearTimeout(timer)
-  }, [])
+//     return () => clearTimeout(timer)
+//   }, [])
 
-  if (shouldRedirect) {
-    return <Navigate to="/login" replace />
-  }
+//   if (shouldRedirect) {
+//     return <Navigate to="/login" replace />
+//   }
 
-  return null
-}
+//   return null
+// }

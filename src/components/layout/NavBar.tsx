@@ -8,7 +8,6 @@ import {
   ClipboardList,
   CheckSquare,
   BarChart3,
-  Phone,
   Settings,
   Users,
 } from 'lucide-react'
@@ -19,7 +18,9 @@ export default function NavBar() {
 
   const getRoleLabel = () => {
     if (!role) return 'Guest'
-    return role === 'super_admin' ? 'NSCC Admin' : 'School Personnel'
+    if (role === 'super_admin') return 'NSCC Admin'
+    if (role === 'admin') return 'District Admin'
+    return 'School Personnel'
   }
 
   const handleLogout = async () => {
@@ -92,11 +93,11 @@ export default function NavBar() {
             </p>
             <div className="mt-3 text-lg space-y-2">
               <Link
-                to="/general"
+                to="/account"
                 className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
               >
                 <Settings className="w-5 h-5" />
-                <h3 className="font-heading text-lg text-inherit">General</h3>
+                <h3 className="font-heading text-lg text-inherit">Account</h3>
               </Link>
               {can(role, 'manage_users') && (
                 <Link
@@ -109,15 +110,6 @@ export default function NavBar() {
                   </h3>
                 </Link>
               )}
-              <Link
-                to="/contact"
-                className="flex items-center gap-3 text-white hover:bg-white/20 transition-colors p-2 rounded-md"
-              >
-                <Phone className="w-5 h-5" />
-                <h3 className="font-heading text-lg text-inherit">
-                  Contact Us
-                </h3>
-              </Link>
               <hr className="border-white/50"/>
               <button
                 onClick={handleLogout}
