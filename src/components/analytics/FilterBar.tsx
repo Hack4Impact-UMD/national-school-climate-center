@@ -22,6 +22,7 @@ import {
   SURVEY_TYPES as DEFAULT_SURVEY_TYPES,
   COMPARE_BY_OPTIONS as DEFAULT_COMPARE_BY_OPTIONS,
 } from '@/lib/mockAnalyticsData'
+import ReactSelect from 'react-select'
 
 type FilterBarProps = {
   filters: FilterState
@@ -35,7 +36,11 @@ type FilterBarProps = {
   }
 }
 
-export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) {
+export function FilterBar({
+  filters,
+  onFilterChange,
+  options,
+}: FilterBarProps) {
   const {
     schools = DEFAULT_SCHOOLS,
     respondentGroups = DEFAULT_RESPONDENT_GROUPS,
@@ -43,6 +48,11 @@ export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) 
     surveyTypes = DEFAULT_SURVEY_TYPES,
     compareBy = DEFAULT_COMPARE_BY_OPTIONS,
   } = options ?? {}
+
+  const compareByOptions = compareBy.map((option) => ({
+    value: option.id,
+    label: option.name,
+  }))
 
   return (
     <div className="space-y-4">
@@ -77,7 +87,32 @@ export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) 
         </Select>
 
         {/* Compare By */}
-        <Select
+        <ReactSelect
+          isMulti
+          value={compareByOptions.filter((opt) =>
+            filters.compareBy?.includes(opt.value)
+          )}
+          onChange={(selected) =>
+            onFilterChange(
+              'compareBy',
+              selected.map((opt) => opt.value).join(',') || null
+            )
+          }
+          options={compareByOptions}
+          placeholder="Compare Surveys"
+          isSearchable={false}
+          unstyled
+          classNames={{
+            control: () =>
+              'w-[181px] font-body bg-background border-0 rounded-lg shadow-sm px-3 py-1.5 cursor-pointer',
+            placeholder: () => 'text-[#444444]',
+            multiValueLabel: () => 'text-[#444444]',
+            menu: () => 'bg-card rounded-lg shadow-md mt-1',
+            option: ({ isFocused }) =>
+              `px-3 py-2 cursor-pointer ${isFocused ? 'bg-black/5' : ''} text-[#444444]`,
+          }}
+        />
+        {/* <Select
           value={filters.compareBy || ''}
           onValueChange={(value) => onFilterChange('compareBy', value)}
         >
@@ -94,7 +129,7 @@ export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) 
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
 
         {/* Question Type */}
         <Select
@@ -146,7 +181,10 @@ export function FilterBar({ filters, onFilterChange, options }: FilterBarProps) 
             style={{ color: '#444444' }}
             placeholder="From"
           />
-          <span className="text-sm font-body flex-shrink-0" style={{ color: '#444444' }}>
+          <span
+            className="text-sm font-body flex-shrink-0"
+            style={{ color: '#444444' }}
+          >
             -
           </span>
           <Input

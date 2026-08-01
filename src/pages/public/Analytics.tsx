@@ -6,6 +6,7 @@ import ResponseChart from '@/components/analytics/ResponseChart'
 import ChartTypeSelector from '@/components/analytics/ChartTypeSelector'
 import SimpleBarChart from '@/components/analytics/BarChart'
 import SimplePieChart from '@/components/analytics/PieChart'
+import CompareLineChart from '@/components/analytics/CompareLineChart'
 import { FilterBar } from '@/components/analytics/FilterBar'
 import { SearchCombobox } from '@/components/analytics/SearchCombobox'
 import { FilterChips } from '@/components/analytics/FilterChips'
@@ -32,6 +33,9 @@ type FirestoreSurvey = {
   title?: string
   type?: string
   questions?: SurveyQuestion[]
+  districtId?: string
+  schoolId?: string
+  status?: string
 }
 
 type FirestoreAnswer = {
@@ -74,6 +78,21 @@ type ChartEntry = {
 type CachedData = {
   responses: ResponseRecord[]
   cachedAt: number
+}
+
+type SurveyInfo = {
+  id: string
+  title: string
+  districtId: string | null
+  schoolId: string | null
+  status: string | null
+  questionNames: string[]
+}
+
+type PermissionContext = {
+  role: string | null
+  schoolId: string | null
+  districtId: string | null
 }
 
 const CACHE_KEY = 'nscc_analytics_responses' // key used to store and retrieve data from localstorage
@@ -136,6 +155,120 @@ const extractDateString = (
   return null
 }
 
+type ComparisonChart = {
+  questionText: string
+  data: Record<string, string | number>[]
+  lines: { key: string; color: string }[]
+}
+
+const COMPARE_COLORS = [
+  '#F59E1E',
+  '#269ACF',
+  '#7C3AED',
+  '#16A34A',
+  '#DC2626',
+  '#0891B2',
+  '#DB2777',
+  '#65A30D',
+  '#9333EA',
+  '#EA580C',
+]
+
+function buildComparisonCharts(
+  responses: ResponseRecord[],
+  selectedSurveys: SurveyInfo[]
+): ComparisonChart[] {
+  const selectedIds = new Set(selectedSurveys.map((s) => s.id))
+  const relevantResponses = responses.filter((r) => selectedIds.has(r.surveyID))
+
+  // one "issued" date per survey = earliest response date seen for that survey
+  const surveyEarliestDate = new Map<string, string>()
+  relevantResponses.forEach((r) => {
+    if (!r.date) return
+    const existing = surveyEarliestDate.get(r.surveyID)
+    if (!existing || r.date < existing) {
+      surveyEarliestDate.set(r.surveyID, r.date)
+    }
+  })
+
+  // detect collisions: if two selected surveys land on the same date,
+  // disambiguate by appending the survey title so each still gets its own x-axis point
+  const dateCounts = new Map<string, number>()
+  selectedSurveys.forEach((survey) => {
+    const date = surveyEarliestDate.get(survey.id)
+    if (!date) return
+    dateCounts.set(date, (dateCounts.get(date) ?? 0) + 1)
+  })
+
+  const surveyDateLabel = new Map<string, string>()
+  selectedSurveys.forEach((survey) => {
+    const date = surveyEarliestDate.get(survey.id)
+    if (!date) {
+      surveyDateLabel.set(survey.id, 'Unknown')
+      return
+    }
+    const isCollision = (dateCounts.get(date) ?? 0) > 1
+    surveyDateLabel.set(
+      survey.id,
+      isCollision ? `${date} (${survey.title})` : date
+    )
+  })
+
+  // question texts present in every selected survey
+  const questionTextSets = selectedSurveys.map((s) => new Set(s.questionNames))
+  const [firstSet, ...restSets] = questionTextSets
+  const sharedQuestionTexts = Array.from(firstSet).filter((text) =>
+    restSets.every((set) => set.has(text))
+  )
+
+  return sharedQuestionTexts.map((questionText) => {
+    const questionResponses = relevantResponses.filter(
+      (r) => r.question === questionText
+    )
+
+    const answerOptions = Array.from(
+      new Set(questionResponses.map((r) => r.answerValue))
+    ).sort()
+
+    // group by survey's issued date label (disambiguated if needed)
+    const dateMap = new Map<string, Map<string, number>>()
+    const dateTotals = new Map<string, number>()
+
+    questionResponses.forEach((r) => {
+      const date = surveyDateLabel.get(r.surveyID) ?? 'Unknown'
+      if (!dateMap.has(date)) dateMap.set(date, new Map())
+      const answerCounts = dateMap.get(date)!
+      answerCounts.set(
+        r.answerValue,
+        (answerCounts.get(r.answerValue) ?? 0) + 1
+      )
+      dateTotals.set(date, (dateTotals.get(date) ?? 0) + 1)
+    })
+
+    const sortedDates = Array.from(dateMap.keys()).sort()
+
+    const data = sortedDates.map((date) => {
+      const point: Record<string, string | number> = { date }
+      const answerCounts = dateMap.get(date)!
+      const total = dateTotals.get(date) ?? 0
+
+      answerOptions.forEach((option) => {
+        const count = answerCounts.get(option) ?? 0
+        point[option] = total > 0 ? Math.round((count / total) * 100) : 0
+      })
+
+      return point
+    })
+
+    const lines = answerOptions.map((option, i) => ({
+      key: option,
+      color: COMPARE_COLORS[i % COMPARE_COLORS.length],
+    }))
+
+    return { questionText, data, lines }
+  })
+}
+
 const initialCache = loadFromCache()
 
 export default function Analytics() {
@@ -144,6 +277,7 @@ export default function Analytics() {
   const [responses, setResponses] = useState<ResponseRecord[]>(
     initialCache ?? []
   )
+  const [surveys, setSurveys] = useState<SurveyInfo[]>([])
   const [filters, setFilters] = useState<FilterState>(defaultFilterState)
   const [loading, setLoading] = useState(initialCache === null)
   const [error, setError] = useState<string | null>(null)
@@ -162,10 +296,12 @@ export default function Analytics() {
       try {
         const surveySnap = await getDocs(collection(db, 'surveys'))
         const responseRecords: ResponseRecord[] = []
+        const surveysInfo: SurveyInfo[] = []
         for (const surveyDoc of surveySnap.docs) {
           const data = surveyDoc.data() as FirestoreSurvey
           const surveyTitle = data.title ?? 'Untitled Survey'
           const surveyType = data.type ?? null
+
           const surveyQuestions = new Map<
             string,
             {
@@ -185,6 +321,19 @@ export default function Analytics() {
               questionType: question.questionType ?? 'multiple-choice',
             })
           })
+
+          //getting survey info for compare surveys
+          surveysInfo.push({
+            id: surveyDoc.id,
+            title: surveyTitle,
+            districtId: data.districtId ?? null,
+            schoolId: data.schoolId ?? null,
+            status: data.status ?? null,
+            questionNames: Array.from(surveyQuestions.values()).map(
+              (q) => q.text
+            ),
+          })
+
           const responseSnap = await getDocs(
             collection(db, 'surveys', surveyDoc.id, 'responses')
           )
@@ -224,6 +373,7 @@ export default function Analytics() {
         if (isMounted) {
           saveToCache(responseRecords)
           setResponses(responseRecords)
+          setSurveys(surveysInfo)
         }
       } catch (err) {
         console.error(err)
@@ -253,6 +403,31 @@ export default function Analytics() {
       return true
     })
   }, [responses, role, schoolId, districtId])
+  const getPermSurveys = (surveys: SurveyInfo[], auth: PermissionContext) => {
+    const published = surveys.filter((survey) => survey.status === 'Published')
+
+    if (auth.role === 'super_admin') {
+      return published
+    }
+
+    if (auth.role === 'admin') {
+      if (auth.districtId == null) return []
+      return published.filter((survey) => survey.districtId === auth.districtId)
+    }
+
+    if (auth.role === 'school_personnel') {
+      if (auth.schoolId == null) return []
+      return published.filter((survey) => survey.schoolId === auth.schoolId)
+    }
+
+    // unrecognized/missing role — no access by default
+    return []
+  }
+
+  const permittedSurveys = useMemo(
+    () => getPermSurveys(surveys, { role, schoolId, districtId }),
+    [surveys, role, schoolId, districtId]
+  )
 
   const filterOptions = useMemo(() => {
     const schoolMap = new Map<string, string>()
@@ -314,14 +489,20 @@ export default function Analytics() {
       name,
     }))
 
+    const compareBy = permittedSurveys.map((survey) => ({
+      id: survey.id,
+      name: survey.title,
+    }))
+
     return {
       schools,
       respondentGroups,
       questionTypes,
       surveyTypes,
       questions,
+      compareBy,
     }
-  }, [visibleResponses])
+  }, [visibleResponses, permittedSurveys])
 
   const handleFilterChange = (key: keyof FilterState, value: string | null) => {
     setFilters((prev) => ({
@@ -487,6 +668,43 @@ export default function Analytics() {
     }))
   }, [filteredResponses])
 
+  const compareError = useMemo(() => {
+    if (!filters.compareBy) return null
+
+    const selectedIds = filters.compareBy.split(',').filter(Boolean)
+    if (selectedIds.length < 2) return null
+
+    const selectedSurveys = permittedSurveys.filter((s) =>
+      selectedIds.includes(s.id)
+    )
+    if (selectedSurveys.length < 2) return null
+
+    const [first, ...rest] = selectedSurveys
+    const firstQuestionTexts = new Set(first.questionNames)
+
+    const hasMatch = rest.every((survey) =>
+      survey.questionNames.some((text) => firstQuestionTexts.has(text))
+    )
+
+    return hasMatch
+      ? null
+      : 'Surveys are not the same. Please select new surveys to compare'
+  }, [filters.compareBy, permittedSurveys])
+
+  const comparisonCharts = useMemo(() => {
+    if (!filters.compareBy) return []
+
+    const selectedIds = filters.compareBy.split(',').filter(Boolean)
+    if (selectedIds.length < 2) return []
+
+    const selectedSurveys = permittedSurveys.filter((s) =>
+      selectedIds.includes(s.id)
+    )
+    if (selectedSurveys.length < 2 || compareError) return []
+
+    return buildComparisonCharts(responses, selectedSurveys)
+  }, [filters.compareBy, permittedSurveys, responses, compareError])
+
   const [page, setPage] = useState(1)
   const totalPages = charts.length ? Math.ceil(charts.length / PAGE_SIZE) : 0
   const paginatedCharts = charts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -532,6 +750,36 @@ export default function Analytics() {
       )
     }
 
+    if (compareError) {
+      return (
+        <p
+          className="font-body text-red-600 mt-6"
+          data-testid="analytics-compare-error"
+        >
+          {compareError}
+        </p>
+      )
+    }
+
+    if (comparisonCharts.length > 0) {
+      return (
+        <div
+          className="mt-4 bg-background p-4 rounded-2xl"
+          id="analyticsInsight"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
+            {comparisonCharts.map((chart) => (
+              <CompareLineChart
+                key={chart.questionText}
+                title={chart.questionText}
+                data={chart.data}
+                lines={chart.lines}
+              />
+            ))}
+          </div>
+        </div>
+      )
+    }
     if (!responses.length) {
       return (
         <p className="font-body text-body mt-6" data-testid="analytics-empty">

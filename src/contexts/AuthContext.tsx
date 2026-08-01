@@ -42,20 +42,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      const snap = await getDoc(doc(db, 'members', u.uid))
-      if (snap.exists()) {
-        const data = snap.data()
-        const validRoles: Role[] = ['super_admin', 'admin', 'school_personnel', 'student']
-        const fetchedRole = data?.role
-        setRole(validRoles.includes(fetchedRole) ? fetchedRole : null)
-        setSchoolId(data?.school_id ?? null)
-        setDistrictId(data?.district_id ?? null)
-      } else {
+      try { // og role fetching logic enabled so perms are actually set 
+        const snap = await getDoc(doc(db, 'members', u.uid))
+        if (snap.exists()) {
+          const data = snap.data()
+          const roleData = data?.role
+          const validRoles: Role[] = ['super_admin', 'admin', 'school_personnel', 'student']
+          setRole(validRoles.includes(roleData) ? (roleData as Role) : null)
+          setSchoolId(data?.school_id ?? null)
+          setDistrictId(data?.district_id ?? null)
+        } else {
+          setRole(null)
+          setSchoolId(null)
+          setDistrictId(null)
+        }
+      } catch {
+        // firestore error
         setRole(null)
         setSchoolId(null)
         setDistrictId(null)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     })
     return unsub
   }, [])
