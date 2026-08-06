@@ -12,6 +12,7 @@ type ResponseRecord = {
 type ChartEntry = {
   questionId: string
   question: string
+  questionType: string | null
   surveyTitle: string
   chartData: { name: string; value: number }[]
 }
@@ -29,14 +30,56 @@ export const ResponseChart = ({
 }: ResponseChartProps) => {
   const [showWordCloud, setShowWordCloud] = useState(false)
 
-  const questionResponses = filteredResponses.filter(
-    (r) => r.questionId === chart.questionId
+  const isOpenEnded = chart.questionType === 'text' // direct, no filtering
+
+  // only filter (the more expensive op) when we actually need raw text for the cloud
+  const questionResponses = isOpenEnded
+    ? filteredResponses.filter((r) => r.questionId === chart.questionId)
+    : []
+
+  // --- debug logging ---
+  console.log('[ResponseChart]', {
+    questionId: chart.questionId,
+    question: chart.question,
+    questionTypeRaw: chart.questionType,
+    questionTypeTypeof: typeof chart.questionType,
+    isOpenEnded,
+  })
+
+  if (chart.questionType !== 'text' && chart.questionType !== null) {
+    // catches whitespace/casing mismatches, e.g. 'Text' or ' text'
+    console.log(
+      '[ResponseChart] questionType did not match "text" exactly:',
+      JSON.stringify(chart.questionType)
+    )
+  }
+
+  if (isOpenEnded) {
+    console.log(
+      '[ResponseChart] matched questionResponses count:',
+      questionResponses.length,
+      questionResponses.slice(0, 3)
+    )
+  }
+
+  // sanity check: are there responses for this question with a DIFFERENT
+  // questionType than what the chart entry claims? (would indicate the
+  // grouping in Analytics.tsx picked up questionType from the wrong response)
+  const distinctTypesForQuestion = Array.from(
+    new Set(
+      filteredResponses
+        .filter((r) => r.questionId === chart.questionId)
+        .map((r) => r.questionType)
+    )
   )
-
-  const isOpenEnded = questionResponses[0]?.questionType === 'text'
-
-  console.log(isOpenEnded)
-  console.log(questionResponses);
+  if (distinctTypesForQuestion.length > 1) {
+    console.warn(
+      '[ResponseChart] inconsistent questionType across responses for',
+      chart.questionId,
+      distinctTypesForQuestion
+    )
+  }
+  // --- end debug logging ---
 
   return (
     <Card className="border-none">

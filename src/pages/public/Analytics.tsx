@@ -23,16 +23,15 @@ import type {
   SurveyType,
 } from '@/types/analytics'
 
-type SurveyQuestion = {
-  question_id: string
-  text?: string
-  questionType?: string
-}
+import type { QuestionBankItem } from '@/firebase/interfaces'
+
+const QUESTION_BANK_COLLECTION = 'questionBank'
+
 
 type FirestoreSurvey = {
   title?: string
   type?: string
-  questions?: SurveyQuestion[]
+  questions?: string[]
   districtId?: string
   schoolId?: string
   status?: string
@@ -57,6 +56,7 @@ type ResponseRecord = {
   id: string
   questionId: string
   question: string
+  domain: QuestionBankItem['domain'] | null // NEW
   surveyTitle: string
   surveyType: string | null
   surveyID: string
@@ -71,6 +71,7 @@ type ResponseRecord = {
 type ChartEntry = {
   questionId: string
   question: string
+  questionType: string | null
   surveyTitle: string
   chartData: { name: string; value: number }[]
 }
@@ -86,7 +87,7 @@ type SurveyInfo = {
   districtId: string | null
   schoolId: string | null
   status: string | null
-  questionNames: string[]
+  questionIds: string[]
 }
 
 type PermissionContext = {
@@ -118,6 +119,55 @@ function loadFromCache(): ResponseRecord[] | null {
 function saveToCache(responses: ResponseRecord[]) {
   const data: CachedData = { responses, cachedAt: Date.now() }
   localStorage.setItem(CACHE_KEY, JSON.stringify(data))
+}
+
+// Fetches the shared question bank once per load, rather than per-survey.
+async function fetchQuestionBank(): Promise<Map<string, QuestionBankItem>> {
+  const snap = await getDocs(collection(db, QUESTION_BANK_COLLECTION))
+  const map = new Map<string, QuestionBankItem>()
+
+  // --- debug logging ---
+  let oldSchemaCount = 0
+  let newSchemaCount = 0
+  let neitherCount = 0
+  // --- end debug logging ---
+
+  snap.docs.forEach((doc) => {
+    const raw = doc.data() as Record<string, unknown>
+
+    // --- debug logging ---
+    const hasType = 'type' in raw
+    const hasQuestionType = 'questionType' in raw
+
+    if (hasType && !hasQuestionType) oldSchemaCount++
+    else if (hasQuestionType && !hasType) newSchemaCount++
+    else neitherCount++
+
+    console.log('[fetchQuestionBank]', {
+      id: doc.id,
+      text: raw.text,
+      type: raw.type,
+      questionType: raw.questionType,
+      schema: hasType ? 'old (type)' : hasQuestionType ? 'new (questionType)' : 'NEITHER FIELD',
+    })
+    // --- end debug logging ---
+
+    map.set(doc.id, {
+      id: doc.id,
+      ...(raw as Omit<QuestionBankItem, 'id'>),
+    })
+  })
+
+  // --- debug logging ---
+  console.log('[fetchQuestionBank] SUMMARY', {
+    totalDocs: snap.docs.length,
+    oldSchemaCount,
+    newSchemaCount,
+    neitherCount,
+  })
+  // --- end debug logging ---
+
+  return map
 }
 
 const PAGE_SIZE = 4
@@ -156,6 +206,7 @@ const extractDateString = (
 }
 
 type ComparisonChart = {
+  questionId: string
   questionText: string
   data: Record<string, string | number>[]
   lines: { key: string; color: string }[]
@@ -214,23 +265,25 @@ function buildComparisonCharts(
     )
   })
 
-  // question texts present in every selected survey
-  const questionTextSets = selectedSurveys.map((s) => new Set(s.questionNames))
-  const [firstSet, ...restSets] = questionTextSets
-  const sharedQuestionTexts = Array.from(firstSet).filter((text) =>
-    restSets.every((set) => set.has(text))
+  // question IDs present in every selected survey — matching by ID (not text)
+  // means edits to question wording no longer break comparisons.
+  const questionIdSets = selectedSurveys.map((s) => new Set(s.questionIds))
+  const [firstSet, ...restSets] = questionIdSets
+  const sharedQuestionIds = Array.from(firstSet).filter((id) =>
+    restSets.every((set) => set.has(id))
   )
 
-  return sharedQuestionTexts.map((questionText) => {
+  return sharedQuestionIds.map((questionId) => {
     const questionResponses = relevantResponses.filter(
-      (r) => r.question === questionText
+      (r) => r.questionId === questionId
     )
+    const questionText = questionResponses[0]?.question ?? questionId
 
     const answerOptions = Array.from(
       new Set(questionResponses.map((r) => r.answerValue))
     ).sort()
 
-    // group by survey's issued date label (disambiguated if needed)
+    // group by survey's issued date label 
     const dateMap = new Map<string, Map<string, number>>()
     const dateTotals = new Map<string, number>()
 
@@ -265,7 +318,7 @@ function buildComparisonCharts(
       color: COMPARE_COLORS[i % COMPARE_COLORS.length],
     }))
 
-    return { questionText, data, lines }
+    return { questionId, questionText, data, lines }
   })
 }
 
@@ -294,44 +347,24 @@ export default function Analytics() {
       setError(null)
 
       try {
+        const questionBank = await fetchQuestionBank()
         const surveySnap = await getDocs(collection(db, 'surveys'))
         const responseRecords: ResponseRecord[] = []
         const surveysInfo: SurveyInfo[] = []
+
         for (const surveyDoc of surveySnap.docs) {
           const data = surveyDoc.data() as FirestoreSurvey
           const surveyTitle = data.title ?? 'Untitled Survey'
           const surveyType = data.type ?? null
+          const questionIds = data.questions ?? []
 
-          const surveyQuestions = new Map<
-            string,
-            {
-              text: string
-              surveyTitle: string
-              surveyType: string | null
-              questionType: string | null
-            }
-          >()
-
-          data.questions?.forEach((question) => {
-            if (!question.question_id) return
-            surveyQuestions.set(question.question_id, {
-              text: question.text ?? question.question_id,
-              surveyTitle,
-              surveyType,
-              questionType: question.questionType ?? 'multiple-choice',
-            })
-          })
-
-          //getting survey info for compare surveys
           surveysInfo.push({
             id: surveyDoc.id,
             title: surveyTitle,
             districtId: data.districtId ?? null,
             schoolId: data.schoolId ?? null,
             status: data.status ?? null,
-            questionNames: Array.from(surveyQuestions.values()).map(
-              (q) => q.text
-            ),
+            questionIds,
           })
 
           const responseSnap = await getDocs(
@@ -345,19 +378,19 @@ export default function Analytics() {
 
             data.answers?.forEach((answer, index) => {
               if (!answer.question_id) return
-              const questionMetadata = surveyQuestions.get(answer.question_id)
+              const bankItem = questionBank.get(answer.question_id)
+
+              console.log('bankItem:', bankItem);
 
               responseRecords.push({
                 id: `${doc.id}-${answer.question_id}-${index}`,
                 questionId: answer.question_id,
-                question: questionMetadata?.text ?? answer.question_id,
-                surveyTitle:
-                  questionMetadata?.surveyTitle ??
-                  data.surveyTitle ??
-                  'Unknown Survey',
+                question: bankItem?.text ?? answer.question_id,
+                domain: bankItem?.domain ?? null,
+                surveyTitle: data.surveyTitle ?? surveyTitle,
                 surveyID: surveyDoc.id,
-                surveyType: questionMetadata?.surveyType ?? null,
-                questionType: questionMetadata?.questionType ?? null,
+                surveyType,
+                questionType: bankItem?.questionType ?? null,
                 school,
                 district: data.district_id ?? null,
                 respondentGroup,
@@ -403,6 +436,7 @@ export default function Analytics() {
       return true
     })
   }, [responses, role, schoolId, districtId])
+
   const getPermSurveys = (surveys: SurveyInfo[], auth: PermissionContext) => {
     const published = surveys.filter((survey) => survey.status === 'Published')
 
@@ -484,6 +518,7 @@ export default function Analytics() {
         name,
       })
     )
+
     const questions = Array.from(questionMap.entries()).map(([id, name]) => ({
       id,
       name,
@@ -645,6 +680,7 @@ export default function Analytics() {
         grouped.set(response.questionId, {
           questionId: response.questionId,
           question: response.question,
+          questionType: response.questionType, // NEW
           surveyTitle: response.surveyTitle,
           chartData: [],
         })
@@ -680,10 +716,10 @@ export default function Analytics() {
     if (selectedSurveys.length < 2) return null
 
     const [first, ...rest] = selectedSurveys
-    const firstQuestionTexts = new Set(first.questionNames)
+    const firstQuestionIds = new Set(first.questionIds)
 
     const hasMatch = rest.every((survey) =>
-      survey.questionNames.some((text) => firstQuestionTexts.has(text))
+      survey.questionIds.some((id) => firstQuestionIds.has(id))
     )
 
     return hasMatch
@@ -770,7 +806,7 @@ export default function Analytics() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-background p-4 rounded-2xl">
             {comparisonCharts.map((chart) => (
               <CompareLineChart
-                key={chart.questionText}
+                key={chart.questionId}
                 title={chart.questionText}
                 data={chart.data}
                 lines={chart.lines}
@@ -799,6 +835,8 @@ export default function Analytics() {
         </p>
       )
     }
+
+    console.log('responses:', filteredResponses);
 
     return (
       <div className="mt-4 bg-background p-4 rounded-2xl" id="analyticsInsight">
