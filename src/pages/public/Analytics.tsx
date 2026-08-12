@@ -23,7 +23,7 @@ import type {
   SurveyType,
 } from '@/types/analytics'
 
-import type { QuestionBankItem } from '@/firebase/interfaces'
+import type { QuestionBankItem, QuestionBankItemWithId } from '@/firebase/interfaces'
 
 const QUESTION_BANK_COLLECTION = 'questionBank'
 
@@ -56,7 +56,7 @@ type ResponseRecord = {
   id: string
   questionId: string
   question: string
-  domain: QuestionBankItem['domain'] | null // NEW
+  domain: QuestionBankItemWithId['domain'] | null
   surveyTitle: string
   surveyType: string | null
   surveyID: string
@@ -122,9 +122,9 @@ function saveToCache(responses: ResponseRecord[]) {
 }
 
 // Fetches the shared question bank once per load, rather than per-survey.
-async function fetchQuestionBank(): Promise<Map<string, QuestionBankItem>> {
+async function fetchQuestionBank(): Promise<Map<string, QuestionBankItemWithId>> {
   const snap = await getDocs(collection(db, QUESTION_BANK_COLLECTION))
-  const map = new Map<string, QuestionBankItem>()
+  const map = new Map<string, QuestionBankItemWithId>()
 
   // --- debug logging ---
   let oldSchemaCount = 0
@@ -133,7 +133,7 @@ async function fetchQuestionBank(): Promise<Map<string, QuestionBankItem>> {
   // --- end debug logging ---
 
   snap.docs.forEach((doc) => {
-    const raw = doc.data() as Record<string, unknown>
+    const raw = doc.data() as QuestionBankItem
 
     // --- debug logging ---
     const hasType = 'type' in raw
@@ -146,15 +146,14 @@ async function fetchQuestionBank(): Promise<Map<string, QuestionBankItem>> {
     console.log('[fetchQuestionBank]', {
       id: doc.id,
       text: raw.text,
-      type: raw.type,
-      questionType: raw.questionType,
-      schema: hasType ? 'old (type)' : hasQuestionType ? 'new (questionType)' : 'NEITHER FIELD',
+      type: raw.questionType,
+      schema: hasType ? 'new (type)' : hasQuestionType ? 'old (questionType)' : 'NEITHER FIELD',
     })
     // --- end debug logging ---
 
     map.set(doc.id, {
       id: doc.id,
-      ...(raw as Omit<QuestionBankItem, 'id'>),
+      ...raw,
     })
   })
 
@@ -380,7 +379,7 @@ export default function Analytics() {
               if (!answer.question_id) return
               const bankItem = questionBank.get(answer.question_id)
 
-              console.log('bankItem:', bankItem);
+              console.log('bankItem:', bankItem, answer.question_id);
 
               responseRecords.push({
                 id: `${doc.id}-${answer.question_id}-${index}`,
@@ -672,6 +671,7 @@ export default function Analytics() {
     })
   }, [visibleResponses, filters])
 
+  console.log('filteredResponses:', filteredResponses);
   const charts = useMemo(() => {
     const grouped = new Map<string, ChartEntry>()
 
@@ -680,11 +680,12 @@ export default function Analytics() {
         grouped.set(response.questionId, {
           questionId: response.questionId,
           question: response.question,
-          questionType: response.questionType, // NEW
+          questionType: response.questionType,   
           surveyTitle: response.surveyTitle,
           chartData: [],
         })
       }
+
 
       const entry = grouped.get(response.questionId)
       if (!entry) return
@@ -703,6 +704,8 @@ export default function Analytics() {
       chartData: entry.chartData.sort((a, b) => a.name.localeCompare(b.name)),
     }))
   }, [filteredResponses])
+
+  console.log('charts:', charts);
 
   const compareError = useMemo(() => {
     if (!filters.compareBy) return null
