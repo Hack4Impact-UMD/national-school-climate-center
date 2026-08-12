@@ -88,15 +88,20 @@ export interface ConsentGrant {
 }
 
 export interface QuestionBankItem {
-  id: string
   text: string
   domain: 'leadership' | 'safety' | 'learning' | 'relationships' | 'environment'
-  type: string
+  questionType: string
   options?: unknown[]
   validation?: Record<string, unknown>
   createdAt: Timestamp | FieldValue
   updatedAt: Timestamp | FieldValue
 }
+
+export interface QuestionBankItemWithId extends QuestionBankItem {
+  id: string
+}
+
+export type QuestionDomain = { id: string; name: string }
 
 export interface Mail {
   id: string

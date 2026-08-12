@@ -90,7 +90,7 @@ export default function ReviewSurveyPage({
             {
               id: q.id,
               text: q.prompt || q.name,
-              type: q.questionType,
+              questionType: q.questionType,
               options: q.options ?? [],
               updatedAt: serverTimestamp(),
             },
