@@ -14,6 +14,7 @@ export type Question = {
  * Used when loading and editing questions in the survey builder
  */
 export interface EditableQuestion extends QuestionBankItem {
+  id?: string            // Question ID from questionBank
   order: number          // Position in the survey
   required: boolean      // Whether the question is required
   overrides?: unknown    // Any custom settings for this survey

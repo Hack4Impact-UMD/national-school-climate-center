@@ -82,8 +82,8 @@ export default function CreateAccountSchool() {
         throw firestoreError
       }
 
-      // 3. Navigate to home
-      navigate('/home')
+      // 3. Navigate to analytics dashboard
+      navigate('/analytics')
     } catch (error) {
       console.error('Error creating account:', error)
 

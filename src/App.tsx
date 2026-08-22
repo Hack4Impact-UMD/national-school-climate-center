@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/public/Home'
 import About from './pages/public/About'
 import Analytics from './pages/public/Analytics'
 import Login from './pages/auth/Login'
@@ -39,8 +38,8 @@ export default function App() {
       {/* Authenticated shell */}
       <Route element={<ProtectedRoute requireAuth />}>
         <Route element={<Layout />}>
-          <Route index element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<Home />} />
+          <Route index element={<Navigate to="/analytics" replace />} />
+          <Route path="/home" element={<Navigate to="/analytics" replace />} />
           <Route path="/about" element={<About />} />
 
           {/* Action-gated */}

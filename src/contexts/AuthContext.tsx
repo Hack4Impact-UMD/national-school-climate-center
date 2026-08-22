@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, onSnapshot, type Unsubscribe } from 'firebase/firestore'
 import { auth, db } from '@/firebase/config'
 import type { Role } from '@/types/auth'
 
@@ -13,6 +13,7 @@ type AuthState = {
   districtId: string | null
   loading: boolean
   logout: () => Promise<void>
+  refreshUserData: () => Promise<void> 
 }
 
 const AuthCtx = createContext<AuthState>({
@@ -22,6 +23,7 @@ const AuthCtx = createContext<AuthState>({
   districtId: null,
   loading: true,
   logout: async () => {},
+  refreshUserData: async () => {}
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -32,8 +34,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
+    let memberUnsub: Unsubscribe | null = null
+
+    const authUnsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
+
+      if (memberUnsub) {
+        memberUnsub()
+        memberUnsub = null
+      }
+
       if (!u) {
         setRole(null)
         setSchoolId(null)
@@ -42,38 +52,79 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      try { // og role fetching logic enabled so perms are actually set 
-        const snap = await getDoc(doc(db, 'members', u.uid))
-        if (snap.exists()) {
-          const data = snap.data()
-          const roleData = data?.role
-          const validRoles: Role[] = ['super_admin', 'admin', 'school_personnel', 'student']
-          setRole(validRoles.includes(roleData) ? (roleData as Role) : null)
-          setSchoolId(data?.school_id ?? null)
-          setDistrictId(data?.district_id ?? null)
-        } else {
+      setLoading(true)
+      memberUnsub = onSnapshot(
+        doc(db, 'members', u.uid),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data()
+            const roleData = data?.role
+            const validRoles: Role[] = [
+              'super_admin',
+              'admin',
+              'school_personnel',
+              'student',
+            ]
+            setRole(validRoles.includes(roleData) ? (roleData as Role) : null)
+            setSchoolId(data?.school_id ?? null)
+            setDistrictId(data?.district_id ?? null)
+          } else {
+            setRole(null)
+            setSchoolId(null)
+            setDistrictId(null)
+          }
+          setLoading(false)
+        },
+        (error) => {
+          console.error('Error listening to member document:', error)
           setRole(null)
           setSchoolId(null)
           setDistrictId(null)
+          setLoading(false)
         }
-      } catch {
-        // firestore error
+      )
+    })
+
+    return () => {
+      if (memberUnsub) memberUnsub()
+      authUnsub()
+    }
+  }, [])
+
+  const fetchMemberData = async (u: User) => {
+    try {
+      const snap = await getDoc(doc(db, 'members', u.uid))
+      if (snap.exists()) {
+        const data = snap.data()
+        const roleData = data?.role
+        const validRoles: Role[] = ['super_admin', 'admin', 'school_personnel', 'student']
+        setRole(validRoles.includes(roleData) ? (roleData as Role) : null)
+        setSchoolId(data?.school_id ?? null)
+        setDistrictId(data?.district_id ?? null)
+      } else {
         setRole(null)
         setSchoolId(null)
         setDistrictId(null)
-      } finally {
-        setLoading(false)
       }
-    })
-    return unsub
-  }, [])
+    } catch {
+      setRole(null)
+      setSchoolId(null)
+      setDistrictId(null)
+    }
+  }
+
+  const refreshUserData = async () => {
+    if (auth.currentUser) {
+      await fetchMemberData(auth.currentUser)
+    }
+  }
 
   const logout = async () => {
     await signOut(auth)
   }
 
   return (
-    <AuthCtx.Provider value={{ user, role, schoolId, districtId, loading, logout }}>
+    <AuthCtx.Provider value={{ user, role, schoolId, districtId, loading, logout, refreshUserData }}>
       {children}
     </AuthCtx.Provider>
   )

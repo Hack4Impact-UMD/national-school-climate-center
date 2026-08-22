@@ -20,7 +20,7 @@ import type {
   Response,
   School,
   SchoolWithId,
-  QuestionBankItem,
+  QuestionBankItemWithId,
 } from '@/firebase/interfaces'
 
 // ===== Dummy data =====
@@ -306,7 +306,7 @@ const { BaseLayer, Overlay } = LayersControl
 export default function GeoMap() {
   const [responses, setResponses] = useState<ResponseWithId[]>([])
   const [schools, setSchools] = useState<SchoolWithId[]>([])
-  const [questions, setQuestions] = useState<QuestionBankItem[]>([])
+  const [questions, setQuestions] = useState<QuestionBankItemWithId[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   //fetch data for schools, responses
@@ -335,9 +335,9 @@ export default function GeoMap() {
           ...(doc.data() as School),
         }))
 
-        const questionData: QuestionBankItem[] = questionSnapshot.docs.map(
+        const questionData: QuestionBankItemWithId[] = questionSnapshot.docs.map(
           (doc) => ({
-            ...(doc.data() as QuestionBankItem),
+            ...(doc.data() as Omit<QuestionBankItemWithId, 'id'>),
             id: doc.id,
           })
         )
