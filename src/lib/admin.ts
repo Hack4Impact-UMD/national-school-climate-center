@@ -157,8 +157,6 @@ export async function updateMemberRole(id: string, role: Role) {
   await updateDoc(d, { role })
 }
 
-// TODO: Implement UI for deleting members in the Admin page
-// Should show confirmation dialog and respect role-based permissions
 export async function deleteMember(id: string) {
   const d = doc(db, 'members', id)
   await deleteDoc(d)
