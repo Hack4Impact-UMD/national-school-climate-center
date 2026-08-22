@@ -1,5 +1,5 @@
 import { collection, doc, addDoc, setDoc, deleteDoc, updateDoc, getDoc, serverTimestamp, type DocumentReference } from 'firebase/firestore'
-import { db } from '@/firebase/config'
+import { auth, db } from '@/firebase/config'
 import type { Survey } from '@/types/survey'
 import type { Question } from '@/firebase/interfaces'
 import type { Question as BuilderQuestion } from '@/types/surveybuilder'
@@ -187,4 +187,30 @@ export async function deleteQuestion(
 
   // Update the survey document
   await updateDoc(surveyRef, updateData)
+}
+
+/**
+ * Deletes a member account from Firestore.
+ * Also deletes the user from Firebase Auth if the currently signed-in user is deleting their own account.
+ * @param uid - The UID of the user account to delete
+ */
+export async function deleteAccount(uid: string): Promise<void> {
+  const userDocRef = doc(db, 'members', uid)
+  await deleteDoc(userDocRef)
+
+  // If the currently signed in user deletes their own account, delete from Firebase Auth as well
+  if (auth.currentUser && auth.currentUser.uid === uid) {
+    try {
+      await auth.currentUser.delete()
+    } catch (err) {
+      console.warn('Could not delete user from Firebase Auth client-side:', err)
+    }
+  }
+}
+
+/**
+ * Alias for deleteAccount
+ */
+export async function deleteUserAccount(uid: string): Promise<void> {
+  return deleteAccount(uid)
 }

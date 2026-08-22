@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search, Plus, Pencil, X } from 'lucide-react'
+import { Search, Plus, Pencil, X, Trash2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { deleteAccount } from '@/functions/firebaseFunctions'
 import {
   Dialog,
   DialogContent,
@@ -68,6 +69,14 @@ export default function ManageUsers() {
   const [editRole, setEditRole] = useState<Role>('admin')
   const [editLoading, setEditLoading] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
+
+  const [deletingMember, setDeletingMember] = useState<{
+    id: string
+    displayName?: string | null
+    email?: string | null
+  } | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const availableRoles = useMemo(() => {
     const all: { value: Role; label: string }[] = [
@@ -193,6 +202,31 @@ export default function ManageUsers() {
     }
   }
 
+  const openDeleteDialog = (user: {
+    id: string
+    displayName?: string | null
+    email?: string | null
+  }) => {
+    setDeletingMember(user)
+    setDeleteError(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deletingMember) return
+    setDeleteLoading(true)
+    setDeleteError(null)
+    try {
+      await deleteAccount(deletingMember.id)
+      setDeletingMember(null)
+    } catch (err: unknown) {
+      console.error('Delete account failed:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      setDeleteError('Failed to delete account: ' + msg)
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
   return (
     <div className="p-6">
       <h1 className="font-heading text-4xl font-bold text-heading mb-4">
@@ -284,6 +318,23 @@ export default function ManageUsers() {
                           aria-label="Cancel invitation"
                         >
                           <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : r.kind === 'member' ? (
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openDeleteDialog({
+                              id: r.id,
+                              email: r.email,
+                              displayName: r.displayName,
+                            })
+                          }
+                          className="text-gray-500 hover:text-red-600 cursor-pointer"
+                          aria-label="Delete user"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     ) : (
@@ -429,6 +480,47 @@ export default function ManageUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete member confirmation dialog styled after LogoutWarning.tsx */}
+      {deletingMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="rounded-2xl text-center bg-white p-6 max-w-md w-full mx-4 shadow-xl">
+            <h2 className="font-heading text-2xl font-bold text-primary mb-2">
+              Delete User Account
+            </h2>
+            <p className="font-body text-body mb-6">
+              Are you sure you want to delete the account for{' '}
+              <span className="font-semibold text-primary">
+                {deletingMember.displayName || deletingMember.email || 'this user'}
+              </span>
+              ? This action cannot be undone.
+            </p>
+            {deleteError && (
+              <p className="text-sm text-red-500 font-body mb-4">{deleteError}</p>
+            )}
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeletingMember(null)
+                  setDeleteError(null)
+                }}
+                disabled={deleteLoading}
+                className="w-1/2 rounded-xl cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                disabled={deleteLoading}
+                className="w-1/2 bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+              >
+                {deleteLoading ? 'Deleting…' : 'Delete Account'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

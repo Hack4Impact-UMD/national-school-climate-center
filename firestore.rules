@@ -23,24 +23,46 @@ service cloud.firestore {
       // Allow any signed-in user to read members (temporarily broadened for auth checks)
       allow read: if signedIn();
 
-      // Super admins can create/delete any role
-      allow create, delete: if isSuperAdmin() &&
+      // Super admins can create any role
+      allow create: if isSuperAdmin() &&
         request.resource.data.keys().hasOnly(['role','joinedAt','email','displayName']) &&
         request.resource.data.keys().hasAll(['role']) &&
         request.resource.data.role in ['super_admin','admin','school_personnel','student'];
 
-      // Regular admins can only create/delete school_personnel and student accounts
-      allow create, delete: if isAdmin() && !isSuperAdmin() &&
+      // Regular admins can only create school_personnel and student accounts
+      allow create: if isAdmin() && !isSuperAdmin() &&
         request.resource.data.keys().hasOnly(['role','joinedAt','email','displayName']) &&
         request.resource.data.keys().hasAll(['role']) &&
         request.resource.data.role in ['school_personnel','student'];
+      
+      // new users can create firestore accounts
+      allow create: if signedIn() && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly(['role','joinedAt','email','displayName','inviteId']) &&
+        request.resource.data.keys().hasAll(['role','email','inviteId']) &&
+        request.resource.data.email == request.auth.token.email &&
+        get(/databases/$(database)/documents/invitations/$(request.resource.data.inviteId)).data.status == 'pending' &&
+        get(/databases/$(database)/documents/invitations/$(request.resource.data.inviteId)).data.email == request.auth.token.email &&
+        get(/databases/$(database)/documents/invitations/$(request.resource.data.inviteId)).data.role == request.resource.data.role;
+
+      // Super admins can delete any member
+      allow delete: if isSuperAdmin();
+
+      // Regular admins can delete school_personnel and student accounts only
+      allow delete: if isAdmin() && !isSuperAdmin() &&
+        resource.data.role in ['school_personnel', 'student'];
+
+      // Allow users to delete their own member record
+      allow delete: if signedIn() && request.auth.uid == uid;
 
       // Super admins can update any member
       allow update: if isSuperAdmin();
 
       // Regular admins can update school_personnel and student accounts only
       allow update: if isAdmin() && !isSuperAdmin() &&
-        get(/databases/$(database)/documents/members/$(uid)).data.role in ['school_personnel','student'];
+        resource.data.role in ['school_personnel','student'];
+        
+      allow update: if signedIn() && request.auth.uid == uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password']);
     }
 
     // Invitations collection - pending user invites
@@ -59,6 +81,17 @@ service cloud.firestore {
 
       // All admins can read invitations
       allow read: if isAdmin();
+    
+      // new users can get invitation that they signed up with
+      allow get: if resource.data.status == 'pending';
+      
+      // new users can update the invitation they signed up with
+      allow update: if signedIn() &&
+        resource.data.status == 'pending' &&
+        resource.data.email == request.auth.token.email &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','acceptedAt','acceptedBy']) &&
+        request.resource.data.status == 'accepted' &&
+        request.resource.data.acceptedBy == request.auth.uid;
 
       // Super admins can update/delete any invitation
       allow update: if isSuperAdmin() &&
@@ -93,6 +126,12 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if isAdmin();
       }
+    }
+    
+    // Mail collection - triggers Firestore Trigger Email extension
+    match /mail/{id} {
+      allow create: if isAdmin();
+      allow read, update, delete: if false;
     }
 
     // Schools collection
