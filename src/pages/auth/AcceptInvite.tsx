@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/firebase/config'
 import { getInvitationById, acceptInvitation } from '@/lib/admin'
+import { useAuth } from '@/contexts/AuthContext'
 
 type Invite = {
     email: string
@@ -16,6 +17,8 @@ export default function AcceptInvite() {
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
     const inviteId = searchParams.get('id')
+
+    const { refreshUserData } = useAuth()
 
     const [status, setStatus] = useState<'loading' | 'ready' | 'invalid'>(
         'loading'
@@ -65,11 +68,15 @@ export default function AcceptInvite() {
             )
             try {
                 await acceptInvitation(inviteId, cred.user.uid)
+                await refreshUserData()     
+                navigate('/analytics')
             } catch (acceptError) {
                 // Roll back the newly created auth account so the user can retry.
+                const errObj = acceptError instanceof Error ? acceptError : null
+                const errWithCode = acceptError as { code?: string }
                 console.log('Accept invitation failed:', {
-                    code: (acceptError as any)?.code,
-                    message: (acceptError as any)?.message,
+                    code: errWithCode?.code,
+                    message: errObj?.message ?? String(acceptError),
                     inviteId,
                     uid: cred.user.uid,
                     authEmail: cred.user.email,
@@ -80,7 +87,6 @@ export default function AcceptInvite() {
                 await cred.user.delete().catch(() => { })
                 throw acceptError
             }
-            navigate('/home')
         } catch (error) {
             console.error('Error accepting invitation:', error)
             if (error instanceof Error && 'code' in error) {
