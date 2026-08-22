@@ -1,6 +1,6 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
-import type { Survey, QuestionBankItem, SurveyWithId } from '@/firebase/interfaces'
+import type { Survey, QuestionBankItemWithId, SurveyWithId } from '@/firebase/interfaces'
 import type { EditableQuestion } from '@/types/surveybuilder'
 
 /**
@@ -42,18 +42,18 @@ export async function loadSurveyQuestions(
         return {
           id: snapshot.id,
           ...snapshot.data(),
-        } as QuestionBankItem
+        } as QuestionBankItemWithId
       }
       return null
     })
 
     const results = await Promise.all(questionPromises)
     const allQuestionBankItems = results.filter(
-      (q): q is QuestionBankItem => q !== null
+      (q): q is QuestionBankItemWithId => q !== null
     )
 
     // Step 4: Create a map for quick lookup
-    const questionBankMap = new Map<string, QuestionBankItem>()
+    const questionBankMap = new Map<string, QuestionBankItemWithId>()
     allQuestionBankItems.forEach((q) => {
       questionBankMap.set(q.id, q)
     })

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
-import type { QuestionBankItem } from '@/firebase/interfaces'
+import type { QuestionBankItemWithId } from '@/firebase/interfaces'
 
 interface UseQuestionBankReturn {
-  questions: QuestionBankItem[]
+  questions: QuestionBankItemWithId[]
   loading: boolean
   error: string | null
 }
@@ -16,7 +16,7 @@ interface UseQuestionBankReturn {
 export function useQuestionBank(
   questionIds: string[] | null
 ): UseQuestionBankReturn {
-  const [questions, setQuestions] = useState<QuestionBankItem[]>([])
+  const [questions, setQuestions] = useState<QuestionBankItemWithId[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,14 +41,14 @@ export function useQuestionBank(
             return {
               id: snapshot.id,
               ...snapshot.data(),
-            } as QuestionBankItem
+            } as QuestionBankItemWithId
           }
           return null
         })
 
         const results = await Promise.all(questionPromises)
         const validQuestions = results.filter(
-          (q): q is QuestionBankItem => q !== null
+          (q): q is QuestionBankItemWithId => q !== null
         )
 
         setQuestions(validQuestions)
