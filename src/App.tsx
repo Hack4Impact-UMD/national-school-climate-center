@@ -70,16 +70,19 @@ export default function App() {
             <Route path="/analytics" element={<Analytics />} />
           </Route>
 
-          {/* NSCC admin-only */}
-          <Route element={<ProtectedRoute requiredAction="manage_users" />}>
-            <Route path="/surveys" element={<AllSurveys />} />
-            <Route path="/surveys/:surveyId" element={<SurveyDetails />} />
-            <Route path="/manage-users" element={<ManageUsers />} />
+          <Route element={<ProtectedRoute requiredAction="read" />}>
             <Route path="/account" element={<Account />} />
             <Route
               path="/account/change-password"
               element={<ChangePassword />}
             />
+          </Route>
+
+          {/* NSCC admin-only */}
+          <Route element={<ProtectedRoute requiredAction="manage_users" />}>
+            <Route path="/surveys" element={<AllSurveys />} />
+            <Route path="/surveys/:surveyId" element={<SurveyDetails />} />
+            <Route path="/manage-users" element={<ManageUsers />} />
           </Route>
           {/* <Route path="/demo" element={<DatabaseDemo />} /> */}
         </Route>
